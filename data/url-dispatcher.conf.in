@@ -1,0 +1,11 @@
+description "URL Dispatcher"
+author "Ted Gould <ted@ubuntu.com>"
+
+start on started dbus
+stop on stopping dbus
+
+respawn
+
+emits application-start
+
+exec @pkglibexecdir@/url-dispatcher
