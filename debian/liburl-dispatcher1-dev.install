@@ -1,0 +1,3 @@
+debian/tmp/usr/include/liburl-dispatcher-1/*
+debian/tmp/usr/lib/*/liburl-dispatcher.so
+debian/tmp/usr/lib/*/pkgconfig/url-dispatcher-1.pc
