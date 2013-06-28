@@ -1,0 +1,11 @@
+libdir=@libdir@
+includedir=@includedir@
+
+Cflags: -I${includedir}/liburl-dispatcher-@apiversion@
+Requires: glib-2.0 gio-2.0
+Libs: -L${libdir} -lurl-dispatcher
+
+Name: liburl-dispatcher
+Description: A library to request a URL to be opened
+Version: @VERSION@
+
