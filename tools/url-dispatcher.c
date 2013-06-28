@@ -1,7 +1,7 @@
 
 #include "url-dispatcher.h"
 
-static gboolean global_succcess = FALSE;
+static gboolean global_success = FALSE;
 
 static void
 callback (const gchar * url, gboolean success, gpointer user_data)
