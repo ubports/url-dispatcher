@@ -11,10 +11,42 @@ struct _dispatch_data_t {
 };
 
 static void
-got_proxy (GObject * obj, GAsyncResult * res, gpointer user_data)
+url_dispatched (GObject * obj, GAsyncResult * res, gpointer user_data)
 {
 
 
+	return;
+}
+
+static void
+got_proxy (GObject * obj, GAsyncResult * res, gpointer user_data)
+{
+	GError * error = NULL;
+	dispatch_data_t * dispatch_data = (dispatch_data_t *)user_data;
+
+	dispatch_data->proxy = service_iface_com_canonical_urldispatcher_proxy_new_for_bus_finish(res, &error);
+
+	if (error != NULL) {
+		g_warning("Unable to get proxy for URL Dispatcher: %s", error->message);
+		g_error_free(error);
+
+		if (dispatch_data->cb != NULL) {
+			dispatch_data->cb(dispatch_data->url, FALSE, dispatch_data->user_data);
+		}
+
+		g_free(dispatch_data->url);
+		g_free(dispatch_data);
+		return;
+	}
+
+	service_iface_com_canonical_urldispatcher_call_dispatch_url(
+		dispatch_data->proxy,
+		dispatch_data->url,
+		NULL, /* cancelable */
+		url_dispatched,
+		dispatch_data);
+
+	return;
 }
 
 void
