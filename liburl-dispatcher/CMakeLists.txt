@@ -22,7 +22,7 @@ add_gdbus_codegen(
 OUTFILES GENERATED_SOURCES
 NAME service-iface
 PREFIX com.canonical.URLDispatcher.
-NAMESPACE _ServiceIface
+NAMESPACE ServiceIface
 SERVICE_XML ${CMAKE_CURRENT_SOURCE_DIR}/../data/com.canonical.URLDispatcher.xml
 )
 
@@ -39,6 +39,7 @@ ${GIO2_LIBRARIES}
 ###########################
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fvisibility=hidden")
+include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 set(DISPATCHER_HEADERS
 url-dispatcher.h
