@@ -67,6 +67,23 @@ pass_url_to_app (const gchar * app_id, const gchar * url)
 	return;
 }
 
+/* URL handlers need to be identified */
+typedef struct _url_type_t url_type_t;
+struct _url_type_t {
+	gchar * regex_patern;
+	GRegex * regex_object;
+	gchar * app_id;
+};
+
+/* TODO: Make these come from registrations, but this works for now */
+url_type_t url_types[] = {
+	{
+		.regex_patern = "^tel://[\\d\\.+x,\\(\\)-]*$",
+		.regex_object = NULL,
+		.app_id = "telephony-app"
+	}
+};
+
 /* Get a URL off of the bus */
 static gboolean
 dispatch_url (GObject * skel, GDBusMethodInvocation * invocation, const gchar * url, gpointer user_data)
@@ -90,7 +107,21 @@ dispatch_url (GObject * skel, GDBusMethodInvocation * invocation, const gchar * 
 		return TRUE;
 	}
 
+	int i;
+	for (i = 0; i < G_N_ELEMENTS(url_types); i++) {
+		if (url_types[i].regex_object == NULL) {
+			url_types[i].regex_object = g_regex_new(url_types[i].regex_patern, 0, 0, NULL);
+		}
 
+		if (g_regex_match(url_types[i].regex_object, url, 0, NULL)) {
+			pass_url_to_app(url_types[i].app_id, url);
+
+			g_dbus_method_invocation_return_value(invocation, NULL);
+			return TRUE;
+		}
+	}
+
+	bad_url(invocation, url);
 	return TRUE;
 }
 
@@ -158,6 +189,11 @@ main (int argc, char * argv[])
 	g_object_unref(cancellable);
 	g_object_unref(skel);
 	g_regex_unref(applicationre);
+
+	int i;
+	for (i = 0; i < G_N_ELEMENTS(url_types); i++) {
+		g_clear_pointer(&url_types[i].regex_object, g_regex_unref);
+	}
 
 	return 0;
 }
