@@ -6,10 +6,53 @@ GMainLoop * mainloop = NULL;
 GCancellable * cancellable = NULL;
 ServiceIfaceComCanonicalURLDispatcher * skel = NULL;
 
+/* Errors */
+enum {
+	ERROR_BAD_URL
+};
+
+/* Error Quark */
+static GQuark
+error_domain (void)
+{
+	static GQuark errorq = 0;
+	if (errorq == 0) {
+		errorq = g_quark_from_static_string("url-dispatcher");
+	}
+	return errorq;
+}
+
+/* Register our errors */
+static void
+register_dbus_errors (void)
+{
+	g_dbus_error_register_error(error_domain(), ERROR_BAD_URL, "com.canonical.URLDispatcher.BadURL");
+	return;
+}
+
+/* Say that we have a bad URL and report a recoverable error on the process that
+   sent it to us. */
+static gboolean
+bad_url (GDBusMethodInvocation * invocation, const gchar * url)
+{
+	/* TODO: Recoverable Error */
+
+	g_dbus_method_invocation_return_error(invocation,
+		error_domain(),
+		ERROR_BAD_URL,
+		"URL '%s' is not handleable by the URL Dispatcher",
+		url);
+
+	return TRUE;
+}
+
 /* Get a URL off of the bus */
 static gboolean
 dispatch_url (GObject * skel, GDBusMethodInvocation * invocation, const gchar * url, gpointer user_data)
 {
+	if (url == NULL || url[0] == '\0') {
+		return bad_url(invocation, url);
+	}
 
 
 	return TRUE;
@@ -38,6 +81,8 @@ bus_got (GObject * obj, GAsyncResult * res, gpointer user_data)
 		g_main_loop_quit(mainloop);
 		return;
 	}
+
+	register_dbus_errors();
 
 	g_dbus_interface_skeleton_export(G_DBUS_INTERFACE_SKELETON(skel), bus, "/com/canonical/URLDispatcher", &error);
 	if (error != NULL) {
