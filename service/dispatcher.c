@@ -51,6 +51,8 @@ bad_url (GDBusMethodInvocation * invocation, const gchar * url)
 static void
 pass_url_to_app (const gchar * app_id, const gchar * url)
 {
+	g_debug("Emitting 'application-start' for APP_ID='%s' and URLS='%s'", app_id, url);
+
 	/* TODO: Port to libupstart */
 	gchar * cmdline = NULL;
 
@@ -69,6 +71,8 @@ pass_url_to_app (const gchar * app_id, const gchar * url)
 static gboolean
 dispatch_url (GObject * skel, GDBusMethodInvocation * invocation, const gchar * url, gpointer user_data)
 {
+	g_debug("Dispatching URL: %s", url);
+
 	if (url == NULL || url[0] == '\0') {
 		return bad_url(invocation, url);
 	}
@@ -76,7 +80,7 @@ dispatch_url (GObject * skel, GDBusMethodInvocation * invocation, const gchar * 
 	/* Special case the application URL */
 	GMatchInfo * appmatch = NULL;
 	if (g_regex_match(applicationre, url, 0, &appmatch)) {
-		gchar * appid = g_match_info_fetch(appmatch, 0);
+		gchar * appid = g_match_info_fetch(appmatch, 1);
 		pass_url_to_app(appid, NULL);
 
 		g_free(appid);
