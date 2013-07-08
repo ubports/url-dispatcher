@@ -1,11 +1,22 @@
 #include <gio/gio.h>
+#include "service-iface.h"
 
 /* Globals */
 GMainLoop * mainloop = NULL;
 GCancellable * cancellable = NULL;
+ServiceIfaceComCanonicalURLDispatcher * skel = NULL;
+
+/* Get a URL off of the bus */
+static gboolean
+dispatch_url (GObject * skel, GDBusMethodInvocation * invocation, const gchar * url, gpointer user_data)
+{
+
+
+	return TRUE;
+}
 
 /* Callback when we're connected to dbus */
-void
+static void
 bus_got (GObject * obj, GAsyncResult * res, gpointer user_data)
 {
 	GDBusConnection * bus = NULL;
@@ -19,6 +30,15 @@ bus_got (GObject * obj, GAsyncResult * res, gpointer user_data)
 		return;
 	}
 
+	g_dbus_interface_skeleton_export(G_DBUS_INTERFACE_SKELETON(skel), bus, "/com/canonical/URLDispatcher", &error);
+	if (error != NULL) {
+		g_error("Unable to export interface skeleton: %s", error->message);
+		g_main_loop_quit(mainloop);
+		return;
+	}
+
+	/* TODO: Own name */
+
 	return;
 }
 
@@ -31,11 +51,16 @@ main (int argc, char * argv[])
 
 	g_bus_get(G_BUS_TYPE_SESSION, cancellable, bus_got, NULL);
 
+	skel = service_iface_com_canonical_urldispatcher_skeleton_new();
+	g_signal_connect(skel, "handle-dispatch-url", G_CALLBACK(dispatch_url), NULL);
+
 	/* Run Main */
 	g_main_loop_run(mainloop);
 
 	/* Clean up globals */
 	g_main_loop_unref(mainloop);
+	g_object_unref(cancellable);
+	g_object_unref(skel);
 
 	return 0;
 }
