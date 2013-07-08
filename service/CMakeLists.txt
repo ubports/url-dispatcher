@@ -24,6 +24,7 @@ add_library(service-generated STATIC ${SERVICE_GENERATED_SOURCES})
 target_link_libraries(service-generated
 ${GLIB2_LIBRARIES}
 ${GOBJECT2_LIBRARIES}
+${GIO2_LIBRARIES}
 )
 
 ###########################
