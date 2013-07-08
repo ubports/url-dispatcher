@@ -15,6 +15,15 @@ dispatch_url (GObject * skel, GDBusMethodInvocation * invocation, const gchar * 
 	return TRUE;
 }
 
+/* We're goin' down cap'n */
+static void
+name_lost (GDBusConnection * con, const gchar * name, gpointer user_data)
+{
+	g_error("Unable to get name '%s'", name);
+	g_main_loop_quit(mainloop);
+	return;
+}
+
 /* Callback when we're connected to dbus */
 static void
 bus_got (GObject * obj, GAsyncResult * res, gpointer user_data)
@@ -37,7 +46,12 @@ bus_got (GObject * obj, GAsyncResult * res, gpointer user_data)
 		return;
 	}
 
-	/* TODO: Own name */
+	g_bus_own_name_on_connection(bus,
+		"com.canonical.URLDispatcher",
+		G_BUS_NAME_OWNER_FLAGS_NONE, /* flags */
+		NULL, /* name acquired */
+		name_lost,
+		NULL, NULL); /* user data */
 
 	return;
 }
