@@ -5,6 +5,7 @@
 GMainLoop * mainloop = NULL;
 GCancellable * cancellable = NULL;
 ServiceIfaceComCanonicalURLDispatcher * skel = NULL;
+GRegex * applicationre = NULL;
 
 /* Errors */
 enum {
@@ -46,12 +47,34 @@ bad_url (GDBusMethodInvocation * invocation, const gchar * url)
 	return TRUE;
 }
 
+/* Handles taking an application and an URL and sending them to Upstart */
+static void
+pass_url_to_app (const gchar * app_id, const gchar * url)
+{
+
+
+	return;
+}
+
 /* Get a URL off of the bus */
 static gboolean
 dispatch_url (GObject * skel, GDBusMethodInvocation * invocation, const gchar * url, gpointer user_data)
 {
 	if (url == NULL || url[0] == '\0') {
 		return bad_url(invocation, url);
+	}
+
+	/* Special case the application URL */
+	GMatchInfo * appmatch = NULL;
+	if (g_regex_match(applicationre, url, 0, &appmatch)) {
+		gchar * appid = g_match_info_fetch(appmatch, 0);
+		pass_url_to_app(appid, NULL);
+
+		g_free(appid);
+		g_match_info_free(appmatch);
+
+		g_dbus_method_invocation_return_value(invocation, NULL);
+		return TRUE;
 	}
 
 
@@ -107,6 +130,7 @@ main (int argc, char * argv[])
 {
 	mainloop = g_main_loop_new(NULL, FALSE);
 	cancellable = g_cancellable_new();
+	applicationre = g_regex_new("^application:///([a-zA-Z0-9_-]*)\\.desktop$", 0, 0, NULL);
 
 	g_bus_get(G_BUS_TYPE_SESSION, cancellable, bus_got, NULL);
 
@@ -120,6 +144,7 @@ main (int argc, char * argv[])
 	g_main_loop_unref(mainloop);
 	g_object_unref(cancellable);
 	g_object_unref(skel);
+	g_regex_unref(applicationre);
 
 	return 0;
 }
