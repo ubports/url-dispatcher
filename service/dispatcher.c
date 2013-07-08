@@ -51,7 +51,16 @@ bad_url (GDBusMethodInvocation * invocation, const gchar * url)
 static void
 pass_url_to_app (const gchar * app_id, const gchar * url)
 {
+	/* TODO: Port to libupstart */
+	gchar * cmdline = NULL;
 
+	if (url == NULL) {
+		cmdline = g_strdup_printf("initctl emit application-start APP_ID=\"%s\"", app_id);
+	} else {
+		cmdline = g_strdup_printf("initctl emit application-start APP_ID=\"%s\" APP_URLS=\"%s\"", app_id, url);
+	}
+
+	g_spawn_command_line_async(cmdline, NULL);
 
 	return;
 }
