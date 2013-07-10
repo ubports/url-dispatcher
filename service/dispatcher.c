@@ -2,10 +2,10 @@
 #include "service-iface.h"
 
 /* Globals */
-GMainLoop * mainloop = NULL;
-GCancellable * cancellable = NULL;
-ServiceIfaceComCanonicalURLDispatcher * skel = NULL;
-GRegex * applicationre = NULL;
+static GMainLoop * mainloop = NULL;
+static GCancellable * cancellable = NULL;
+static ServiceIfaceComCanonicalURLDispatcher * skel = NULL;
+static GRegex * applicationre = NULL;
 
 /* Errors */
 enum {
