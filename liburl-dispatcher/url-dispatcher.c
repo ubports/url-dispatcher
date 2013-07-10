@@ -34,6 +34,7 @@ url_dispatched (GObject * obj, GAsyncResult * res, gpointer user_data)
 		}
 	}
 
+	g_clear_object(&dispatch_data->proxy);
 	g_free(dispatch_data->url);
 	g_free(dispatch_data);
 
