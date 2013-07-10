@@ -12,22 +12,13 @@ enum {
 	ERROR_BAD_URL
 };
 
-/* Error Quark */
-static GQuark
-error_domain (void)
-{
-	static GQuark errorq = 0;
-	if (errorq == 0) {
-		errorq = g_quark_from_static_string("url-dispatcher");
-	}
-	return errorq;
-}
+G_DEFINE_QUARK(url_dispatcher, url_dispatcher_error);
 
 /* Register our errors */
 static void
 register_dbus_errors (void)
 {
-	g_dbus_error_register_error(error_domain(), ERROR_BAD_URL, "com.canonical.URLDispatcher.BadURL");
+	g_dbus_error_register_error(url_dispatcher_error_quark(), ERROR_BAD_URL, "com.canonical.URLDispatcher.BadURL");
 	return;
 }
 
@@ -39,7 +30,7 @@ bad_url (GDBusMethodInvocation * invocation, const gchar * url)
 	/* TODO: Recoverable Error */
 
 	g_dbus_method_invocation_return_error(invocation,
-		error_domain(),
+		url_dispatcher_error_quark(),
 		ERROR_BAD_URL,
 		"URL '%s' is not handleable by the URL Dispatcher",
 		url);
