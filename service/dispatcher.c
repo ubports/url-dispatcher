@@ -114,8 +114,7 @@ dispatch_url (GObject * skel, GDBusMethodInvocation * invocation, const gchar * 
 		}
 	}
 
-	bad_url(invocation, url);
-	return TRUE;
+	return bad_url(invocation, url);
 }
 
 /* We're goin' down cap'n */
