@@ -63,6 +63,7 @@ pass_url_to_app (const gchar * app_id, const gchar * url)
 	}
 
 	g_spawn_command_line_async(cmdline, NULL);
+	g_free(cmdline);
 
 	return;
 }
