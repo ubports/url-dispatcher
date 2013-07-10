@@ -53,8 +53,14 @@ pass_url_to_app (const gchar * app_id, const gchar * url)
 		cmdline = g_strdup_printf("initctl emit application-start APP_ID=\"%s\" APP_URLS=\"%s\"", app_id, url);
 	}
 
-	g_spawn_command_line_async(cmdline, NULL);
+	GError * error = NULL;
+	g_spawn_command_line_async(cmdline, &error);
 	g_free(cmdline);
+
+	if (error != NULL) {
+		g_warning("Unable to spawn initctl: %s", error->message);
+		g_error_free(error);
+	}
 
 	return;
 }
