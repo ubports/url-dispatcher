@@ -8,22 +8,22 @@ Build-Depends: cmake,
                dh-autoreconf,
                gtester2xunit,
                intltool,
-               libdbustest1-dev,
                libdbus-1-dev,
+               libdbustest1-dev,
                python3-dbusmock,
 Standards-Version: 3.9.4
 Homepage: http://launchpad.net/url-dispatcher
 # If you aren't a member of ~indicator-applet-developers but need to upload
 # packaging changes, just go ahead.  ~indicator-applet-developers will notice
 # and sync up the code again.
-Vcs-Bzr: http://bazaar.launchpad.net/~indicator-applet-developers/url-dispatcher/
-Vcs-Browser: https://code.launchpad.net/~indicator-applet-developers/url-dispatcher/
+Vcs-Bzr: https://code.launchpad.net/~indicator-applet-developers/url-dispatcher/trunk.13.10
+Vcs-Browser: http://bazaar.launchpad.net/~indicator-applet-developers/url-dispatcher/trunk.13.10/files
 
 Package: url-dispatcher
 Architecture: any
-Depends: ${misc:Depends},
+Depends: upstart-app-launch,
+         ${misc:Depends},
          ${shlibs:Depends},
-         upstart-app-launch,
 Description: Service to allow sending of URLs and get handlers started
  Allows applications to request a URL to be opened and handled by another
  process without seeing the list of other applications on the system or
@@ -33,9 +33,9 @@ Description: Service to allow sending of URLs and get handlers started
 
 Package: url-dispatcher-tools
 Architecture: any
-Depends: ${misc:Depends},
+Depends: url-dispatcher (= ${binary:Version}),
+         ${misc:Depends},
          ${shlibs:Depends},
-         url-dispatcher (= ${binary:Version}),
 Description: Tools for working with the URL Dispatcher.
  Allows applications to request a URL to be opened and handled by another
  process without seeing the list of other applications on the system or
@@ -46,11 +46,11 @@ Description: Tools for working with the URL Dispatcher.
 Package: liburl-dispatcher1
 Section: libs
 Architecture: any
-Depends: ${shlibs:Depends},
-         ${misc:Depends},
-Pre-Depends: ${misc:Pre-Depends}
+Depends: ${misc:Depends},
+         ${shlibs:Depends},
+Pre-Depends: ${misc:Pre-Depends},
 Multi-Arch: same
-Recommends: url-dispatcher (= ${binary:Version})
+Recommends: url-dispatcher (= ${binary:Version}),
 Description: library for sending requests to the url dispatcher
  Allows applications to request a URL to be opened and handled by another
  process without seeing the list of other applications on the system or
@@ -61,10 +61,10 @@ Description: library for sending requests to the url dispatcher
 Package: liburl-dispatcher1-dev
 Section: libdevel
 Architecture: any
-Depends: ${shlibs:Depends},
-         ${misc:Depends},
+Depends: libglib2.0-dev,
          liburl-dispatcher1 (= ${binary:Version}),
-         libglib2.0-dev
+         ${misc:Depends},
+         ${shlibs:Depends},
 Multi-Arch: same
 Description: library for sending requests to the url dispatcher
  Allows applications to request a URL to be opened and handled by another
@@ -72,4 +72,3 @@ Description: library for sending requests to the url dispatcher
  starting them inside its own Application Confinement.
  .
  This package contains files that are needed to build applications.
-
