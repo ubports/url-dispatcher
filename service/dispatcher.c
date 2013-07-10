@@ -158,6 +158,8 @@ bus_got (GObject * obj, GAsyncResult * res, gpointer user_data)
 		name_lost,
 		NULL, NULL); /* user data */
 
+	g_object_unref(bus);
+
 	return;
 }
 
