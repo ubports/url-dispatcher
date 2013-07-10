@@ -24,11 +24,14 @@ add_library(service-generated STATIC ${SERVICE_GENERATED_SOURCES})
 target_link_libraries(service-generated
 ${GLIB2_LIBRARIES}
 ${GOBJECT2_LIBRARIES}
+${GIO2_LIBRARIES}
 )
 
 ###########################
 # Service Executable
 ###########################
+
+include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 add_executable(service-exec dispatcher.c)
 
