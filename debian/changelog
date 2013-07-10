@@ -1,3 +1,13 @@
+url-dispatcher (0.1-0ubuntu2) UNRELEASED; urgency=low
+
+  * Remove debian/watch
+  * debian/control:
+    - Modifications related to compliance with our packaging standards
+  * Add copyright info to the source code
+  * Automatic snapshot from revision 11 (bootstrap)
+
+ -- Łukasz 'sil2100' Zemczak <lukasz.zemczak@canonical.com>  Wed, 10 Jul 2013 13:19:14 +0200
+
 url-dispatcher (0.1-0ubuntu1) saucy; urgency=low
 
   * Start
