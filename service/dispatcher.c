@@ -106,6 +106,7 @@ dispatch_url (GObject * skel, GDBusMethodInvocation * invocation, const gchar * 
 		g_dbus_method_invocation_return_value(invocation, NULL);
 		return TRUE;
 	}
+	g_match_info_free(appmatch);
 
 	int i;
 	for (i = 0; i < G_N_ELEMENTS(url_types); i++) {
