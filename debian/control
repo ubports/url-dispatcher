@@ -9,6 +9,8 @@ Build-Depends: cmake,
                gtester2xunit,
                intltool,
                libdbus-1-dev,
+               libglib2.0-dev,
+               python,
 Standards-Version: 3.9.4
 Homepage: http://launchpad.net/url-dispatcher
 # If you aren't a member of ~indicator-applet-developers but need to upload
