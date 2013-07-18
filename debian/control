@@ -9,8 +9,8 @@ Build-Depends: cmake,
                gtester2xunit,
                intltool,
                libdbus-1-dev,
-               libdbustest1-dev,
-               python3-dbusmock,
+               libglib2.0-dev,
+               python,
 Standards-Version: 3.9.4
 Homepage: http://launchpad.net/url-dispatcher
 # If you aren't a member of ~indicator-applet-developers but need to upload
@@ -46,10 +46,10 @@ Description: Tools for working with the URL Dispatcher.
 Package: liburl-dispatcher1
 Section: libs
 Architecture: any
+Multi-Arch: same
+Pre-Depends: ${misc:Pre-Depends},
 Depends: ${misc:Depends},
          ${shlibs:Depends},
-Pre-Depends: ${misc:Pre-Depends},
-Multi-Arch: same
 Recommends: url-dispatcher (= ${binary:Version}),
 Description: library for sending requests to the url dispatcher
  Allows applications to request a URL to be opened and handled by another
@@ -61,11 +61,12 @@ Description: library for sending requests to the url dispatcher
 Package: liburl-dispatcher1-dev
 Section: libdevel
 Architecture: any
+Multi-Arch: same
+Pre-Depends: ${misc:Pre-Depends},
 Depends: libglib2.0-dev,
          liburl-dispatcher1 (= ${binary:Version}),
          ${misc:Depends},
          ${shlibs:Depends},
-Multi-Arch: same
 Description: library for sending requests to the url dispatcher
  Allows applications to request a URL to be opened and handled by another
  process without seeing the list of other applications on the system or
