@@ -22,6 +22,7 @@ Vcs-Browser: http://bazaar.launchpad.net/~indicator-applet-developers/url-dispat
 Package: url-dispatcher
 Architecture: any
 Multi-Arch: same
+Pre-Depends: ${misc:Pre-Depends},
 Depends: upstart-app-launch,
          ${misc:Depends},
          ${shlibs:Depends},
