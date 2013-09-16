@@ -92,6 +92,17 @@ struct _url_type_t {
 
 /* TODO: Make these come from registrations, but this works for now */
 url_type_t url_types[] = {
+	/* Music */
+	{
+		.regex_patern = "^music://",
+		.regex_object = NULL,
+		.app_id = "music-app"
+	},
+	{
+		.regex_patern = "^file:///home/[a-zA-Z0-9_\-]*/Music/",
+		.regex_object = NULL,
+		.app_id = "music-app"
+	},
 	/* Phone Numbers */
 	{
 		.regex_patern = "^tel://[\\d\\.+x,\\(\\)-]*$",
