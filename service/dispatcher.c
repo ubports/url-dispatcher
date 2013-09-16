@@ -101,6 +101,7 @@ url_type_t url_types[] = {
 		.app_id = "music-app"
 	},
 	{
+		/* TODO: This is temporary for 13.10, we expect to be smarter in the future */
 		.regex_patern = "^file:///home/" USERNAME_REGEX "/Music/",
 		.regex_object = NULL,
 		.app_id = "music-app"
@@ -124,6 +125,7 @@ url_type_t url_types[] = {
 		.app_id = "mediaplayer-app"
 	},
 	{
+		/* TODO: This is temporary for 13.10, we expect to be smarter in the future */
 		.regex_patern = "^file:///home/" USERNAME_REGEX "/Videos/",
 		.regex_object = NULL,
 		.app_id = "mediaplayer-app"
