@@ -17,6 +17,7 @@
 
 #include <gio/gio.h>
 #include "service-iface.h"
+#include "recoverable-problem.h"
 
 /* Globals */
 static GMainLoop * mainloop = NULL;
@@ -44,9 +45,35 @@ register_dbus_errors (void)
 static void
 recoverable_problem_file (GObject * obj, GAsyncResult * res, gpointer user_data)
 {
+	gchar * badurl = (gchar *)user_data;
+	GVariant * pid_tuple = NULL;
+	GError * error = NULL;
 
+	pid_tuple = g_dbus_connection_call_finish(G_DBUS_CONNECTION(obj), res, &error);
+	if (error != NULL) {
+		g_warning("Unable to get PID for calling program with URL '%s': %s", badurl, error->message);
+		g_free(badurl);
+		g_error_free(error);
+		return;
+	}
 
+	guint32 pid = 0;
+	g_variant_get(pid_tuple, "(u)", &pid);
+	g_variant_unref(pid_tuple);
 
+	gchar * signature = g_strdup_printf("url-dispatcher;bad-url;%s", badurl);
+	gchar * additional[3] = {
+		"BadURL",
+		badurl,
+		NULL
+	};
+
+	report_recoverable_problem(signature, pid, FALSE, additional);
+
+	g_free(signature);
+	g_free(badurl);
+
+	return;
 }
 
 /* Say that we have a bad URL and report a recoverable error on the process that
