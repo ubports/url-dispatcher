@@ -92,16 +92,19 @@ struct _url_type_t {
 
 /* TODO: Make these come from registrations, but this works for now */
 url_type_t url_types[] = {
+	/* Phone Numbers */
 	{
 		.regex_patern = "^tel://[\\d\\.+x,\\(\\)-]*$",
 		.regex_object = NULL,
 		.app_id = "telephony-app"
 	},
+	/* Settings */
 	{
 		.regex_patern = "^settings://system/",
 		.regex_object = NULL,
 		.app_id = "ubuntu-system-settings"
 	},
+	/* Web Stuff */
 	{
 		.regex_patern = "^http://",
 		.regex_object = NULL,
