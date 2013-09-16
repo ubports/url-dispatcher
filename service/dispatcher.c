@@ -101,6 +101,16 @@ url_type_t url_types[] = {
 		.regex_patern = "^settings://system/",
 		.regex_object = NULL,
 		.app_id = "ubuntu-system-settings"
+	},
+	{
+		.regex_patern = "^http://",
+		.regex_object = NULL,
+		.app_id = "webbrowser-app"
+	},
+	{
+		.regex_patern = "^https://",
+		.regex_object = NULL,
+		.app_id = "webbrowser-app"
 	}
 };
 
