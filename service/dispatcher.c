@@ -109,7 +109,7 @@ url_type_t url_types[] = {
 	{
 		.regex_patern = "^tel://[\\d\\.+x,\\(\\)-]*$",
 		.regex_object = NULL,
-		.app_id = "telephony-app"
+		.app_id = "dialer-app"
 	},
 	/* Settings */
 	{
