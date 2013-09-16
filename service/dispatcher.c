@@ -115,6 +115,17 @@ url_type_t url_types[] = {
 		.regex_object = NULL,
 		.app_id = "ubuntu-system-settings"
 	},
+	/* Video */
+	{
+		.regex_patern = "^video://",
+		.regex_object = NULL,
+		.app_id = "mediaplayer-app"
+	},
+	{
+		.regex_patern = "^file:///home/[a-zA-Z0-9_\-]*/Videos/",
+		.regex_object = NULL,
+		.app_id = "mediaplayer-app"
+	},
 	/* Web Stuff */
 	{
 		.regex_patern = "^http://",
