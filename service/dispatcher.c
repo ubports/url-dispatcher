@@ -90,6 +90,8 @@ struct _url_type_t {
 	gchar * app_id;
 };
 
+#define USERNAME_REGEX  "[a-zA-Z0-9_\-]*"
+
 /* TODO: Make these come from registrations, but this works for now */
 url_type_t url_types[] = {
 	/* Music */
@@ -99,7 +101,7 @@ url_type_t url_types[] = {
 		.app_id = "music-app"
 	},
 	{
-		.regex_patern = "^file:///home/[a-zA-Z0-9_\-]*/Music/",
+		.regex_patern = "^file:///home/" USERNAME_REGEX "/Music/",
 		.regex_object = NULL,
 		.app_id = "music-app"
 	},
@@ -122,7 +124,7 @@ url_type_t url_types[] = {
 		.app_id = "mediaplayer-app"
 	},
 	{
-		.regex_patern = "^file:///home/[a-zA-Z0-9_\-]*/Videos/",
+		.regex_patern = "^file:///home/" USERNAME_REGEX "/Videos/",
 		.regex_object = NULL,
 		.app_id = "mediaplayer-app"
 	},
