@@ -90,18 +90,47 @@ struct _url_type_t {
 	gchar * app_id;
 };
 
+#define USERNAME_REGEX  "[a-zA-Z0-9_\\-]*"
+
 /* TODO: Make these come from registrations, but this works for now */
 url_type_t url_types[] = {
+	/* Music */
+	{
+		.regex_patern = "^music://",
+		.regex_object = NULL,
+		.app_id = "music-app"
+	},
+	{
+		/* TODO: This is temporary for 13.10, we expect to be smarter in the future */
+		.regex_patern = "^file:///home/" USERNAME_REGEX "/Music/",
+		.regex_object = NULL,
+		.app_id = "music-app"
+	},
+	/* Phone Numbers */
 	{
 		.regex_patern = "^tel://[\\d\\.+x,\\(\\)-]*$",
 		.regex_object = NULL,
 		.app_id = "telephony-app"
 	},
+	/* Settings */
 	{
 		.regex_patern = "^settings://system/",
 		.regex_object = NULL,
 		.app_id = "ubuntu-system-settings"
 	},
+	/* Video */
+	{
+		.regex_patern = "^video://",
+		.regex_object = NULL,
+		.app_id = "mediaplayer-app"
+	},
+	{
+		/* TODO: This is temporary for 13.10, we expect to be smarter in the future */
+		.regex_patern = "^file:///home/" USERNAME_REGEX "/Videos/",
+		.regex_object = NULL,
+		.app_id = "mediaplayer-app"
+	},
+	/* Web Stuff */
 	{
 		.regex_patern = "^http://",
 		.regex_object = NULL,
