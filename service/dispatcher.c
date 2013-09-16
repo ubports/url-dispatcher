@@ -90,7 +90,7 @@ struct _url_type_t {
 	gchar * app_id;
 };
 
-#define USERNAME_REGEX  "[a-zA-Z0-9_\-]*"
+#define USERNAME_REGEX  "[a-zA-Z0-9_\\-]*"
 
 /* TODO: Make these come from registrations, but this works for now */
 url_type_t url_types[] = {
