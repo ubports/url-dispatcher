@@ -39,12 +39,36 @@ register_dbus_errors (void)
 	return;
 }
 
+/* We should have the PID now so we can make sure to file the
+   problem on the right package. */
+static void
+recoverable_problem_file (GObject * obj, GAsyncResult * res, gpointer user_data)
+{
+
+
+
+}
+
 /* Say that we have a bad URL and report a recoverable error on the process that
    sent it to us. */
 static gboolean
 bad_url (GDBusMethodInvocation * invocation, const gchar * url)
 {
-	/* TODO: Recoverable Error */
+	const gchar * sender = g_dbus_method_invocation_get_sender(invocation);
+	GDBusConnection * conn = g_dbus_method_invocation_get_connection(invocation);
+
+	g_dbus_connection_call(conn,
+		"org.freedesktop.DBus",
+		"/",
+		"org.freedesktop.DBus",
+		"GetConnectionUnixProcessID",
+		g_variant_new("(s)", sender),
+		G_VARIANT_TYPE("(u)"),
+		G_DBUS_CALL_FLAGS_NONE,
+		-1, /* timeout */
+		NULL, /* cancellable */
+		recoverable_problem_file,
+		g_strdup(url));
 
 	g_dbus_method_invocation_return_error(invocation,
 		url_dispatcher_error_quark(),
