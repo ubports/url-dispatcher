@@ -214,6 +214,12 @@ manifest_version (JsonParser * manifest, version_search_t version_type, const gc
 		return original_ver;
 	}
 
+	if (version_type == VERSION_SEARCH_CURRENT) {
+		JsonNode * node = json_parser_get_root(manifest);
+		JsonObject * obj = json_node_get_object(node);
+		return json_object_get_string_member(obj, "version");
+	}
+
 	return NULL;
 }
 
