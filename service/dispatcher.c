@@ -195,6 +195,28 @@ get_manifest_file (const gchar * pkg)
 	return parser;
 }
 
+/* Figure out the app name using the manifest */
+const gchar *
+manifest_app_name (JsonParser * manifest, app_name_t app_type, const gchar * original_app)
+{
+	if (app_type == APP_NAME_PRECISE) {
+		return original_app;
+	}
+
+	return NULL;
+}
+
+/* Figure out the app name using the manifest */
+const gchar *
+manifest_version (JsonParser * manifest, version_search_t version_type, const gchar * original_ver)
+{
+	if (version_type == VERSION_SEARCH_PRECISE) {
+		return original_ver;
+	}
+
+	return NULL;
+}
+
 /* Works with a fuzzy set of parameters to determine the right app to
    call and then calls pass_url_to_app() with the full AppID */
 static gboolean
@@ -213,12 +235,27 @@ app_id_discover (const gchar * pkg, const gchar * app, const gchar * version, co
 		return TRUE;
 	}
 
+	/* Get the manifest and turn that into our needed values */
 	JsonParser * parser = get_manifest_file(pkg);
+	if (parser == NULL) {
+		return FALSE;
+	}
 
+	const gchar * final_app = manifest_app_name(parser, app_name, app);
+	const gchar * final_ver = manifest_version(parser, version_search, version);
 
+	if (final_app == NULL || final_ver == NULL) {
+		g_object_unref(parser);
+		return FALSE;
+	}
+
+	gchar * appid = g_strdup_printf("%s_%s_%s", pkg, final_app, final_ver);
 	g_object_unref(parser);
 
-	return FALSE;
+	pass_url_to_app(appid, url);
+
+	g_free(appid);
+	return TRUE;
 }
 
 /* URL handlers need to be identified */
