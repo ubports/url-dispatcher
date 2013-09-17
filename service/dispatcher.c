@@ -83,11 +83,67 @@ pass_url_to_app (const gchar * app_id, const gchar * url)
 	return;
 }
 
+typedef enum _app_name_t app_name_t;
+enum _app_name_t {
+	APP_NAME_PRECISE,
+	APP_NAME_ONLY,
+	APP_NAME_FIRST,
+	APP_NAME_LAST
+};
+
+typedef enum _version_search_t version_search_t;
+enum _version_search_t {
+	VERSION_SEARCH_PRECISE,
+	VERSION_SEARCH_CURRENT
+};
+
+/* Check to see if the app name is one of our keywords */
+static app_name_t
+app_name_type (const gchar * appname)
+{
+	if (g_strcmp0(appname, "only-listed-app") == 0) {
+		return APP_NAME_ONLY;
+	}
+
+	if (g_strcmp0(appname, "first-listed-app") == 0) {
+		return APP_NAME_ONLY;
+	}
+
+	if (g_strcmp0(appname, "last-listed-app") == 0) {
+		return APP_NAME_ONLY;
+	}
+
+	return APP_NAME_PRECISE;
+}
+
+/* Check to see if the version is special */
+static version_search_t
+version_search_type (const gchar * version)
+{
+	if (g_strcmp0(version, "current-user-version") == 0) {
+		return VERSION_SEARCH_CURRENT;
+	}
+
+	return VERSION_SEARCH_PRECISE;
+}
+
 /* Works with a fuzzy set of parameters to determine the right app to
    call and then calls pass_url_to_app() with the full AppID */
 static gboolean
 app_id_discover (const gchar * pkg, const gchar * app, const gchar * version, const gchar * url)
 {
+	version_search_t version_search = version_search_type(version);
+	app_name_t app_name = app_name_type(app);
+
+	if (version_search == VERSION_SEARCH_PRECISE && app_name == APP_NAME_PRECISE) {
+		/* This the non-search case, just put it together and pass along */
+		gchar * appid = g_strdup_printf("%s_%s_%s", pkg, app, version);
+
+		pass_url_to_app(appid, url);
+
+		g_free(appid);
+		return TRUE;
+	}
 
 	return FALSE;
 }
