@@ -203,7 +203,40 @@ manifest_app_name (JsonParser * manifest, app_name_t app_type, const gchar * ori
 		return original_app;
 	}
 
-	return NULL;
+	JsonNode * root_node = json_parser_get_root(manifest);
+	JsonObject * root_obj = json_node_get_object(root_node);
+	JsonObject * hooks = json_object_get_object_member(root_obj, "hooks");
+
+	if (hooks == NULL) {
+		return NULL;
+	}
+
+	GList * apps = json_object_get_members(hooks);
+	if (apps == NULL) {
+		return NULL;
+	}
+
+	const gchar * retapp = NULL;
+
+	switch (app_type) {
+	case APP_NAME_ONLY:
+		if (g_list_length(apps) == 1) {
+			retapp = (const gchar *)apps->data;
+		}
+		break;
+	case APP_NAME_FIRST:
+		retapp = (const gchar *)apps->data;
+		break;
+	case APP_NAME_LAST:
+		retapp = (const gchar *)(g_list_last(apps)->data);
+		break;
+	default:
+		break;
+	}
+
+	g_list_free(apps);
+
+	return retapp;
 }
 
 /* Figure out the app name using the manifest */
