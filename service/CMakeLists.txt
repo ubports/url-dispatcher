@@ -25,6 +25,7 @@ target_link_libraries(service-generated
 ${GLIB2_LIBRARIES}
 ${GOBJECT2_LIBRARIES}
 ${GIO2_LIBRARIES}
+${JSONGLIB_LIBRARIES}
 )
 
 ###########################
