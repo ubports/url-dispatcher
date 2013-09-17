@@ -110,7 +110,6 @@ report_recoverable_problem (const gchar * signature, GPid report_pid, gboolean w
 	}
 
 	gboolean first = TRUE;
-	gint i;
 
 	if (error_stdin != 0 && signature != NULL) {
 		write_string(error_stdin, "DuplicateSignature");
@@ -120,14 +119,17 @@ report_recoverable_problem (const gchar * signature, GPid report_pid, gboolean w
 		first = FALSE;
 	}
 
-	for (i = 0; additional_properties != NULL && additional_properties[i] != NULL; i++) {
-		if (!first) {
-			write_null(error_stdin);
-		} else {
-			first = FALSE;
-		}
+	if (error_stdin != 0 && additional_properties != NULL) {
+		gint i;
+		for (i = 0; additional_properties[i] != NULL; i++) {
+			if (!first) {
+				write_null(error_stdin);
+			} else {
+				first = FALSE;
+			}
 
-		write_string(error_stdin, additional_properties[i]);
+			write_string(error_stdin, additional_properties[i]);
+		}
 	}
 
 	if (error_stdin != 0) {
