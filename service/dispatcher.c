@@ -85,11 +85,11 @@ pass_url_to_app (const gchar * app_id, const gchar * url)
 
 /* Works with a fuzzy set of parameters to determine the right app to
    call and then calls pass_url_to_app() with the full AppID */
-static void
+static gboolean
 app_id_discover (const gchar * pkg, const gchar * app, const gchar * version, const gchar * url)
 {
 
-	return;
+	return FALSE;
 }
 
 /* URL handlers need to be identified */
@@ -170,14 +170,17 @@ dispatch_url (GObject * skel, GDBusMethodInvocation * invocation, const gchar * 
 		gchar * app = g_match_info_fetch(appidmatch, 2);
 		gchar * version = g_match_info_fetch(appidmatch, 3);
 
-		app_id_discover(package, app, version, NULL);
+		if (app_id_discover(package, app, version, NULL)) {
+			g_dbus_method_invocation_return_value(invocation, NULL);
+		} else {
+			bad_url(invocation, url);
+		}
 
 		g_free(package);
 		g_free(app);
 		g_free(version);
 		g_match_info_free(appidmatch);
 
-		g_dbus_method_invocation_return_value(invocation, NULL);
 		return TRUE;
 	}
 	g_match_info_free(appidmatch);
