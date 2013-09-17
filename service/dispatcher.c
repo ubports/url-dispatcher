@@ -23,6 +23,7 @@ static GMainLoop * mainloop = NULL;
 static GCancellable * cancellable = NULL;
 static ServiceIfaceComCanonicalURLDispatcher * skel = NULL;
 static GRegex * applicationre = NULL;
+static GRegex * appidre = NULL;
 
 /* Errors */
 enum {
@@ -78,6 +79,15 @@ pass_url_to_app (const gchar * app_id, const gchar * url)
 		g_warning("Unable to spawn initctl: %s", error->message);
 		g_error_free(error);
 	}
+
+	return;
+}
+
+/* Works with a fuzzy set of parameters to determine the right app to
+   call and then calls pass_url_to_app() with the full AppID */
+static void
+app_id_discover (const gchar * pkg, const gchar * app, const gchar * version, const gchar * url)
+{
 
 	return;
 }
@@ -152,6 +162,25 @@ dispatch_url (GObject * skel, GDBusMethodInvocation * invocation, const gchar * 
 	if (url == NULL || url[0] == '\0') {
 		return bad_url(invocation, url);
 	}
+
+	/* Special case the app id */
+	GMatchInfo * appidmatch = NULL;
+	if (g_regex_match(appidre, url, 0, &appidmatch)) {
+		gchar * package = g_match_info_fetch(appidmatch, 1);
+		gchar * app = g_match_info_fetch(appidmatch, 2);
+		gchar * version = g_match_info_fetch(appidmatch, 3);
+
+		app_id_discover(package, app, version, NULL);
+
+		g_free(package);
+		g_free(app);
+		g_free(version);
+		g_match_info_free(appidmatch);
+
+		g_dbus_method_invocation_return_value(invocation, NULL);
+		return TRUE;
+	}
+	g_match_info_free(appidmatch);
 
 	/* Special case the application URL */
 	GMatchInfo * appmatch = NULL;
@@ -236,6 +265,7 @@ main (int argc, char * argv[])
 	mainloop = g_main_loop_new(NULL, FALSE);
 	cancellable = g_cancellable_new();
 	applicationre = g_regex_new("^application:///([a-zA-Z0-9_-]*)\\.desktop$", 0, 0, NULL);
+	appidre = g_regex_new("^appid://([a-zA-Z0-9-]*)/([a-zA-Z0-9-]*)/([a-zA-Z0-9-]*)$", 0, 0, NULL);
 
 	g_bus_get(G_BUS_TYPE_SESSION, cancellable, bus_got, NULL);
 
@@ -250,6 +280,7 @@ main (int argc, char * argv[])
 	g_object_unref(cancellable);
 	g_object_unref(skel);
 	g_regex_unref(applicationre);
+	g_regex_unref(appidre);
 
 	int i;
 	for (i = 0; i < G_N_ELEMENTS(url_types); i++) {
