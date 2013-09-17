@@ -16,6 +16,7 @@
  */
 
 #include <gio/gio.h>
+#include <json-glib/json-glib.h>
 #include "service-iface.h"
 
 /* Globals */
@@ -127,6 +128,73 @@ version_search_type (const gchar * version)
 	return VERSION_SEARCH_PRECISE;
 }
 
+/* Try and get a manifest file and do a couple sanity checks on it */
+JsonParser *
+get_manifest_file (const gchar * pkg)
+{
+	/* Get the directory from click */
+	GError * error = NULL;
+	gchar * cmdline = g_strdup_printf("click pkgdir \"%s\"", pkg);
+
+	gchar * output = NULL;
+	g_spawn_command_line_sync(cmdline, &output, NULL, NULL, &error);
+	g_free(cmdline);
+
+	gchar * newline = g_strstr_len(output, -1, "\n");
+	if (newline != NULL) {
+		newline[0] = '\0';
+	}
+
+	if (error != NULL) {
+		g_warning("Unable to get directory for '%s' package: %s", pkg, error->message);
+		g_error_free(error);
+		g_free(output);
+		return NULL;
+	}
+
+	/* Use that to determine which manifest we want */
+	gchar * manifestfile = g_strdup_printf("%s.manifest", pkg);
+	gchar * manifestpath = g_build_filename(output, ".click", "info", manifestfile, NULL);
+	g_debug("Loading manifest: %s", manifestpath);
+	g_free(output);
+	g_free(manifestfile);
+
+	/* Let's look at that manifest file */
+	JsonParser * parser = json_parser_new();
+	json_parser_load_from_file(parser, manifestpath, &error);
+	g_free(manifestpath);
+
+	if (error != NULL) {
+		g_warning("Unable to load manifest for '%s': %s", pkg, error->message);
+		g_error_free(error);
+		g_object_unref(parser);
+		return NULL;
+	}
+
+	JsonNode * root = json_parser_get_root(parser);
+	if (json_node_get_node_type(root) != JSON_NODE_OBJECT) {
+		g_warning("Manifest file for package '%s' does not have an object as its root node", pkg);
+		g_object_unref(parser);
+		return NULL;
+	}
+
+	JsonObject * rootobj = json_node_get_object(root);
+
+	if (!json_object_has_member(rootobj, "version")) {
+		g_warning("Manifest file for package '%s' does not have a version", pkg);
+		g_object_unref(parser);
+		return NULL;
+	}
+
+	if (!json_object_has_member(rootobj, "hooks")) {
+		g_warning("Manifest file for package '%s' does not have a hooks section", pkg);
+		g_object_unref(parser);
+		return NULL;
+	}
+
+	return parser;
+}
+
 /* Works with a fuzzy set of parameters to determine the right app to
    call and then calls pass_url_to_app() with the full AppID */
 static gboolean
@@ -144,6 +212,11 @@ app_id_discover (const gchar * pkg, const gchar * app, const gchar * version, co
 		g_free(appid);
 		return TRUE;
 	}
+
+	JsonParser * parser = get_manifest_file(pkg);
+
+
+	g_object_unref(parser);
 
 	return FALSE;
 }
