@@ -1,3 +1,15 @@
+url-dispatcher (0.1+13.10.20130917.1-0ubuntu1) saucy; urgency=low
+
+  [ Ted Gould ]
+  * Call webbrowser for http/https URLs.
+  * Switch the library relationship to the service to a Suggests.
+  * URLs for music and video application launching.
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 21
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Tue, 17 Sep 2013 22:11:05 +0000
+
 url-dispatcher (0.1+13.10.20130823-0ubuntu1) saucy; urgency=low
 
   [ Ted Gould ]
