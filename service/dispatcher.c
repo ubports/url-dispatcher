@@ -16,6 +16,7 @@
  */
 
 #include <gio/gio.h>
+#include <upstart-app-launch.h>
 #include "service-iface.h"
 
 /* Globals */
@@ -61,22 +62,13 @@ pass_url_to_app (const gchar * app_id, const gchar * url)
 {
 	g_debug("Emitting 'application-start' for APP_ID='%s' and URLS='%s'", app_id, url);
 
-	/* TODO: Port to libupstart */
-	gchar * cmdline = NULL;
+	const gchar * urls[2] = {
+		url,
+		NULL
+	};
 
-	if (url == NULL) {
-		cmdline = g_strdup_printf("initctl emit application-start APP_ID=\"%s\"", app_id);
-	} else {
-		cmdline = g_strdup_printf("initctl emit application-start APP_ID=\"%s\" APP_URLS=\"%s\"", app_id, url);
-	}
-
-	GError * error = NULL;
-	g_spawn_command_line_async(cmdline, &error);
-	g_free(cmdline);
-
-	if (error != NULL) {
-		g_warning("Unable to spawn initctl: %s", error->message);
-		g_error_free(error);
+	if (!upstart_app_launch_start_application(app_id, urls)) {
+		g_warning("Unable to start application '%s' with URL '%s'", app_id, url);
 	}
 
 	return;
