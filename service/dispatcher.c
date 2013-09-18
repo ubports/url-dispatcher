@@ -86,6 +86,12 @@ struct _url_type_t {
 
 /* TODO: Make these come from registrations, but this works for now */
 url_type_t url_types[] = {
+	/* Address Book */
+	{
+		.regex_patern = "^addressbook://",
+		.regex_object = NULL,
+		.app_id = "address-book-app"
+	},
 	/* Music */
 	{
 		.regex_patern = "^music://",
