@@ -10,7 +10,7 @@ add_library (gtest STATIC
 # App ID URL test
 
 add_executable (app-id-test app-id-test.cc)
-target_link_libraries (app-id-test gtest)
+target_link_libraries (app-id-test gtest ${GTEST_LIBS})
 
 add_test (app-id-test app-id-test)
 

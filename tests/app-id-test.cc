@@ -7,7 +7,7 @@ class AppIdTest : public ::testing::Test
 		virtual void SetUp() {
 			return;
 		}
-}
+};
 
 TEST_F(AppIdTest, StubTest)
 {
