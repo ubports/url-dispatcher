@@ -65,7 +65,6 @@ add_subdirectory(service)
 add_subdirectory(liburl-dispatcher)
 add_subdirectory(tools)
 
-# TODO
-# enable_testing()
-# add_subdirectory(tests)
+enable_testing()
+add_subdirectory(tests)
 
