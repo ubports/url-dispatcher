@@ -37,7 +37,7 @@ add_executable(service-exec dispatcher.c)
 
 set_target_properties(service-exec PROPERTIES OUTPUT_NAME "url-dispatcher")
 
-target_link_libraries(service-exec service-generated)
+target_link_libraries(service-exec service-generated ${UPSTART_APP_LAUNCH_LIBRARIES})
 
 ###########################
 # Installation
