@@ -25,6 +25,7 @@ static GCancellable * cancellable = NULL;
 static ServiceIfaceComCanonicalURLDispatcher * skel = NULL;
 static GRegex * applicationre = NULL;
 static GRegex * appidre = NULL;
+static gchar * click_exec = NULL;
 
 /* Errors */
 enum {
@@ -134,7 +135,9 @@ get_manifest_file (const gchar * pkg)
 {
 	/* Get the directory from click */
 	GError * error = NULL;
-	gchar * cmdline = g_strdup_printf("click pkgdir \"%s\"", pkg);
+	gchar * cmdline = g_strdup_printf("%s pkgdir \"%s\"", 
+		click_exec == NULL ? "click" : click_exec,
+		pkg);
 
 	gchar * output = NULL;
 	g_spawn_command_line_sync(cmdline, &output, NULL, NULL, &error);
@@ -475,6 +478,10 @@ main (int argc, char * argv[])
 	applicationre = g_regex_new("^application:///([a-zA-Z0-9_-]*)\\.desktop$", 0, 0, NULL);
 	appidre = g_regex_new("^appid://([a-z0-9\\.-]*)/([a-zA-Z0-9-]*)/([a-zA-Z0-9-]*)$", 0, 0, NULL);
 
+	if (g_getenv("URL_DISPATCHER_CLICK_EXEC") != NULL) {
+		click_exec = g_strdup(g_getenv("URL_DISPATCHER_CLICK_EXEC"));
+	}
+
 	g_bus_get(G_BUS_TYPE_SESSION, cancellable, bus_got, NULL);
 
 	skel = service_iface_com_canonical_urldispatcher_skeleton_new();
@@ -489,6 +496,7 @@ main (int argc, char * argv[])
 	g_object_unref(skel);
 	g_regex_unref(applicationre);
 	g_regex_unref(appidre);
+	g_free(click_exec);
 
 	int i;
 	for (i = 0; i < G_N_ELEMENTS(url_types); i++) {
