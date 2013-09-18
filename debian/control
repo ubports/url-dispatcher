@@ -10,6 +10,7 @@ Build-Depends: cmake,
                intltool,
                libdbus-1-dev,
                libglib2.0-dev,
+               libupstart-app-launch1-dev,
                python,
 Standards-Version: 3.9.4
 Homepage: http://launchpad.net/url-dispatcher
