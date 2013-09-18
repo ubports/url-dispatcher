@@ -1,0 +1,9 @@
+{
+	"version": "1.2.3",
+	"name": "com.test.good",
+	"hooks": {
+		"app1": {
+			"test": "test"
+		}
+	}
+}
