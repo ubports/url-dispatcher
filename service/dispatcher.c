@@ -92,6 +92,12 @@ url_type_t url_types[] = {
 		.regex_object = NULL,
 		.app_id = "address-book-app"
 	},
+	/* Messages */
+	{
+		.regex_patern = "^message://",
+		.regex_object = NULL,
+		.app_id = "messaging-app"
+	},
 	/* Music */
 	{
 		.regex_patern = "^music://",
