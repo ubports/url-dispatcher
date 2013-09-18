@@ -1,6 +1,9 @@
 project(url-dispatcher C)
 cmake_minimum_required(VERSION 2.8.9)
 
+option (enable_tests "Build tests" ON)
+option (enable_lcov "Generate Coverage Reports" ON)
+
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake" "${CMAKE_MODULE_PATH}")
 
 set(PACKAGE ${CMAKE_PROJECT_NAME})
@@ -65,6 +68,15 @@ add_subdirectory(service)
 add_subdirectory(liburl-dispatcher)
 add_subdirectory(tools)
 
-enable_testing()
-add_subdirectory(tests)
+# testing & coverage
+if (${enable_tests})
+  set (GTEST_SOURCE_DIR /usr/src/gtest/src)
+  set (GTEST_INCLUDE_DIR ${GTEST_SOURCE_DIR}/..)
+  set (GTEST_LIBS -lpthread)
+  enable_testing ()
+  if (${enable_lcov})
+#    include(GCov)
+  endif ()
+  add_subdirectory(tests)
+endif ()
 
