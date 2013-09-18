@@ -1,4 +1,4 @@
-project(url-dispatcher C)
+project(url-dispatcher C CXX)
 cmake_minimum_required(VERSION 2.8.9)
 
 option (enable_tests "Build tests" ON)
