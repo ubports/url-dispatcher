@@ -1,3 +1,16 @@
+url-dispatcher (0.1+13.10.20130919.3-0ubuntu1) saucy; urgency=low
+
+  [ Ted Gould ]
+  * Fix the name of the dialer-app.
+  * Fix the URI environment variable by properly using libupstart-app-
+    launch.
+  * Add URLs for PIM apps.
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 25
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Thu, 19 Sep 2013 14:05:04 +0000
+
 url-dispatcher (0.1+13.10.20130917.1-0ubuntu1) saucy; urgency=low
 
   [ Ted Gould ]
