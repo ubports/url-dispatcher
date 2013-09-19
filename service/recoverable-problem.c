@@ -72,19 +72,19 @@ report_recoverable_problem (const gchar * signature, GPid report_pid, gboolean w
 		"/usr/share/apport/recoverable_problem",
 		NULL
 	};
+	gchar * argv_pid[4] = {
+		"/usr/share/apport/recoverable_problem",
+		"-p",
+		NULL, /* put pid_str when allocated here */
+		NULL
+	};
+
 
 	argv = (gchar **)argv_nopid;
 
 	if (report_pid != 0) {
 		pid_str = g_strdup_printf("%d", report_pid);
-
-		gchar * argv_pid[4] = {
-			"/usr/share/apport/recoverable_problem",
-			"-p",
-			pid_str,
-			NULL
-		};
-
+		argv_pid[2] = pid_str;
 		argv = (gchar**)argv_pid;
 	}
 
@@ -158,6 +158,8 @@ report_recoverable_problem (const gchar * signature, GPid report_pid, gboolean w
 
 		g_spawn_close_pid(pid);
 	}
+
+	g_free(pid_str);
 
 	return;
 }
