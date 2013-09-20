@@ -18,6 +18,7 @@
 #include <gio/gio.h>
 #include <upstart-app-launch.h>
 #include "service-iface.h"
+#include "recoverable-problem.h"
 
 /* Globals */
 static GMainLoop * mainloop = NULL;
@@ -40,12 +41,62 @@ register_dbus_errors (void)
 	return;
 }
 
+/* We should have the PID now so we can make sure to file the
+   problem on the right package. */
+static void
+recoverable_problem_file (GObject * obj, GAsyncResult * res, gpointer user_data)
+{
+	gchar * badurl = (gchar *)user_data;
+	GVariant * pid_tuple = NULL;
+	GError * error = NULL;
+
+	pid_tuple = g_dbus_connection_call_finish(G_DBUS_CONNECTION(obj), res, &error);
+	if (error != NULL) {
+		g_warning("Unable to get PID for calling program with URL '%s': %s", badurl, error->message);
+		g_free(badurl);
+		g_error_free(error);
+		return;
+	}
+
+	guint32 pid = 0;
+	g_variant_get(pid_tuple, "(u)", &pid);
+	g_variant_unref(pid_tuple);
+
+	gchar * signature = g_strdup_printf("url-dispatcher;bad-url;%s", badurl);
+	gchar * additional[3] = {
+		"BadURL",
+		badurl,
+		NULL
+	};
+
+	report_recoverable_problem(signature, pid, FALSE, additional);
+
+	g_free(signature);
+	g_free(badurl);
+
+	return;
+}
+
 /* Say that we have a bad URL and report a recoverable error on the process that
    sent it to us. */
 static gboolean
 bad_url (GDBusMethodInvocation * invocation, const gchar * url)
 {
-	/* TODO: Recoverable Error */
+	const gchar * sender = g_dbus_method_invocation_get_sender(invocation);
+	GDBusConnection * conn = g_dbus_method_invocation_get_connection(invocation);
+
+	g_dbus_connection_call(conn,
+		"org.freedesktop.DBus",
+		"/",
+		"org.freedesktop.DBus",
+		"GetConnectionUnixProcessID",
+		g_variant_new("(s)", sender),
+		G_VARIANT_TYPE("(u)"),
+		G_DBUS_CALL_FLAGS_NONE,
+		-1, /* timeout */
+		NULL, /* cancellable */
+		recoverable_problem_file,
+		g_strdup(url));
 
 	g_dbus_method_invocation_return_error(invocation,
 		url_dispatcher_error_quark(),

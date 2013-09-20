@@ -33,7 +33,7 @@ ${GIO2_LIBRARIES}
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
-add_executable(service-exec dispatcher.c)
+add_executable(service-exec dispatcher.c recoverable-problem.h recoverable-problem.c)
 
 set_target_properties(service-exec PROPERTIES OUTPUT_NAME "url-dispatcher")
 
