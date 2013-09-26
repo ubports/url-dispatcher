@@ -2,6 +2,7 @@
 #include <gio/gio.h>
 #include <gtest/gtest.h>
 #include "dispatcher.h"
+#include "upstart-app-launch-mock.h"
 
 class DispatcherTest : public ::testing::Test
 {
@@ -29,6 +30,8 @@ class DispatcherTest : public ::testing::Test
 			}
 
 			g_main_loop_unref(mainloop);
+
+			upstart_app_launch_mock_clear_last_app_id();
 
 			g_test_dbus_down(testbus);
 			g_object_unref(testbus);
