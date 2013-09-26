@@ -143,6 +143,12 @@ url_type_t url_types[] = {
 		.regex_object = NULL,
 		.app_id = "address-book-app"
 	},
+	/* Calendar */
+	{
+		.regex_patern = "^calendar://",
+		.regex_object = NULL,
+		.app_id = "calendar-app"
+	},
 	/* Messages */
 	{
 		.regex_patern = "^message://",
