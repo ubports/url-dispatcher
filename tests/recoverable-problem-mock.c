@@ -18,6 +18,7 @@
  */
 
 #include <gio/gio.h>
+#include "recoverable-problem.h"
 
 void
 report_recoverable_problem (const gchar * signature, GPid report_pid, gboolean wait, gchar * additional_properties[])
