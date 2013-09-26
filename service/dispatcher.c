@@ -17,10 +17,12 @@
 
 #include <gio/gio.h>
 #include <json-glib/json-glib.h>
+#include <upstart-app-launch.h>
+#include "dispatcher.h"
 #include "service-iface.h"
+#include "recoverable-problem.h"
 
 /* Globals */
-static GMainLoop * mainloop = NULL;
 static GCancellable * cancellable = NULL;
 static ServiceIfaceComCanonicalURLDispatcher * skel = NULL;
 static GRegex * applicationre = NULL;
@@ -42,12 +44,62 @@ register_dbus_errors (void)
 	return;
 }
 
+/* We should have the PID now so we can make sure to file the
+   problem on the right package. */
+static void
+recoverable_problem_file (GObject * obj, GAsyncResult * res, gpointer user_data)
+{
+	gchar * badurl = (gchar *)user_data;
+	GVariant * pid_tuple = NULL;
+	GError * error = NULL;
+
+	pid_tuple = g_dbus_connection_call_finish(G_DBUS_CONNECTION(obj), res, &error);
+	if (error != NULL) {
+		g_warning("Unable to get PID for calling program with URL '%s': %s", badurl, error->message);
+		g_free(badurl);
+		g_error_free(error);
+		return;
+	}
+
+	guint32 pid = 0;
+	g_variant_get(pid_tuple, "(u)", &pid);
+	g_variant_unref(pid_tuple);
+
+	gchar * signature = g_strdup_printf("url-dispatcher;bad-url;%s", badurl);
+	gchar * additional[3] = {
+		"BadURL",
+		badurl,
+		NULL
+	};
+
+	report_recoverable_problem(signature, pid, FALSE, additional);
+
+	g_free(signature);
+	g_free(badurl);
+
+	return;
+}
+
 /* Say that we have a bad URL and report a recoverable error on the process that
    sent it to us. */
 static gboolean
 bad_url (GDBusMethodInvocation * invocation, const gchar * url)
 {
-	/* TODO: Recoverable Error */
+	const gchar * sender = g_dbus_method_invocation_get_sender(invocation);
+	GDBusConnection * conn = g_dbus_method_invocation_get_connection(invocation);
+
+	g_dbus_connection_call(conn,
+		"org.freedesktop.DBus",
+		"/",
+		"org.freedesktop.DBus",
+		"GetConnectionUnixProcessID",
+		g_variant_new("(s)", sender),
+		G_VARIANT_TYPE("(u)"),
+		G_DBUS_CALL_FLAGS_NONE,
+		-1, /* timeout */
+		NULL, /* cancellable */
+		recoverable_problem_file,
+		g_strdup(url));
 
 	g_dbus_method_invocation_return_error(invocation,
 		url_dispatcher_error_quark(),
@@ -64,22 +116,13 @@ pass_url_to_app (const gchar * app_id, const gchar * url)
 {
 	g_debug("Emitting 'application-start' for APP_ID='%s' and URLS='%s'", app_id, url);
 
-	/* TODO: Port to libupstart */
-	gchar * cmdline = NULL;
+	const gchar * urls[2] = {
+		url,
+		NULL
+	};
 
-	if (url == NULL) {
-		cmdline = g_strdup_printf("initctl emit application-start APP_ID=\"%s\"", app_id);
-	} else {
-		cmdline = g_strdup_printf("initctl emit application-start APP_ID=\"%s\" APP_URLS=\"%s\"", app_id, url);
-	}
-
-	GError * error = NULL;
-	g_spawn_command_line_async(cmdline, &error);
-	g_free(cmdline);
-
-	if (error != NULL) {
-		g_warning("Unable to spawn initctl: %s", error->message);
-		g_error_free(error);
+	if (!upstart_app_launch_start_application(app_id, urls)) {
+		g_warning("Unable to start application '%s' with URL '%s'", app_id, url);
 	}
 
 	return;
@@ -312,6 +355,18 @@ struct _url_type_t {
 
 /* TODO: Make these come from registrations, but this works for now */
 url_type_t url_types[] = {
+	/* Address Book */
+	{
+		.regex_patern = "^addressbook://",
+		.regex_object = NULL,
+		.app_id = "address-book-app"
+	},
+	/* Messages */
+	{
+		.regex_patern = "^message://",
+		.regex_object = NULL,
+		.app_id = "messaging-app"
+	},
 	/* Music */
 	{
 		.regex_patern = "^music://",
@@ -328,7 +383,7 @@ url_type_t url_types[] = {
 	{
 		.regex_patern = "^tel://[\\d\\.+x,\\(\\)-]*$",
 		.regex_object = NULL,
-		.app_id = "telephony-app"
+		.app_id = "dialer-app"
 	},
 	/* Settings */
 	{
@@ -363,7 +418,7 @@ url_type_t url_types[] = {
 
 /* Get a URL off of the bus */
 static gboolean
-dispatch_url (GObject * skel, GDBusMethodInvocation * invocation, const gchar * url, gpointer user_data)
+dispatch_url_cb (GObject * skel, GDBusMethodInvocation * invocation, const gchar * url, gpointer user_data)
 {
 	g_debug("Dispatching URL: %s", url);
 
@@ -371,27 +426,36 @@ dispatch_url (GObject * skel, GDBusMethodInvocation * invocation, const gchar * 
 		return bad_url(invocation, url);
 	}
 
+	if (dispatch_url(url)) {
+		g_dbus_method_invocation_return_value(invocation, NULL);
+	} else {
+		bad_url(invocation, url);
+	}
+
+	return TRUE;
+}
+
+/* The core of the URL handling */
+gboolean
+dispatch_url (const gchar * url)
+{
 	/* Special case the app id */
 	GMatchInfo * appidmatch = NULL;
 	if (g_regex_match(appidre, url, 0, &appidmatch)) {
 		gchar * package = g_match_info_fetch(appidmatch, 1);
 		gchar * app = g_match_info_fetch(appidmatch, 2);
 		gchar * version = g_match_info_fetch(appidmatch, 3);
+		gboolean retval = TRUE;
 
-		if (app_id_discover(package, app, version, NULL)) {
-			g_dbus_method_invocation_return_value(invocation, NULL);
-		} else {
-			bad_url(invocation, url);
-		}
+		retval = app_id_discover(package, app, version, NULL);
 
 		g_free(package);
 		g_free(app);
 		g_free(version);
 		g_match_info_free(appidmatch);
 
-		return TRUE;
+		return retval;
 	}
-	g_match_info_free(appidmatch);
 
 	/* Special case the application URL */
 	GMatchInfo * appmatch = NULL;
@@ -402,7 +466,6 @@ dispatch_url (GObject * skel, GDBusMethodInvocation * invocation, const gchar * 
 		g_free(appid);
 		g_match_info_free(appmatch);
 
-		g_dbus_method_invocation_return_value(invocation, NULL);
 		return TRUE;
 	}
 	g_match_info_free(appmatch);
@@ -416,18 +479,18 @@ dispatch_url (GObject * skel, GDBusMethodInvocation * invocation, const gchar * 
 		if (g_regex_match(url_types[i].regex_object, url, 0, NULL)) {
 			pass_url_to_app(url_types[i].app_id, url);
 
-			g_dbus_method_invocation_return_value(invocation, NULL);
 			return TRUE;
 		}
 	}
 
-	return bad_url(invocation, url);
+	return FALSE;
 }
 
 /* We're goin' down cap'n */
 static void
 name_lost (GDBusConnection * con, const gchar * name, gpointer user_data)
 {
+	GMainLoop * mainloop = (GMainLoop *)user_data;
 	g_error("Unable to get name '%s'", name);
 	g_main_loop_quit(mainloop);
 	return;
@@ -437,6 +500,7 @@ name_lost (GDBusConnection * con, const gchar * name, gpointer user_data)
 static void
 bus_got (GObject * obj, GAsyncResult * res, gpointer user_data)
 {
+	GMainLoop * mainloop = (GMainLoop *)user_data;
 	GDBusConnection * bus = NULL;
 	GError * error = NULL;
 
@@ -462,36 +526,40 @@ bus_got (GObject * obj, GAsyncResult * res, gpointer user_data)
 		G_BUS_NAME_OWNER_FLAGS_NONE, /* flags */
 		NULL, /* name acquired */
 		name_lost,
-		NULL, NULL); /* user data */
+		user_data, NULL); /* user data */
 
 	g_object_unref(bus);
 
 	return;
 }
 
-/* Where it all begins */
-int
-main (int argc, char * argv[])
+/* Initialize all the globals */
+gboolean
+dispatcher_init (GMainLoop * mainloop)
 {
-	mainloop = g_main_loop_new(NULL, FALSE);
 	cancellable = g_cancellable_new();
-	applicationre = g_regex_new("^application:///([a-zA-Z0-9_-]*)\\.desktop$", 0, 0, NULL);
-	appidre = g_regex_new("^appid://([a-z0-9\\.-]*)/([a-zA-Z0-9-]*)/([a-zA-Z0-9-]*)$", 0, 0, NULL);
+
+	applicationre = g_regex_new("^application:///([a-zA-Z0-9_\\.-]*)\\.desktop$", 0, 0, NULL);
+	appidre = g_regex_new("^appid://([a-z0-9\\.-]*)/([a-zA-Z0-9-]*)/([a-zA-Z0-9\\.-]*)$", 0, 0, NULL);
 
 	if (g_getenv("URL_DISPATCHER_CLICK_EXEC") != NULL) {
 		click_exec = g_strdup(g_getenv("URL_DISPATCHER_CLICK_EXEC"));
 	}
 
-	g_bus_get(G_BUS_TYPE_SESSION, cancellable, bus_got, NULL);
+	g_bus_get(G_BUS_TYPE_SESSION, cancellable, bus_got, mainloop);
 
 	skel = service_iface_com_canonical_urldispatcher_skeleton_new();
-	g_signal_connect(skel, "handle-dispatch-url", G_CALLBACK(dispatch_url), NULL);
+	g_signal_connect(skel, "handle-dispatch-url", G_CALLBACK(dispatch_url_cb), NULL);
 
-	/* Run Main */
-	g_main_loop_run(mainloop);
+	return TRUE;
+}
 
-	/* Clean up globals */
-	g_main_loop_unref(mainloop);
+/* Clean up all the globals */
+gboolean
+dispatcher_shutdown (void)
+{
+	g_cancellable_cancel(cancellable);
+
 	g_object_unref(cancellable);
 	g_object_unref(skel);
 	g_regex_unref(applicationre);
@@ -503,5 +571,5 @@ main (int argc, char * argv[])
 		g_clear_pointer(&url_types[i].regex_object, g_regex_unref);
 	}
 
-	return 0;
+	return TRUE;
 }
