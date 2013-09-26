@@ -1,5 +1,6 @@
 
 #include <gtest/gtest.h>
+#include "dispatcher.h"
 
 class DispatcherTest : public ::testing::Test
 {

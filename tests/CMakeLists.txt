@@ -26,6 +26,8 @@ target_link_libraries(mock-lib
 # App ID URL test
 ###########################
 
+include_directories("${CMAKE_SOURCE_DIR}/service")
+
 add_executable (dispatcher-test dispatcher-test.cc)
 target_link_libraries (dispatcher-test
 	dispatcher-lib
