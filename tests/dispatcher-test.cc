@@ -56,7 +56,11 @@ class DispatcherTest : public ::testing::Test
 		}
 };
 
-TEST_F(DispatcherTest, StubTest)
+TEST_F(DispatcherTest, ApplicationTest)
 {
+	dispatch_url("application:///foo.desktop");
+	ASSERT_STREQ("foo", upstart_app_launch_mock_get_last_app_id());
+	upstart_app_launch_mock_clear_last_app_id();
+
 	return;
 }
