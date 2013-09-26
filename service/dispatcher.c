@@ -316,6 +316,8 @@ dispatcher_init (GMainLoop * mainloop)
 gboolean
 dispatcher_shutdown (void)
 {
+	g_cancellable_cancel(cancellable);
+
 	g_object_unref(cancellable);
 	g_object_unref(skel);
 	g_regex_unref(applicationre);
