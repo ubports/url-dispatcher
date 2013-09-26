@@ -24,6 +24,7 @@ G_BEGIN_DECLS
 
 gboolean dispatcher_init (GMainLoop * mainloop);
 gboolean dispatcher_shutdown (void);
+gboolean dispatch_url (const gchar * url);
 
 G_END_DECLS
 

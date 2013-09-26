@@ -200,7 +200,7 @@ url_type_t url_types[] = {
 
 /* Get a URL off of the bus */
 static gboolean
-dispatch_url (GObject * skel, GDBusMethodInvocation * invocation, const gchar * url, gpointer user_data)
+dispatch_url_cb (GObject * skel, GDBusMethodInvocation * invocation, const gchar * url, gpointer user_data)
 {
 	g_debug("Dispatching URL: %s", url);
 
@@ -208,6 +208,19 @@ dispatch_url (GObject * skel, GDBusMethodInvocation * invocation, const gchar * 
 		return bad_url(invocation, url);
 	}
 
+	if (dispatch_url(url)) {
+		g_dbus_method_invocation_return_value(invocation, NULL);
+	} else {
+		bad_url(invocation, url);
+	}
+
+	return TRUE;
+}
+
+/* The core of the URL handling */
+gboolean
+dispatch_url (const gchar * url)
+{
 	/* Special case the application URL */
 	GMatchInfo * appmatch = NULL;
 	if (g_regex_match(applicationre, url, 0, &appmatch)) {
@@ -217,7 +230,6 @@ dispatch_url (GObject * skel, GDBusMethodInvocation * invocation, const gchar * 
 		g_free(appid);
 		g_match_info_free(appmatch);
 
-		g_dbus_method_invocation_return_value(invocation, NULL);
 		return TRUE;
 	}
 	g_match_info_free(appmatch);
@@ -231,12 +243,11 @@ dispatch_url (GObject * skel, GDBusMethodInvocation * invocation, const gchar * 
 		if (g_regex_match(url_types[i].regex_object, url, 0, NULL)) {
 			pass_url_to_app(url_types[i].app_id, url);
 
-			g_dbus_method_invocation_return_value(invocation, NULL);
 			return TRUE;
 		}
 	}
 
-	return bad_url(invocation, url);
+	return FALSE;
 }
 
 /* We're goin' down cap'n */
@@ -296,7 +307,7 @@ dispatcher_init (GMainLoop * mainloop)
 	g_bus_get(G_BUS_TYPE_SESSION, cancellable, bus_got, mainloop);
 
 	skel = service_iface_com_canonical_urldispatcher_skeleton_new();
-	g_signal_connect(skel, "handle-dispatch-url", G_CALLBACK(dispatch_url), NULL);
+	g_signal_connect(skel, "handle-dispatch-url", G_CALLBACK(dispatch_url_cb), NULL);
 
 	return TRUE;
 }
