@@ -302,7 +302,7 @@ gboolean
 dispatcher_init (GMainLoop * mainloop)
 {
 	cancellable = g_cancellable_new();
-	applicationre = g_regex_new("^application:///([a-zA-Z0-9_-]*)\\.desktop$", 0, 0, NULL);
+	applicationre = g_regex_new("^application:///([a-zA-Z0-9_\\.-]*)\\.desktop$", 0, 0, NULL);
 
 	g_bus_get(G_BUS_TYPE_SESSION, cancellable, bus_got, mainloop);
 
