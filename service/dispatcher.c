@@ -145,7 +145,7 @@ url_type_t url_types[] = {
 	},
 	/* Calendar */
 	{
-		.regex_patern = "^calendar://",
+		.regex_patern = "^calendar:///",
 		.regex_object = NULL,
 		.app_id = "calendar-app"
 	},
