@@ -58,12 +58,29 @@ class DispatcherTest : public ::testing::Test
 
 TEST_F(DispatcherTest, ApplicationTest)
 {
+	/* Good sanity check */
 	dispatch_url("application:///foo.desktop");
 	ASSERT_STREQ("foo", upstart_app_launch_mock_get_last_app_id());
 	upstart_app_launch_mock_clear_last_app_id();
 
+	/* No .desktop */
 	dispatch_url("application:///foo");
 	ASSERT_TRUE(NULL == upstart_app_launch_mock_get_last_app_id());
+	upstart_app_launch_mock_clear_last_app_id();
+
+	/* Missing a / */
+	dispatch_url("application://foo.desktop");
+	ASSERT_TRUE(NULL == upstart_app_launch_mock_get_last_app_id());
+	upstart_app_launch_mock_clear_last_app_id();
+
+	/* Good with hyphens */
+	dispatch_url("application:///my-really-cool-app.desktop");
+	ASSERT_STREQ("my-really-cool-app", upstart_app_launch_mock_get_last_app_id());
+	upstart_app_launch_mock_clear_last_app_id();
+
+	/* Good Click Style */
+	dispatch_url("application:///com.test.foo_bar-app_0.3.4.desktop");
+	ASSERT_STREQ("com.test.foo_bar-app_0.3.4", upstart_app_launch_mock_get_last_app_id());
 	upstart_app_launch_mock_clear_last_app_id();
 
 	return;
