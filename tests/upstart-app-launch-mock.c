@@ -32,6 +32,8 @@ void
 upstart_app_launch_mock_clear_last_app_id (void)
 {
 	g_free(last_appid);
+	last_appid = NULL;
+	return;
 }
 
 gchar *
