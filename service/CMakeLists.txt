@@ -28,16 +28,31 @@ ${GIO2_LIBRARIES}
 )
 
 ###########################
+# Dispatcher Lib
+###########################
+
+add_library(dispatcher-lib STATIC
+	dispatcher.h
+	dispatcher.c)
+
+target_link_libraries(dispatcher-lib
+	service-generated
+	${GLIB2_LIBRARIES}
+	${GOBJECT2_LIBRARIES}
+	${GIO2_LIBRARIES}
+)
+
+###########################
 # Service Executable
 ###########################
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
-add_executable(service-exec dispatcher.c dispatcher.h service.c recoverable-problem.h recoverable-problem.c)
+add_executable(service-exec service.c recoverable-problem.h recoverable-problem.c)
 
 set_target_properties(service-exec PROPERTIES OUTPUT_NAME "url-dispatcher")
 
-target_link_libraries(service-exec service-generated ${UPSTART_APP_LAUNCH_LIBRARIES})
+target_link_libraries(service-exec dispatcher-lib ${UPSTART_APP_LAUNCH_LIBRARIES})
 
 ###########################
 # Installation
