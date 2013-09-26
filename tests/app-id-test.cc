@@ -101,3 +101,20 @@ TEST_F(AppIdTest, WildcardUrl)
 
 	return;
 }
+
+TEST_F(AppIdTest, OrderingUrl)
+{
+	dispatch_url("appid://com.test.multiple/first-listed-app/current-user-version");
+	ASSERT_STREQ("com.test.multiple_app-first_1.2.3", upstart_app_launch_mock_get_last_app_id());
+	upstart_app_launch_mock_clear_last_app_id();
+
+	dispatch_url("appid://com.test.multiple/last-listed-app/current-user-version");
+	ASSERT_STREQ("com.test.multiple_app-last_1.2.3", upstart_app_launch_mock_get_last_app_id());
+	upstart_app_launch_mock_clear_last_app_id();
+
+	dispatch_url("appid://com.test.multiple/only-listed-app/current-user-version");
+	ASSERT_TRUE(NULL == upstart_app_launch_mock_get_last_app_id());
+	upstart_app_launch_mock_clear_last_app_id();
+
+	return;
+}

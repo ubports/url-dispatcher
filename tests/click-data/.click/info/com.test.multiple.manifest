@@ -1,0 +1,15 @@
+{
+	"version": "1.2.3",
+	"name": "com.test.good",
+	"hooks": {
+		"app-first": {
+			"test": "test"
+		},
+		"app-middle": {
+			"test": "test"
+		},
+		"app-last": {
+			"test": "test"
+		}
+	}
+}
