@@ -62,5 +62,9 @@ TEST_F(DispatcherTest, ApplicationTest)
 	ASSERT_STREQ("foo", upstart_app_launch_mock_get_last_app_id());
 	upstart_app_launch_mock_clear_last_app_id();
 
+	dispatch_url("application:///foo");
+	ASSERT_TRUE(NULL == upstart_app_launch_mock_get_last_app_id());
+	upstart_app_launch_mock_clear_last_app_id();
+
 	return;
 }
