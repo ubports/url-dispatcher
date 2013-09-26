@@ -30,7 +30,7 @@ class AppIdTest : public ::testing::Test
 	protected:
 		virtual void SetUp() {
 			g_setenv("URL_DISPATCHER_CLICK_EXEC", CMAKE_SOURCE_DIR "/click-test.sh", TRUE);
-			g_setenv("URL_DISPATCHER_TEST_CLICK_DIR", CMAKE_SOURCE_DIR, TRUE);
+			g_setenv("URL_DISPATCHER_TEST_CLICK_DIR", CMAKE_SOURCE_DIR "/click-data/", TRUE);
 
 			testbus = g_test_dbus_new(G_TEST_DBUS_NONE);
 			g_test_dbus_up(testbus);
@@ -59,7 +59,17 @@ class AppIdTest : public ::testing::Test
 		}
 };
 
-TEST_F(AppIdTest, StubTest)
+TEST_F(AppIdTest, fullUrl)
 {
-	ASSERT_TRUE(TRUE);
+	/* Good sanity check */
+	dispatch_url("appid://com.test.good/app1/1.2.3");
+	ASSERT_STREQ("com.test.good_app1_1.2.3", upstart_app_launch_mock_get_last_app_id());
+	upstart_app_launch_mock_clear_last_app_id();
+
+	/* No version at all */
+	dispatch_url("appid://com.test.good/app1");
+	ASSERT_TRUE(NULL == upstart_app_launch_mock_get_last_app_id());
+	upstart_app_launch_mock_clear_last_app_id();
+
+	return;
 }
