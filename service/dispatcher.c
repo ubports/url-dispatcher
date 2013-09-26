@@ -151,11 +151,11 @@ app_name_type (const gchar * appname)
 	}
 
 	if (g_strcmp0(appname, "first-listed-app") == 0) {
-		return APP_NAME_ONLY;
+		return APP_NAME_FIRST;
 	}
 
 	if (g_strcmp0(appname, "last-listed-app") == 0) {
-		return APP_NAME_ONLY;
+		return APP_NAME_LAST;
 	}
 
 	return APP_NAME_PRECISE;
