@@ -24,7 +24,7 @@ target_link_libraries(mock-lib
 )
 
 ###########################
-# App ID URL test
+# Dispatcher test
 ###########################
 
 include_directories("${CMAKE_SOURCE_DIR}/service")
@@ -37,4 +37,19 @@ target_link_libraries (dispatcher-test
 	${GTEST_LIBS})
 
 add_test (dispatcher-test dispatcher-test)
+
+###########################
+# App ID URL test
+###########################
+
+add_definitions ( -DCMAKE_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}" )
+
+add_executable (app-id-test app-id-test.cc)
+target_link_libraries (app-id-test
+	dispatcher-lib
+	mock-lib
+	gtest
+	${GTEST_LIBS})
+
+add_test (app-id-test app-id-test)
 
