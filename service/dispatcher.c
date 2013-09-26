@@ -491,7 +491,7 @@ static void
 name_lost (GDBusConnection * con, const gchar * name, gpointer user_data)
 {
 	GMainLoop * mainloop = (GMainLoop *)user_data;
-	g_error("Unable to get name '%s'", name);
+	g_warning("Unable to get name '%s'", name);
 	g_main_loop_quit(mainloop);
 	return;
 }
@@ -507,8 +507,11 @@ bus_got (GObject * obj, GAsyncResult * res, gpointer user_data)
 	bus = g_bus_get_finish(res, &error);
 
 	if (error != NULL) {
-		g_error("Unable to connect to D-Bus: %s", error->message);
-		g_main_loop_quit(mainloop);
+		if (!g_error_matches(error, G_IO_ERROR, G_IO_ERROR_CANCELLED)) {
+			g_error("Unable to connect to D-Bus: %s", error->message);
+			g_main_loop_quit(mainloop);
+		}
+		g_error_free(error);
 		return;
 	}
 
