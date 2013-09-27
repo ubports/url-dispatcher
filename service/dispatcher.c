@@ -17,11 +17,11 @@
 
 #include <gio/gio.h>
 #include <upstart-app-launch.h>
+#include "dispatcher.h"
 #include "service-iface.h"
 #include "recoverable-problem.h"
 
 /* Globals */
-static GMainLoop * mainloop = NULL;
 static GCancellable * cancellable = NULL;
 static ServiceIfaceComCanonicalURLDispatcher * skel = NULL;
 static GRegex * applicationre = NULL;
@@ -200,7 +200,7 @@ url_type_t url_types[] = {
 
 /* Get a URL off of the bus */
 static gboolean
-dispatch_url (GObject * skel, GDBusMethodInvocation * invocation, const gchar * url, gpointer user_data)
+dispatch_url_cb (GObject * skel, GDBusMethodInvocation * invocation, const gchar * url, gpointer user_data)
 {
 	g_debug("Dispatching URL: %s", url);
 
@@ -208,6 +208,19 @@ dispatch_url (GObject * skel, GDBusMethodInvocation * invocation, const gchar * 
 		return bad_url(invocation, url);
 	}
 
+	if (dispatch_url(url)) {
+		g_dbus_method_invocation_return_value(invocation, NULL);
+	} else {
+		bad_url(invocation, url);
+	}
+
+	return TRUE;
+}
+
+/* The core of the URL handling */
+gboolean
+dispatch_url (const gchar * url)
+{
 	/* Special case the application URL */
 	GMatchInfo * appmatch = NULL;
 	if (g_regex_match(applicationre, url, 0, &appmatch)) {
@@ -217,7 +230,6 @@ dispatch_url (GObject * skel, GDBusMethodInvocation * invocation, const gchar * 
 		g_free(appid);
 		g_match_info_free(appmatch);
 
-		g_dbus_method_invocation_return_value(invocation, NULL);
 		return TRUE;
 	}
 	g_match_info_free(appmatch);
@@ -231,19 +243,19 @@ dispatch_url (GObject * skel, GDBusMethodInvocation * invocation, const gchar * 
 		if (g_regex_match(url_types[i].regex_object, url, 0, NULL)) {
 			pass_url_to_app(url_types[i].app_id, url);
 
-			g_dbus_method_invocation_return_value(invocation, NULL);
 			return TRUE;
 		}
 	}
 
-	return bad_url(invocation, url);
+	return FALSE;
 }
 
 /* We're goin' down cap'n */
 static void
 name_lost (GDBusConnection * con, const gchar * name, gpointer user_data)
 {
-	g_error("Unable to get name '%s'", name);
+	GMainLoop * mainloop = (GMainLoop *)user_data;
+	g_warning("Unable to get name '%s'", name);
 	g_main_loop_quit(mainloop);
 	return;
 }
@@ -252,14 +264,18 @@ name_lost (GDBusConnection * con, const gchar * name, gpointer user_data)
 static void
 bus_got (GObject * obj, GAsyncResult * res, gpointer user_data)
 {
+	GMainLoop * mainloop = (GMainLoop *)user_data;
 	GDBusConnection * bus = NULL;
 	GError * error = NULL;
 
 	bus = g_bus_get_finish(res, &error);
 
 	if (error != NULL) {
-		g_error("Unable to connect to D-Bus: %s", error->message);
-		g_main_loop_quit(mainloop);
+		if (!g_error_matches(error, G_IO_ERROR, G_IO_ERROR_CANCELLED)) {
+			g_error("Unable to connect to D-Bus: %s", error->message);
+			g_main_loop_quit(mainloop);
+		}
+		g_error_free(error);
 		return;
 	}
 
@@ -277,31 +293,34 @@ bus_got (GObject * obj, GAsyncResult * res, gpointer user_data)
 		G_BUS_NAME_OWNER_FLAGS_NONE, /* flags */
 		NULL, /* name acquired */
 		name_lost,
-		NULL, NULL); /* user data */
+		user_data, NULL); /* user data */
 
 	g_object_unref(bus);
 
 	return;
 }
 
-/* Where it all begins */
-int
-main (int argc, char * argv[])
+/* Initialize all the globals */
+gboolean
+dispatcher_init (GMainLoop * mainloop)
 {
-	mainloop = g_main_loop_new(NULL, FALSE);
 	cancellable = g_cancellable_new();
-	applicationre = g_regex_new("^application:///([a-zA-Z0-9_-]*)\\.desktop$", 0, 0, NULL);
+	applicationre = g_regex_new("^application:///([a-zA-Z0-9_\\.-]*)\\.desktop$", 0, 0, NULL);
 
-	g_bus_get(G_BUS_TYPE_SESSION, cancellable, bus_got, NULL);
+	g_bus_get(G_BUS_TYPE_SESSION, cancellable, bus_got, mainloop);
 
 	skel = service_iface_com_canonical_urldispatcher_skeleton_new();
-	g_signal_connect(skel, "handle-dispatch-url", G_CALLBACK(dispatch_url), NULL);
+	g_signal_connect(skel, "handle-dispatch-url", G_CALLBACK(dispatch_url_cb), NULL);
 
-	/* Run Main */
-	g_main_loop_run(mainloop);
+	return TRUE;
+}
 
-	/* Clean up globals */
-	g_main_loop_unref(mainloop);
+/* Clean up all the globals */
+gboolean
+dispatcher_shutdown (void)
+{
+	g_cancellable_cancel(cancellable);
+
 	g_object_unref(cancellable);
 	g_object_unref(skel);
 	g_regex_unref(applicationre);
@@ -311,5 +330,5 @@ main (int argc, char * argv[])
 		g_clear_pointer(&url_types[i].regex_object, g_regex_unref);
 	}
 
-	return 0;
+	return TRUE;
 }
