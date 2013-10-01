@@ -141,7 +141,7 @@ url_type_t url_types[] = {
 	{
 		.regex_patern = "^alarm:///",
 		.regex_object = NULL,
-		.app_id = "clock-app"
+		.app_id = "ubuntu-clock-app"
 	},
 	/* Address Book */
 	{
