@@ -137,6 +137,12 @@ struct _url_type_t {
 
 /* TODO: Make these come from registrations, but this works for now */
 url_type_t url_types[] = {
+	/* Alarms */
+	{
+		.regex_patern = "^alarm:///",
+		.regex_object = NULL,
+		.app_id = "ubuntu-clock-app"
+	},
 	/* Address Book */
 	{
 		.regex_patern = "^addressbook:///",
