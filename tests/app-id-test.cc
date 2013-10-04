@@ -119,6 +119,14 @@ TEST_F(AppIdTest, OrderingUrl)
 	return;
 }
 
+TEST_F(AppIdTest, CustomUri)
+{
+	/* Good sanity check */
+	ASSERT_TRUE(dispatch_url("appidtest:///foo"));
+	ASSERT_STREQ("com.test.good_app1_1.2.3", upstart_app_launch_mock_get_last_app_id());
+	upstart_app_launch_mock_clear_last_app_id();
+}
+
 TEST_F(AppIdTest, BadDirectory)
 {
 	g_setenv("URL_DISPATCHER_TEST_CLICK_DIR", CMAKE_SOURCE_DIR "/not-a-real-directory/", TRUE);
@@ -138,4 +146,3 @@ TEST_F(AppIdTest, BadClick)
 	ASSERT_TRUE(NULL == upstart_app_launch_mock_get_last_app_id());
 	upstart_app_launch_mock_clear_last_app_id();
 }
-
