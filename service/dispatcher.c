@@ -490,7 +490,11 @@ dispatch_url (const gchar * url)
 		}
 
 		if (g_regex_match(url_types[i].regex_object, url, 0, NULL)) {
-			pass_url_to_app(url_types[i].app_id, url);
+			if (url_types[i].app_id != NULL) {
+				pass_url_to_app(url_types[i].app_id, url);
+			} else {
+				app_id_discover(url_types[i].package, url_types[i].application, url_types[i].version, url);
+			}
 
 			return TRUE;
 		}
