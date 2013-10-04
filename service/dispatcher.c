@@ -358,6 +358,16 @@ struct _url_type_t {
 
 /* TODO: Make these come from registrations, but this works for now */
 url_type_t url_types[] = {
+#ifdef APP_ID_TEST_URI
+	{
+		.regex_patern = "^appidtest:///",
+		.regex_object = NULL,
+		.package = "com.test.good",
+		.application = "first-listed-app",
+		.version = "current-user-version",
+		.app_id = NULL
+	},
+#endif
 	/* Address Book */
 	{
 		.regex_patern = "^addressbook://",
