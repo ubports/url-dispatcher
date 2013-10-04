@@ -349,6 +349,9 @@ struct _url_type_t {
 	gchar * regex_patern;
 	GRegex * regex_object;
 	gchar * app_id;
+	gchar * package;
+	gchar * application;
+	gchar * version;
 };
 
 #define USERNAME_REGEX  "[a-zA-Z0-9_\\-]*"
@@ -359,59 +362,69 @@ url_type_t url_types[] = {
 	{
 		.regex_patern = "^addressbook://",
 		.regex_object = NULL,
+		.package = NULL, .application = NULL, .version = NULL,
 		.app_id = "address-book-app"
 	},
 	/* Messages */
 	{
 		.regex_patern = "^message://",
 		.regex_object = NULL,
+		.package = NULL, .application = NULL, .version = NULL,
 		.app_id = "messaging-app"
 	},
 	/* Music */
 	{
 		.regex_patern = "^music://",
 		.regex_object = NULL,
+		.package = NULL, .application = NULL, .version = NULL,
 		.app_id = "music-app"
 	},
 	{
 		/* TODO: This is temporary for 13.10, we expect to be smarter in the future */
 		.regex_patern = "^file:///home/" USERNAME_REGEX "/Music/",
 		.regex_object = NULL,
+		.package = NULL, .application = NULL, .version = NULL,
 		.app_id = "music-app"
 	},
 	/* Phone Numbers */
 	{
 		.regex_patern = "^tel://[\\d\\.+x,\\(\\)-]*$",
 		.regex_object = NULL,
+		.package = NULL, .application = NULL, .version = NULL,
 		.app_id = "dialer-app"
 	},
 	/* Settings */
 	{
 		.regex_patern = "^settings://system/",
 		.regex_object = NULL,
+		.package = NULL, .application = NULL, .version = NULL,
 		.app_id = "ubuntu-system-settings"
 	},
 	/* Video */
 	{
 		.regex_patern = "^video://",
 		.regex_object = NULL,
+		.package = NULL, .application = NULL, .version = NULL,
 		.app_id = "mediaplayer-app"
 	},
 	{
 		/* TODO: This is temporary for 13.10, we expect to be smarter in the future */
 		.regex_patern = "^file:///home/" USERNAME_REGEX "/Videos/",
 		.regex_object = NULL,
+		.package = NULL, .application = NULL, .version = NULL,
 		.app_id = "mediaplayer-app"
 	},
 	/* Web Stuff */
 	{
 		.regex_patern = "^http://",
 		.regex_object = NULL,
+		.package = NULL, .application = NULL, .version = NULL,
 		.app_id = "webbrowser-app"
 	},
 	{
 		.regex_patern = "^https://",
 		.regex_object = NULL,
+		.package = NULL, .application = NULL, .version = NULL,
 		.app_id = "webbrowser-app"
 	}
 };
