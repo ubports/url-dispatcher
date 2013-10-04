@@ -1,3 +1,16 @@
+url-dispatcher (0.1+13.10.20131003-0ubuntu1) saucy; urgency=low
+
+  [ Ted Gould ]
+  * Enfoce the ///. (LP: #1231444)
+  * Make dispatcher more testable and add some application:/// tests.
+  * Adding a calendar URL. (LP: #1231136)
+  * Adding the alarm URL pattern. (LP: #1233176)
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 32
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Thu, 03 Oct 2013 02:08:19 +0000
+
 url-dispatcher (0.1+13.10.20130924.1-0ubuntu1) saucy; urgency=low
 
   [ Ted Gould ]

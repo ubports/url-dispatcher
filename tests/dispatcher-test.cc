@@ -85,3 +85,18 @@ TEST_F(DispatcherTest, ApplicationTest)
 
 	return;
 }
+
+TEST_F(DispatcherTest, CalendarTest)
+{
+	/* Base Calendar */
+	dispatch_url("calendar:///?starttime=196311221830Z");
+	ASSERT_STREQ("calendar-app", upstart_app_launch_mock_get_last_app_id());
+	upstart_app_launch_mock_clear_last_app_id();
+
+	/* Two Slash Calendar */
+	dispatch_url("calendar://?starttime=196311221830Z");
+	ASSERT_TRUE(NULL == upstart_app_launch_mock_get_last_app_id());
+	upstart_app_launch_mock_clear_last_app_id();
+
+	return;
+}
