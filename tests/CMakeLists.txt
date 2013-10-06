@@ -42,6 +42,8 @@ add_test (dispatcher-test dispatcher-test)
 # App ID URL test
 ###########################
 
+include_directories("${CMAKE_BINARY_DIR}/service")
+
 add_definitions ( -DCMAKE_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}" )
 add_definitions ( -DAPP_ID_TEST_URI=1 )
 
