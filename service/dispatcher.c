@@ -178,7 +178,7 @@ get_manifest_file (const gchar * pkg)
 {
 	/* Get the directory from click */
 	GError * error = NULL;
-	gchar * cmdline = g_strdup_printf("%s pkgdir \"%s\"", 
+	gchar * cmdline = g_strdup_printf("%s info \"%s\"", 
 		click_exec == NULL ? "click" : click_exec,
 		pkg);
 
@@ -186,29 +186,17 @@ get_manifest_file (const gchar * pkg)
 	g_spawn_command_line_sync(cmdline, &output, NULL, NULL, &error);
 	g_free(cmdline);
 
-	gchar * newline = g_strstr_len(output, -1, "\n");
-	if (newline != NULL) {
-		newline[0] = '\0';
-	}
-
 	if (error != NULL) {
-		g_warning("Unable to get directory for '%s' package: %s", pkg, error->message);
+		g_warning("Unable to get manifest for '%s' package: %s", pkg, error->message);
 		g_error_free(error);
 		g_free(output);
 		return NULL;
 	}
 
-	/* Use that to determine which manifest we want */
-	gchar * manifestfile = g_strdup_printf("%s.manifest", pkg);
-	gchar * manifestpath = g_build_filename(output, ".click", "info", manifestfile, NULL);
-	g_debug("Loading manifest: %s", manifestpath);
-	g_free(output);
-	g_free(manifestfile);
-
 	/* Let's look at that manifest file */
 	JsonParser * parser = json_parser_new();
-	json_parser_load_from_file(parser, manifestpath, &error);
-	g_free(manifestpath);
+	json_parser_load_from_data(parser, output, -1, &error);
+	g_free(output);
 
 	if (error != NULL) {
 		g_warning("Unable to load manifest for '%s': %s", pkg, error->message);
