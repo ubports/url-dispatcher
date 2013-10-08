@@ -337,22 +337,37 @@ struct _url_type_t {
 	gchar * regex_patern;
 	GRegex * regex_object;
 	gchar * app_id;
+	gchar * package;
+	gchar * application;
+	gchar * version;
 };
 
 #define USERNAME_REGEX  "[a-zA-Z0-9_\\-]*"
 
 /* TODO: Make these come from registrations, but this works for now */
 url_type_t url_types[] = {
+#ifdef APP_ID_TEST_URI
+	{
+		.regex_patern = "^appidtest:///",
+		.regex_object = NULL,
+		.package = "com.test.good",
+		.application = "first-listed-app",
+		.version = "current-user-version",
+		.app_id = NULL
+	},
+#endif
 	/* Alarms */
 	{
 		.regex_patern = "^alarm:///",
 		.regex_object = NULL,
+		.package = NULL, .application = NULL, .version = NULL,
 		.app_id = "ubuntu-clock-app"
 	},
 	/* Address Book */
 	{
 		.regex_patern = "^addressbook:///",
 		.regex_object = NULL,
+		.package = NULL, .application = NULL, .version = NULL,
 		.app_id = "address-book-app"
 	},
 	/* Calendar */
@@ -365,53 +380,62 @@ url_type_t url_types[] = {
 	{
 		.regex_patern = "^message:///",
 		.regex_object = NULL,
+		.package = NULL, .application = NULL, .version = NULL,
 		.app_id = "messaging-app"
 	},
 	/* Music */
 	{
 		.regex_patern = "^music:///",
 		.regex_object = NULL,
+		.package = NULL, .application = NULL, .version = NULL,
 		.app_id = "music-app"
 	},
 	{
 		/* TODO: This is temporary for 13.10, we expect to be smarter in the future */
 		.regex_patern = "^file:///home/" USERNAME_REGEX "/Music/",
 		.regex_object = NULL,
+		.package = NULL, .application = NULL, .version = NULL,
 		.app_id = "music-app"
 	},
 	/* Phone Numbers */
 	{
 		.regex_patern = "^tel:///[\\d\\.+x,\\(\\)-]*$",
 		.regex_object = NULL,
+		.package = NULL, .application = NULL, .version = NULL,
 		.app_id = "dialer-app"
 	},
 	/* Settings */
 	{
 		.regex_patern = "^settings:///system/",
 		.regex_object = NULL,
+		.package = NULL, .application = NULL, .version = NULL,
 		.app_id = "ubuntu-system-settings"
 	},
 	/* Video */
 	{
 		.regex_patern = "^video:///",
 		.regex_object = NULL,
+		.package = NULL, .application = NULL, .version = NULL,
 		.app_id = "mediaplayer-app"
 	},
 	{
 		/* TODO: This is temporary for 13.10, we expect to be smarter in the future */
 		.regex_patern = "^file:///home/" USERNAME_REGEX "/Videos/",
 		.regex_object = NULL,
+		.package = NULL, .application = NULL, .version = NULL,
 		.app_id = "mediaplayer-app"
 	},
 	/* Web Stuff */
 	{
 		.regex_patern = "^http://",
 		.regex_object = NULL,
+		.package = NULL, .application = NULL, .version = NULL,
 		.app_id = "webbrowser-app"
 	},
 	{
 		.regex_patern = "^https://",
 		.regex_object = NULL,
+		.package = NULL, .application = NULL, .version = NULL,
 		.app_id = "webbrowser-app"
 	}
 };
@@ -477,7 +501,11 @@ dispatch_url (const gchar * url)
 		}
 
 		if (g_regex_match(url_types[i].regex_object, url, 0, NULL)) {
-			pass_url_to_app(url_types[i].app_id, url);
+			if (url_types[i].app_id != NULL) {
+				pass_url_to_app(url_types[i].app_id, url);
+			} else {
+				app_id_discover(url_types[i].package, url_types[i].application, url_types[i].version, url);
+			}
 
 			return TRUE;
 		}

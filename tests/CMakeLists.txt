@@ -42,9 +42,12 @@ add_test (dispatcher-test dispatcher-test)
 # App ID URL test
 ###########################
 
-add_definitions ( -DCMAKE_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}" )
+include_directories("${CMAKE_BINARY_DIR}/service")
 
-add_executable (app-id-test app-id-test.cc)
+add_definitions ( -DCMAKE_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}" )
+add_definitions ( -DAPP_ID_TEST_URI=1 )
+
+add_executable (app-id-test app-id-test.cc "${CMAKE_SOURCE_DIR}/service/dispatcher.c")
 target_link_libraries (app-id-test
 	dispatcher-lib
 	mock-lib
