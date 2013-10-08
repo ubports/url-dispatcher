@@ -362,8 +362,10 @@ url_type_t url_types[] = {
 	{
 		.regex_patern = "^alarm:///",
 		.regex_object = NULL,
-		.package = NULL, .application = NULL, .version = NULL,
-		.app_id = "ubuntu-clock-app"
+		.app_id = NULL,
+		.package = "com.ubuntu.clock",
+		.application = "clock",
+		.version = CURRENT
 	},
 	/* Address Book */
 	{
@@ -376,7 +378,10 @@ url_type_t url_types[] = {
 	{
 		.regex_patern = "^calendar:///",
 		.regex_object = NULL,
-		.app_id = "calendar-app"
+		.app_id = NULL,
+		.package = "com.ubuntu.calendar",
+		.application = "calendar",
+		.version = CURRENT
 	},
 	/* Messages */
 	{
@@ -389,15 +394,19 @@ url_type_t url_types[] = {
 	{
 		.regex_patern = "^music:///",
 		.regex_object = NULL,
-		.package = NULL, .application = NULL, .version = NULL,
-		.app_id = "music-app"
+		.app_id = NULL,
+		.package = "com.ubuntu.music",
+		.application = "music",
+		.version = CURRENT
 	},
 	{
 		/* TODO: This is temporary for 13.10, we expect to be smarter in the future */
 		.regex_patern = "^file:///home/" USERNAME_REGEX "/Music/",
 		.regex_object = NULL,
-		.package = NULL, .application = NULL, .version = NULL,
-		.app_id = "music-app"
+		.app_id = NULL,
+		.package = "com.ubuntu.music",
+		.application = "music",
+		.version = CURRENT
 	},
 	/* Phone Numbers */
 	{
@@ -417,15 +426,19 @@ url_type_t url_types[] = {
 	{
 		.regex_patern = "^video:///",
 		.regex_object = NULL,
-		.package = NULL, .application = NULL, .version = NULL,
-		.app_id = "mediaplayer-app"
+		.app_id = NULL,
+		.package = "com.ubuntu.mediaplayer",
+		.application = "mediaplayer",
+		.version = CURRENT
 	},
 	{
 		/* TODO: This is temporary for 13.10, we expect to be smarter in the future */
 		.regex_patern = "^file:///home/" USERNAME_REGEX "/Videos/",
 		.regex_object = NULL,
-		.package = NULL, .application = NULL, .version = NULL,
-		.app_id = "mediaplayer-app"
+		.app_id = NULL,
+		.package = "com.ubuntu.mediaplayer",
+		.application = "mediaplayer",
+		.version = CURRENT
 	},
 	/* Web Stuff */
 	{
