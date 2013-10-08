@@ -93,7 +93,7 @@ TEST_F(DispatcherTest, CalendarTest)
 {
 	/* Base Calendar */
 	dispatch_url("calendar:///?starttime=196311221830Z");
-	ASSERT_STREQ("calendar-app", upstart_app_launch_mock_get_last_app_id());
+	ASSERT_STREQ("com.ubuntu.calendar_calendar_9.8.2343", upstart_app_launch_mock_get_last_app_id());
 	upstart_app_launch_mock_clear_last_app_id();
 
 	/* Two Slash Calendar */
@@ -103,3 +103,44 @@ TEST_F(DispatcherTest, CalendarTest)
 
 	return;
 }
+
+TEST_F(DispatcherTest, VideoTest)
+{
+	/* Base Video */
+	dispatch_url("video:///foo.mp4");
+	ASSERT_STREQ("com.ubuntu.mediaplayer_mediaplayer_2.1.4", upstart_app_launch_mock_get_last_app_id());
+	upstart_app_launch_mock_clear_last_app_id();
+
+	/* File Video */
+	dispatch_url("file:///home/bar/Videos/foo.mp4");
+	ASSERT_STREQ("com.ubuntu.mediaplayer_mediaplayer_2.1.4", upstart_app_launch_mock_get_last_app_id());
+	upstart_app_launch_mock_clear_last_app_id();
+
+	return;
+}
+
+TEST_F(DispatcherTest, MusicTest)
+{
+	/* Base Video */
+	dispatch_url("music:///The_Bars_Live.mp3");
+	ASSERT_STREQ("com.ubuntu.music_music_1.5.4", upstart_app_launch_mock_get_last_app_id());
+	upstart_app_launch_mock_clear_last_app_id();
+
+	/* File Video */
+	dispatch_url("file:///home/bar/Music/The_Bars_Live.mp3");
+	ASSERT_STREQ("com.ubuntu.music_music_1.5.4", upstart_app_launch_mock_get_last_app_id());
+	upstart_app_launch_mock_clear_last_app_id();
+
+	return;
+}
+
+TEST_F(DispatcherTest, AlarmTest)
+{
+	/* Base Alarm */
+	dispatch_url("alarm:///?starttime=196311221830Z");
+	ASSERT_STREQ("com.ubuntu.clock_clock_3.23455.1", upstart_app_launch_mock_get_last_app_id());
+	upstart_app_launch_mock_clear_last_app_id();
+
+	return;
+}
+
