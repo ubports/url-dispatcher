@@ -1,0 +1,9 @@
+{
+	"version": "1.5.4",
+	"name": "com.ubuntu.music",
+	"hooks": {
+		"music": {
+			"test": "test"
+		}
+	}
+}
