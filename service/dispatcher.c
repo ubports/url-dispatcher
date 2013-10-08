@@ -29,6 +29,8 @@ static GRegex * applicationre = NULL;
 static GRegex * appidre = NULL;
 static gchar * click_exec = NULL;
 
+#define CURRENT "current-user-version"
+
 /* Errors */
 enum {
 	ERROR_BAD_URL
@@ -165,7 +167,7 @@ app_name_type (const gchar * appname)
 static version_search_t
 version_search_type (const gchar * version)
 {
-	if (g_strcmp0(version, "current-user-version") == 0) {
+	if (g_strcmp0(version, CURRENT) == 0) {
 		return VERSION_SEARCH_CURRENT;
 	}
 
@@ -352,7 +354,7 @@ url_type_t url_types[] = {
 		.regex_object = NULL,
 		.package = "com.test.good",
 		.application = "first-listed-app",
-		.version = "current-user-version",
+		.version = CURRENT,
 		.app_id = NULL
 	},
 #endif
