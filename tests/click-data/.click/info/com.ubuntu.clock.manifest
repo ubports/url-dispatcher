@@ -1,0 +1,9 @@
+{
+	"version": "3.23455.1",
+	"name": "com.ubuntu.clock",
+	"hooks": {
+		"clock": {
+			"test": "test"
+		}
+	}
+}

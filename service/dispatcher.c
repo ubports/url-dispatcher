@@ -29,6 +29,8 @@ static GRegex * applicationre = NULL;
 static GRegex * appidre = NULL;
 static gchar * click_exec = NULL;
 
+#define CURRENT "current-user-version"
+
 /* Errors */
 enum {
 	ERROR_BAD_URL
@@ -165,7 +167,7 @@ app_name_type (const gchar * appname)
 static version_search_t
 version_search_type (const gchar * version)
 {
-	if (g_strcmp0(version, "current-user-version") == 0) {
+	if (g_strcmp0(version, CURRENT) == 0) {
 		return VERSION_SEARCH_CURRENT;
 	}
 
@@ -352,7 +354,7 @@ url_type_t url_types[] = {
 		.regex_object = NULL,
 		.package = "com.test.good",
 		.application = "first-listed-app",
-		.version = "current-user-version",
+		.version = CURRENT,
 		.app_id = NULL
 	},
 #endif
@@ -360,8 +362,10 @@ url_type_t url_types[] = {
 	{
 		.regex_patern = "^alarm:///",
 		.regex_object = NULL,
-		.package = NULL, .application = NULL, .version = NULL,
-		.app_id = "ubuntu-clock-app"
+		.app_id = NULL,
+		.package = "com.ubuntu.clock",
+		.application = "clock",
+		.version = CURRENT
 	},
 	/* Address Book */
 	{
@@ -374,7 +378,10 @@ url_type_t url_types[] = {
 	{
 		.regex_patern = "^calendar:///",
 		.regex_object = NULL,
-		.app_id = "calendar-app"
+		.app_id = NULL,
+		.package = "com.ubuntu.calendar",
+		.application = "calendar",
+		.version = CURRENT
 	},
 	/* Messages */
 	{
@@ -387,15 +394,19 @@ url_type_t url_types[] = {
 	{
 		.regex_patern = "^music:///",
 		.regex_object = NULL,
-		.package = NULL, .application = NULL, .version = NULL,
-		.app_id = "music-app"
+		.app_id = NULL,
+		.package = "com.ubuntu.music",
+		.application = "music",
+		.version = CURRENT
 	},
 	{
 		/* TODO: This is temporary for 13.10, we expect to be smarter in the future */
 		.regex_patern = "^file:///home/" USERNAME_REGEX "/Music/",
 		.regex_object = NULL,
-		.package = NULL, .application = NULL, .version = NULL,
-		.app_id = "music-app"
+		.app_id = NULL,
+		.package = "com.ubuntu.music",
+		.application = "music",
+		.version = CURRENT
 	},
 	/* Phone Numbers */
 	{
@@ -415,15 +426,19 @@ url_type_t url_types[] = {
 	{
 		.regex_patern = "^video:///",
 		.regex_object = NULL,
-		.package = NULL, .application = NULL, .version = NULL,
-		.app_id = "mediaplayer-app"
+		.app_id = NULL,
+		.package = "com.ubuntu.mediaplayer",
+		.application = "mediaplayer",
+		.version = CURRENT
 	},
 	{
 		/* TODO: This is temporary for 13.10, we expect to be smarter in the future */
 		.regex_patern = "^file:///home/" USERNAME_REGEX "/Videos/",
 		.regex_object = NULL,
-		.package = NULL, .application = NULL, .version = NULL,
-		.app_id = "mediaplayer-app"
+		.app_id = NULL,
+		.package = "com.ubuntu.mediaplayer",
+		.application = "mediaplayer",
+		.version = CURRENT
 	},
 	/* Web Stuff */
 	{
