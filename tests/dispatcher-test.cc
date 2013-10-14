@@ -108,12 +108,12 @@ TEST_F(DispatcherTest, VideoTest)
 {
 	/* Base Video */
 	dispatch_url("video:///foo.mp4");
-	ASSERT_STREQ("com.ubuntu.mediaplayer_mediaplayer_2.1.4", upstart_app_launch_mock_get_last_app_id());
+	ASSERT_STREQ("mediaplayer-app", upstart_app_launch_mock_get_last_app_id());
 	upstart_app_launch_mock_clear_last_app_id();
 
 	/* File Video */
 	dispatch_url("file:///home/bar/Videos/foo.mp4");
-	ASSERT_STREQ("com.ubuntu.mediaplayer_mediaplayer_2.1.4", upstart_app_launch_mock_get_last_app_id());
+	ASSERT_STREQ("mediaplayer-app", upstart_app_launch_mock_get_last_app_id());
 	upstart_app_launch_mock_clear_last_app_id();
 
 	return;

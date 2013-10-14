@@ -426,19 +426,15 @@ url_type_t url_types[] = {
 	{
 		.regex_patern = "^video:///",
 		.regex_object = NULL,
-		.app_id = NULL,
-		.package = "com.ubuntu.mediaplayer",
-		.application = "mediaplayer",
-		.version = CURRENT
+		.package = NULL, .application = NULL, .version = NULL,
+		.app_id = "mediaplayer-app"
 	},
 	{
 		/* TODO: This is temporary for 13.10, we expect to be smarter in the future */
 		.regex_patern = "^file:///home/" USERNAME_REGEX "/Videos/",
 		.regex_object = NULL,
-		.app_id = NULL,
-		.package = "com.ubuntu.mediaplayer",
-		.application = "mediaplayer",
-		.version = CURRENT
+		.package = NULL, .application = NULL, .version = NULL,
+		.app_id = "mediaplayer-app"
 	},
 	/* Web Stuff */
 	{
