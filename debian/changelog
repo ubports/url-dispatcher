@@ -1,3 +1,20 @@
+url-dispatcher (0.1+13.10.20131014.2-0ubuntu1) saucy; urgency=low
+
+  [ Michal Hruby ]
+  * Revert the definition change for mediaplayer, it'll remain a non-
+    click app for now.
+
+  [ Ted Gould ]
+  * Adds the appid:// URL format.
+  * Use 'click info' to get the manifest. (LP: #1232118)
+  * Allow custom URIs to have variable based package specifications.
+  * Switching many core apps to Click App ID's.
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 38
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Mon, 14 Oct 2013 18:07:27 +0000
+
 url-dispatcher (0.1+13.10.20131003-0ubuntu1) saucy; urgency=low
 
   [ Ted Gould ]
