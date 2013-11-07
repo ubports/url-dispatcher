@@ -47,6 +47,9 @@ include_directories(${GIO_UNIX2_INCLUDE_DIRS})
 pkg_check_modules(JSONGLIB REQUIRED json-glib-1.0)
 include_directories(${JSONGLIB_INCLUDE_DIRS})
 
+pkg_check_modules(DBUSTEST REQUIRED dbustest-1>=14.04.0)
+include_directories(${DBUSTEST_INCLUDE_DIRS})
+
 if(${LOCAL_INSTALL})
   set(DBUSSERVICEDIR "${CMAKE_INSTALL_DATADIR}/dbus-1/services/")
 else()
