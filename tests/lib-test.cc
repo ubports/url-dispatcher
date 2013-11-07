@@ -71,30 +71,17 @@ class LibTest : public ::testing::Test
 static void
 simple_cb (const gchar * url, gboolean success, gpointer user_data)
 {
-	unsigned int * count = static_cast<unsigned int *>(user_data);
-	(*count)++;
+	g_main_loop_quit(static_cast<GMainLoop *>(user_data));
 }
 
 TEST_F(LibTest, DummyTest) {
-	unsigned int count = 0;
+	GMainLoop * main = g_main_loop_new(NULL, FALSE);
 
-	url_dispatch_send("foo://bar/barish", simple_cb, &count);
+	url_dispatch_send("foo://bar/barish", simple_cb, main);
 
 	/* Give it some time to send and reply */
-	g_usleep(100000);
-	while (g_main_pending())
-		g_main_iteration(TRUE);
-	g_usleep(100000);
-	while (g_main_pending())
-		g_main_iteration(TRUE);
-	g_usleep(100000);
-	while (g_main_pending())
-		g_main_iteration(TRUE);
-	g_usleep(100000);
-	while (g_main_pending())
-		g_main_iteration(TRUE);
-
-	ASSERT_EQ(count, 1);
+	g_main_loop_run(main);
+	g_main_loop_unref(main);
 
 	guint callslen = 0;
 	const DbusTestDbusMockCall * calls = dbus_test_dbus_mock_object_get_method_calls(mock, obj, "DispatchURL", &callslen, NULL);
