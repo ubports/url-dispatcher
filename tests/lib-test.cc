@@ -68,6 +68,39 @@ class LibTest : public ::testing::Test
 		}
 };
 
-TEST_F(LibTest, DummyTest) {
-
+static void
+simple_cb (const gchar * url, gboolean success, gpointer user_data)
+{
+	unsigned int * count = static_cast<unsigned int *>(user_data);
+	(*count)++;
 }
+
+TEST_F(LibTest, DummyTest) {
+	unsigned int count = 0;
+
+	url_dispatch_send("foo://bar/barish", simple_cb, &count);
+
+	/* Give it some time to send and reply */
+	g_usleep(100000);
+	while (g_main_pending())
+		g_main_iteration(TRUE);
+	g_usleep(100000);
+	while (g_main_pending())
+		g_main_iteration(TRUE);
+	g_usleep(100000);
+	while (g_main_pending())
+		g_main_iteration(TRUE);
+	g_usleep(100000);
+	while (g_main_pending())
+		g_main_iteration(TRUE);
+
+	ASSERT_EQ(count, 1);
+
+	guint callslen = 0;
+	const DbusTestDbusMockCall * calls = dbus_test_dbus_mock_object_get_method_calls(mock, obj, "DispatchURL", &callslen, NULL);
+
+	// ASSERT_NE(calls, nullptr);
+	ASSERT_EQ(callslen, 1);
+	ASSERT_TRUE(g_variant_equal(calls->params, g_variant_new_parsed("('foo://bar/barish',)")));
+}
+
