@@ -60,6 +60,10 @@ class ServiceTest : public ::testing::Test
 		}
 
 		virtual void TearDown() {
+			/* dbustest should probably do this, not sure */
+			kill(dbus_test_process_get_pid(dispatcher), SIGTERM);
+			g_usleep(50000);
+
 			g_clear_object(&dispatcher);
 			g_clear_object(&mock);
 			g_clear_object(&service);
