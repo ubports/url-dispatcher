@@ -56,3 +56,16 @@ target_link_libraries (app-id-test
 
 add_test (app-id-test app-id-test)
 
+###########################
+# lib test
+###########################
+
+add_executable (lib-test lib-test.cc)
+target_link_libraries (lib-test
+	dispatcher
+	gtest
+	${DBUSTEST_LIBS}
+	${GTEST_LIBS})
+
+add_test (lib-test lib-test)
+
