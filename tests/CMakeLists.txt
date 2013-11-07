@@ -69,3 +69,18 @@ target_link_libraries (lib-test
 
 add_test (lib-test lib-test)
 
+###########################
+# lib test
+###########################
+
+add_definitions ( -DURL_DISPATCHER_SERVICE="${CMAKE_BINARY_DIR}/service/url-dispatcher" )
+
+add_executable (service-test service-test.cc)
+target_link_libraries (service-test
+	dispatcher
+	gtest
+	${DBUSTEST_LIBRARIES}
+	${GTEST_LIBS})
+
+add_test (service-test service-test)
+
