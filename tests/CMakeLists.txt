@@ -64,7 +64,7 @@ add_executable (lib-test lib-test.cc)
 target_link_libraries (lib-test
 	dispatcher
 	gtest
-	${DBUSTEST_LIBS}
+	${DBUSTEST_LIBRARIES}
 	${GTEST_LIBS})
 
 add_test (lib-test lib-test)
