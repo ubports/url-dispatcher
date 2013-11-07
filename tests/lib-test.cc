@@ -74,7 +74,7 @@ simple_cb (const gchar * url, gboolean success, gpointer user_data)
 	g_main_loop_quit(static_cast<GMainLoop *>(user_data));
 }
 
-TEST_F(LibTest, DummyTest) {
+TEST_F(LibTest, BaseTest) {
 	GMainLoop * main = g_main_loop_new(NULL, FALSE);
 
 	url_dispatch_send("foo://bar/barish", simple_cb, main);
