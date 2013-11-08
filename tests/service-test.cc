@@ -134,6 +134,8 @@ TEST_F(ServiceTest, ApplicationTest) {
 		}
 	}
 
+	g_variant_unref(env);
+
 	ASSERT_TRUE(found_appid);
 }
 
