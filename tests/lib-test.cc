@@ -88,6 +88,9 @@ TEST_F(LibTest, BaseTest) {
 
 	// ASSERT_NE(calls, nullptr);
 	ASSERT_EQ(callslen, 1);
-	ASSERT_TRUE(g_variant_equal(calls->params, g_variant_new_parsed("('foo://bar/barish',)")));
+	GVariant * check = g_variant_new_parsed("('foo://bar/barish',)");
+	g_variant_ref_sink(check);
+	ASSERT_TRUE(g_variant_equal(calls->params, check));
+	g_variant_unref(check);
 }
 
