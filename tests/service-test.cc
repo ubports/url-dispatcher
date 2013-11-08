@@ -129,8 +129,8 @@ TEST_F(ServiceTest, ApplicationTest) {
 
 	while (g_variant_iter_loop(&iter, "s", &var)) {
 		if (g_strcmp0(var, "APP_ID=foo-bar") == 0) {
+			ASSERT_FALSE(found_appid);
 			found_appid = true;
-			break;
 		}
 	}
 
