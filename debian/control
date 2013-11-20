@@ -15,6 +15,7 @@ Build-Depends: cmake,
                libgtest-dev,
                libupstart-app-launch1-dev (>= 0.3),
                python,
+               python3-dbusmock,
 Standards-Version: 3.9.4
 Homepage: http://launchpad.net/url-dispatcher
 # If you aren't a member of ~indicator-applet-developers but need to upload
