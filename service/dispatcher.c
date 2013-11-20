@@ -74,7 +74,11 @@ recoverable_problem_file (GObject * obj, GAsyncResult * res, gpointer user_data)
 		NULL
 	};
 
-	report_recoverable_problem(signature, pid, FALSE, additional);
+	/* Allow disabling for testing, we don't want to report bugs on
+	   our tests ;-) */
+	if (g_getenv("URL_DISPATCHER_DISABLE_RECOVERABLE_ERROR") == NULL) {
+		report_recoverable_problem(signature, pid, FALSE, additional);
+	}
 
 	g_free(signature);
 	g_free(badurl);
