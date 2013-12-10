@@ -25,8 +25,7 @@ Vcs-Bzr: https://code.launchpad.net/~indicator-applet-developers/url-dispatcher/
 Vcs-Browser: http://bazaar.launchpad.net/~indicator-applet-developers/url-dispatcher/trunk.13.10/files
 
 Package: url-dispatcher
-# Architecture list matches ust arch restriction
-Architecture: amd64 armel armhf i386 mips mipsel powerpc s390x
+Architecture: any
 Multi-Arch: same
 Pre-Depends: ${misc:Pre-Depends},
 Depends: upstart-app-launch,
@@ -41,7 +40,7 @@ Description: service to allow sending of URLs and get handlers started
  This package provides a service for the URL Dispatcher
 
 Package: url-dispatcher-tools
-Architecture: amd64 armel armhf i386 mips mipsel powerpc s390x
+Architecture: any
 Depends: url-dispatcher (= ${binary:Version}),
          ${misc:Depends},
          ${shlibs:Depends},
@@ -54,7 +53,7 @@ Description: tools for working with the URL Dispatcher.
 
 Package: liburl-dispatcher1
 Section: libs
-Architecture: amd64 armel armhf i386 mips mipsel powerpc s390x
+Architecture: any
 Multi-Arch: same
 Pre-Depends: ${misc:Pre-Depends},
 Depends: ${misc:Depends},
@@ -69,7 +68,7 @@ Description: library for sending requests to the url dispatcher
 
 Package: liburl-dispatcher1-dev
 Section: libdevel
-Architecture: amd64 armel armhf i386 mips mipsel powerpc s390x
+Architecture: any
 Multi-Arch: same
 Pre-Depends: ${misc:Pre-Depends},
 Depends: libglib2.0-dev,
