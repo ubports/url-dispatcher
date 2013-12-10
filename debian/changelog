@@ -1,3 +1,15 @@
+url-dispatcher (0.1+14.04.20131209.1-0ubuntu2) trusty; urgency=low
+
+  * Restrict on which arch we build url-dispatcher due to the ust build-dep
+
+ -- Didier Roche <didrocks@ubuntu.com>  Mon, 09 Dec 2013 13:41:41 +0100
+
+url-dispatcher (0.1+14.04.20131209.1-0ubuntu1) trusty; urgency=low
+
+  * Cherry-pick libupstart-app-launch API/ABI bump from trunk
+
+ -- Łukasz 'sil2100' Zemczak <lukasz.zemczak@canonical.com>  Fri, 06 Dec 2013 14:32:26 +0100
+
 url-dispatcher (0.1+13.10.20131014.2-0ubuntu1) saucy; urgency=low
 
   [ Michal Hruby ]
