@@ -1,0 +1,7 @@
+description "URL Dispatcher"
+
+start on file FILE=@datadir@/url-dispatcher/urls/*.url-list
+
+instance $MATCH
+
+exec @pkglibexecdir@/url-dispatcher-update "$MATCH"
