@@ -69,3 +69,22 @@ FILES
 DESTINATION "/usr/share/upstart/sessions"
 )
 
+###########################
+# Upstart Refresh Job
+###########################
+
+set(DISPATCHER_REFRESH_UPSTART
+"${CMAKE_CURRENT_BINARY_DIR}/url-dispatcher-refresh.conf"
+)
+
+configure_file("url-dispatcher-refresh.conf.in"
+  "${DISPATCHER_REFRESH_UPSTART}"
+  @ONLY
+)
+
+install(
+FILES
+"${DISPATCHER_REFRESH_UPSTART}"
+DESTINATION "/usr/share/upstart/sessions"
+)
+
