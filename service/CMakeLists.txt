@@ -1,14 +1,24 @@
 
+include(UseConstantBuilder)
+
 ###########################
 # Generated Lib
 ###########################
 
+
 set(SERVICE_GENERATED_HEADERS
+create-db-sql.h
 service-iface.h
 )
 
 set(SERVICE_GENERATED_SOURCES
 service-iface.c
+)
+
+add_constant_template(SERVICE_GENERATED_SOURCES
+	create-db-sql
+	create_db_sql
+	"${CMAKE_CURRENT_SOURCE_DIR}/create-db.sql"
 )
 
 add_gdbus_codegen(
@@ -33,6 +43,7 @@ ${JSONGLIB_LIBRARIES}
 ###########################
 
 add_library(dispatcher-lib STATIC
+	create-db.c
 	dispatcher.h
 	dispatcher.c)
 
@@ -41,6 +52,7 @@ target_link_libraries(dispatcher-lib
 	${GLIB2_LIBRARIES}
 	${GOBJECT2_LIBRARIES}
 	${GIO2_LIBRARIES}
+	${SQLITE_LIBRARIES}
 )
 
 ###########################
