@@ -84,3 +84,10 @@ target_link_libraries (service-test
 
 add_test (service-test service-test)
 
+
+###########################
+# create db test 
+###########################
+
+add_test (NAME create-db-test
+          COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/test-sql.sh" "${CMAKE_SOURCE_DIR}/service/create-db.sql")
