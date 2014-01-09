@@ -113,7 +113,7 @@ url_db_get_file_motification_time (sqlite3 * db, const gchar * filename, GTimeVa
 		return FALSE;
 	}
 
-	return FALSE;
+	return TRUE;
 }
 
 gboolean
@@ -123,9 +123,30 @@ url_db_set_file_motification_time (sqlite3 * db, const gchar * filename, GTimeVa
 	g_return_val_if_fail(filename != NULL, FALSE);
 	g_return_val_if_fail(timeval != NULL, FALSE);
 
+	sqlite3_stmt * stmt;
+	if (sqlite3_prepare_v2(db,
+			"insert or replace into configfiles values (?1, ?2)",
+			-1, /* length */
+			&stmt,
+			NULL) != SQLITE_OK) {
+		g_warning("Unable to parse SQL to get file times");
+		return FALSE;
+	}
 
+	sqlite3_bind_text(stmt, 1, filename, -1, SQLITE_TRANSIENT);
+	sqlite3_bind_int(stmt, 2, timeval->tv_sec);
 
-	return FALSE;
+	int exec_status = SQLITE_ROW;
+	while ((exec_status = sqlite3_step(stmt)) == SQLITE_ROW) {}
+
+	sqlite3_finalize(stmt);
+
+	if (exec_status != SQLITE_DONE) {
+		g_warning("Unable to execute insert");
+		return FALSE;
+	}
+
+	return TRUE;
 }
 
 gboolean
