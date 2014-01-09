@@ -106,6 +106,33 @@ url_db_insert_url (sqlite3 * db, const gchar * filename, const gchar * protocol,
 	g_return_val_if_fail(filename != NULL, FALSE);
 	g_return_val_if_fail(protocol != NULL, FALSE);
 
+	if (domainsuffix == NULL) {
+		domainsuffix = "";
+	}
 
-	return FALSE;
+	sqlite3_stmt * stmt;
+	if (sqlite3_prepare_v2(db,
+			"insert or replace into urls select rowid, ?2, ?3 from configfiles where name = ?1",
+			-1, /* length */
+			&stmt,
+			NULL) != SQLITE_OK) {
+		g_warning("Unable to parse SQL to insert");
+		return FALSE;
+	}
+
+	sqlite3_bind_text(stmt, 1, filename, -1, SQLITE_TRANSIENT);
+	sqlite3_bind_text(stmt, 2, protocol, -1, SQLITE_TRANSIENT);
+	sqlite3_bind_text(stmt, 3, domainsuffix, -1, SQLITE_TRANSIENT);
+
+	int exec_status = SQLITE_ROW;
+	while ((exec_status = sqlite3_step(stmt)) == SQLITE_ROW) {}
+
+	sqlite3_finalize(stmt);
+
+	if (exec_status != SQLITE_DONE) {
+		g_warning("Unable to execute insert");
+		return FALSE;
+	}
+
+	return TRUE;
 }
