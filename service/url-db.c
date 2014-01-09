@@ -4,7 +4,7 @@
 #include "create-db-sql.h"
 
 sqlite3 *
-create_database (void)
+url_db_create_database (void)
 {
 	const gchar * cachedir = g_getenv("URL_DISPATCHER_CACHE_DIR"); /* Mostly for testing */
 
@@ -57,4 +57,39 @@ create_database (void)
 	}
 
 	return db;
+}
+
+gboolean
+url_db_get_file_motification_time (sqlite3 * db, const gchar * filename, GTimeVal * timeval)
+{
+	g_return_val_if_fail(db != NULL, FALSE);
+	g_return_val_if_fail(filename != NULL, FALSE);
+	g_return_val_if_fail(timeval != NULL, FALSE);
+
+
+
+	return FALSE;
+}
+
+gboolean
+url_db_set_file_motification_time (sqlite3 * db, const gchar * filename, GTimeVal * timeval)
+{
+	g_return_val_if_fail(db != NULL, FALSE);
+	g_return_val_if_fail(filename != NULL, FALSE);
+	g_return_val_if_fail(timeval != NULL, FALSE);
+
+
+
+	return FALSE;
+}
+
+gboolean
+url_db_insert_url (sqlite3 * db, const gchar * filename, const gchar * protocol, const gchar * domainsuffix)
+{
+	g_return_val_if_fail(db != NULL, FALSE);
+	g_return_val_if_fail(filename != NULL, FALSE);
+	g_return_val_if_fail(protocol != NULL, FALSE);
+
+
+	return FALSE;
 }

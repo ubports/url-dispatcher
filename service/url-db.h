@@ -23,7 +23,17 @@
 
 G_BEGIN_DECLS
 
-sqlite3 * create_database (void);
+sqlite3 *     url_db_create_database                (void);
+gboolean      url_db_get_file_motification_time     (sqlite3 *      db,
+                                                     const gchar *  filename,
+                                                     GTimeVal *     timeval);
+gboolean      url_db_set_file_motification_time     (sqlite3 *      db,
+                                                     const gchar *  filename,
+                                                     GTimeVal *     timeval);
+gboolean      url_db_insert_url                     (sqlite3 *      db,
+                                                     const gchar *  filename,
+                                                     const gchar *  protocol,
+                                                     const gchar *  domainsuffix);
 
 G_END_DECLS
 
