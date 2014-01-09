@@ -16,13 +16,52 @@
  */
 
 #include <gio/gio.h>
+#include <json-glib/json-glib.h>
 #include "url-db.h"
+
+typedef struct {
+	const gchar * filename;
+	sqlite3 * db;
+} urldata_t;
+
+static void
+each_url (JsonArray * array, guint index, JsonNode * value, gpointer user_data)
+{
+	urldata_t * urldata = (urldata_t *)user_data;
+
+	g_debug("URL for '%s'", urldata->filename);
+}
 
 static void
 insert_urls_from_file (const gchar * filename, sqlite3 * db)
 {
+	GError * error = NULL;
+	JsonParser * parser = json_parser_new();
+	json_parser_load_from_file(parser, filename, &error);
 
+	if (error != NULL) {
+		g_warning("Unable to parse JSON in '%s': %s", filename, error->message);
+		g_object_unref(parser);
+		return;
+	}
 
+	JsonNode * rootnode = json_parser_get_root(parser);
+	if (!JSON_NODE_HOLDS_ARRAY(rootnode)) {
+		g_warning("File '%s' does not have an array as its root node", filename);
+		g_object_unref(parser);
+		return;
+	}
+
+	JsonArray * rootarray = json_node_get_array(rootnode);
+
+	urldata_t urldata = {
+		.filename = filename,
+		.db = db
+	};
+
+	json_array_foreach_element(rootarray, each_url, &urldata);
+
+	g_object_unref(parser);
 }
 
 static gboolean
