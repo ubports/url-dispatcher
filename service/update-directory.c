@@ -29,7 +29,30 @@ each_url (JsonArray * array, guint index, JsonNode * value, gpointer user_data)
 {
 	urldata_t * urldata = (urldata_t *)user_data;
 
-	g_debug("URL for '%s'", urldata->filename);
+	if (!JSON_NODE_HOLDS_OBJECT(value)) {
+		g_warning("File %s: Array entry %d not an object", urldata->filename, index);
+		return;
+	}
+
+	JsonObject * obj = json_node_get_object(value);
+
+	const gchar * protocol = NULL;
+	const gchar * suffix = NULL;
+
+	if (json_object_has_member(obj, "protocol")) {
+		protocol = json_object_get_string_member(obj, "protocol");
+	}
+
+	if (json_object_has_member(obj, "domain-suffix")) {
+		suffix = json_object_get_string_member(obj, "domain-suffix");
+	}
+
+	if (protocol == NULL && suffix == NULL) {
+		g_warning("File %s: Array entry %d doesn't contain one of 'protocol' or 'domain-suffix'", urldata->filename, index);
+		return;
+	}
+
+	url_db_insert_url(urldata->db, urldata->filename, protocol, suffix);
 }
 
 static void
