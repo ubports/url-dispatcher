@@ -43,7 +43,7 @@ ${JSONGLIB_LIBRARIES}
 ###########################
 
 add_library(dispatcher-lib STATIC
-	create-db.c
+	url-db.c
 	dispatcher.h
 	dispatcher.c)
 
