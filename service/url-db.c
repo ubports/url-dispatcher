@@ -82,7 +82,36 @@ url_db_get_file_motification_time (sqlite3 * db, const gchar * filename, GTimeVa
 	g_return_val_if_fail(filename != NULL, FALSE);
 	g_return_val_if_fail(timeval != NULL, FALSE);
 
+	timeval->tv_sec = 0;
+	timeval->tv_usec = 0;
 
+	sqlite3_stmt * stmt;
+	if (sqlite3_prepare_v2(db,
+			"select timestamp from configfiles where name = ?1",
+			-1, /* length */
+			&stmt,
+			NULL) != SQLITE_OK) {
+		g_warning("Unable to parse SQL to get file times");
+		return FALSE;
+	}
+
+	sqlite3_bind_text(stmt, 1, filename, -1, SQLITE_TRANSIENT);
+
+	int exec_status = SQLITE_ROW;
+	while ((exec_status = sqlite3_step(stmt)) == SQLITE_ROW) {
+		if (timeval->tv_sec != 0) {
+			g_warning("Seemingly two timestamps for the same file");
+		}
+
+		timeval->tv_sec = sqlite3_column_int(stmt, 0);
+	}
+
+	sqlite3_finalize(stmt);
+
+	if (exec_status != SQLITE_DONE) {
+		g_warning("Unable to execute insert");
+		return FALSE;
+	}
 
 	return FALSE;
 }
