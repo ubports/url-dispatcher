@@ -68,10 +68,19 @@ set_target_properties(service-exec PROPERTIES OUTPUT_NAME "url-dispatcher")
 target_link_libraries(service-exec dispatcher-lib ${UPSTART_APP_LAUNCH_LIBRARIES})
 
 ###########################
+# Update Directory
+###########################
+
+add_executable(update-directory update-directory.c url-db.c create-db-sql.c)
+set_target_properties(update-directory PROPERTIES OUTPUT_NAME "update-directory")
+target_link_libraries(update-directory ${GLIB2_LIBRARIES} ${SQLITE_LIBRARIES})
+
+###########################
 # Installation
 ###########################
 
 install(
-  TARGETS service-exec
+  TARGETS service-exec update-directory
   RUNTIME DESTINATION "${CMAKE_INSTALL_FULL_LIBEXECDIR}/url-dispatcher"
 )
+
