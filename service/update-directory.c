@@ -15,14 +15,43 @@
  *
  */
 
-#include <glib.h>
+#include <gio/gio.h>
 #include "url-db.h"
 
 static void
-process_file (const gchar * filename, sqlite3 * db)
+insert_urls_from_file (const gchar * filename, sqlite3 * db)
+{
+
+
+}
+
+static gboolean
+check_file_uptodate (const gchar * filename, sqlite3 * db)
 {
 	g_debug("Processing file: %s", filename);
 
+	GTimeVal dbtime = {0};
+	GTimeVal filetime = {0};
+
+	GFile * file = g_file_new_for_path(filename);
+	g_return_if_fail(file != NULL);
+
+	GFileInfo * info = g_file_query_info(file, G_FILE_ATTRIBUTE_TIME_MODIFIED, G_FILE_QUERY_INFO_NONE, NULL, NULL);
+	g_file_info_get_modification_time(info, &filetime);
+
+	g_object_unref(info);
+	g_object_unref(file);
+
+	if (url_db_get_file_motification_time(db, filename, &dbtime)) {
+		if (filetime.tv_sec <= dbtime.tv_sec) {
+			g_debug("\tup-to-date: %s", filename);
+			return FALSE;
+		}
+	}
+
+	url_db_set_file_motification_time(db, filename, &filetime);
+
+	return TRUE;
 }
 
 int
@@ -47,7 +76,9 @@ main (int argc, char * argv[])
 	const gchar * name = NULL;
 	while ((name = g_dir_read_name(dir)) != NULL) {
 		if (g_str_has_suffix(name, ".url-dispatcher")) {
-			process_file(name, db);
+			if (check_file_uptodate(name, db)) {
+				insert_urls_from_file(name, db);
+			}
 		}
 	}
 
