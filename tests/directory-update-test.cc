@@ -198,7 +198,7 @@ TEST_F(DirectoryUpdateTest, VariedItems)
 	g_spawn_command_line_sync(cmdline, NULL, NULL, NULL, NULL);
 	g_free(cmdline);
 
-	EXPECT_EQ(1, get_file_count(db));
+	EXPECT_EQ(2, get_file_count(db));
 	EXPECT_EQ(0, get_url_count(db));
 
 	/* object-base.url-dispatcher */
@@ -208,6 +208,10 @@ TEST_F(DirectoryUpdateTest, VariedItems)
 	/* bad-filename-suffix.url-launcher */
 	EXPECT_FALSE(has_file(db, UPDATE_DIRECTORY_VARIED "/bad-filename-suffix.url-launcher"));
 	EXPECT_FALSE(has_url(db, "badsuffix", "bad.suffix.com"));
+
+	/* not-json.url-dispatcher */
+	EXPECT_TRUE(has_file(db, UPDATE_DIRECTORY_VARIED "/not-json.url-dispatcher"));
+	EXPECT_FALSE(has_url(db, "notjson", "not.json.com"));
 
 	sqlite3_close(db);
 };
