@@ -70,7 +70,7 @@ target_link_libraries (lib-test
 add_test (lib-test lib-test)
 
 ###########################
-# lib test
+# service test
 ###########################
 
 add_definitions ( -DURL_DISPATCHER_SERVICE="${CMAKE_BINARY_DIR}/service/url-dispatcher" )
@@ -91,3 +91,18 @@ add_test (service-test service-test)
 
 add_test (NAME create-db-test
           COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/test-sql.sh" "${CMAKE_SOURCE_DIR}/service/create-db.sql")
+
+###########################
+# url db test
+###########################
+
+add_definitions ( -DCMAKE_BINARY_DIR="${CMAKE_CURRENT_BINARY_DIR}" )
+
+add_executable (url-db-test url-db-test.cc)
+target_link_libraries (url-db-test
+	url-db-lib
+	gtest
+	${GTEST_LIBS})
+
+add_test (url-db-test url-db-test)
+
