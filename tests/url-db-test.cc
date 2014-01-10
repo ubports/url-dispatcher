@@ -79,3 +79,17 @@ TEST_F(UrlDBTest, TimestampTest) {
 
 	sqlite3_close(db);
 }
+
+TEST_F(UrlDBTest, UrlTest) {
+	sqlite3 * db = url_db_create_database();
+
+	ASSERT_TRUE(db != NULL);
+
+	GTimeVal timeval = {0};
+	timeval.tv_sec = 12345;
+	EXPECT_TRUE(url_db_set_file_motification_time(db, "/foo", &timeval));
+
+	EXPECT_TRUE(url_db_insert_url(db, "/foo", "bar", "foo.com"));
+
+	sqlite3_close(db);
+}
