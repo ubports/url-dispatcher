@@ -198,8 +198,8 @@ TEST_F(DirectoryUpdateTest, VariedItems)
 	g_spawn_command_line_sync(cmdline, NULL, NULL, NULL, NULL);
 	g_free(cmdline);
 
-	EXPECT_EQ(2, get_file_count(db));
-	EXPECT_EQ(0, get_url_count(db));
+	EXPECT_EQ(3, get_file_count(db));
+	EXPECT_EQ(10, get_url_count(db));
 
 	/* object-base.url-dispatcher */
 	EXPECT_TRUE(has_file(db, UPDATE_DIRECTORY_VARIED "/object-base.url-dispatcher"));
@@ -212,6 +212,19 @@ TEST_F(DirectoryUpdateTest, VariedItems)
 	/* not-json.url-dispatcher */
 	EXPECT_TRUE(has_file(db, UPDATE_DIRECTORY_VARIED "/not-json.url-dispatcher"));
 	EXPECT_FALSE(has_url(db, "notjson", "not.json.com"));
+
+	/* lots-o-entries.url-dispatcher */
+	EXPECT_TRUE(has_file(db, UPDATE_DIRECTORY_VARIED "/lots-o-entries.url-dispatcher"));
+	EXPECT_TRUE(has_url(db, "lots0", "lots.com"));
+	EXPECT_TRUE(has_url(db, "lots1", "lots.com"));
+	EXPECT_TRUE(has_url(db, "lots2", "lots.com"));
+	EXPECT_TRUE(has_url(db, "lots3", "lots.com"));
+	EXPECT_TRUE(has_url(db, "lots4", "lots.com"));
+	EXPECT_TRUE(has_url(db, "lots5", "lots.com"));
+	EXPECT_TRUE(has_url(db, "lots6", "lots.com"));
+	EXPECT_TRUE(has_url(db, "lots7", "lots.com"));
+	EXPECT_TRUE(has_url(db, "lots8", "lots.com"));
+	EXPECT_TRUE(has_url(db, "lots9", "lots.com"));
 
 	sqlite3_close(db);
 };
