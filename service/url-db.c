@@ -188,3 +188,10 @@ url_db_insert_url (sqlite3 * db, const gchar * filename, const gchar * protocol,
 
 	return TRUE;
 }
+
+gchar *
+url_db_find_url (sqlite3 * db, const gchar * protocol, const gchar * domainsuffix)
+{
+
+	return NULL;
+}
