@@ -1,4 +1,6 @@
 
+add_definitions ( -DCMAKE_BINARY_DIR="${CMAKE_CURRENT_BINARY_DIR}" )
+
 ###########################
 # Google Test
 ###########################
@@ -93,10 +95,20 @@ add_test (NAME create-db-test
           COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/test-sql.sh" "${CMAKE_SOURCE_DIR}/service/create-db.sql")
 
 ###########################
-# url db test
+# update directory test
 ###########################
 
-add_definitions ( -DCMAKE_BINARY_DIR="${CMAKE_CURRENT_BINARY_DIR}" )
+add_executable (directory-update-test directory-update-test.cc)
+target_link_libraries (directory-update-test
+	url-db-lib
+	gtest
+	${GTEST_LIBS})
+
+add_test (directory-update-test directory-update-test)
+
+###########################
+# url db test
+###########################
 
 add_executable (url-db-test url-db-test.cc)
 target_link_libraries (url-db-test
