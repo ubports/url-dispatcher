@@ -37,11 +37,11 @@ ${JSONGLIB_LIBRARIES}
 ###########################
 
 add_library(dispatcher-lib STATIC
-	url-db.c
 	dispatcher.h
 	dispatcher.c)
 
 target_link_libraries(dispatcher-lib
+	url-db-lib
 	service-generated
 	${GLIB2_LIBRARIES}
 	${GOBJECT2_LIBRARIES}
