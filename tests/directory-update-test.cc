@@ -201,8 +201,13 @@ TEST_F(DirectoryUpdateTest, VariedItems)
 	EXPECT_EQ(1, get_file_count(db));
 	EXPECT_EQ(0, get_url_count(db));
 
+	/* object-base.url-dispatcher */
 	EXPECT_TRUE(has_file(db, UPDATE_DIRECTORY_VARIED "/object-base.url-dispatcher"));
 	EXPECT_FALSE(has_url(db, "object", "object-base.com"));
+
+	/* bad-filename-suffix.url-launcher */
+	EXPECT_FALSE(has_file(db, UPDATE_DIRECTORY_VARIED "/bad-filename-suffix.url-launcher"));
+	EXPECT_FALSE(has_url(db, "badsuffix", "bad.suffix.com"));
 
 	sqlite3_close(db);
 };

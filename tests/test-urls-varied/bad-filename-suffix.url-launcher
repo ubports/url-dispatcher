@@ -1,0 +1,6 @@
+[
+	{
+		"protocol": "badsuffix",
+		"domain-suffix": "bad.suffix.com"
+	}
+]
