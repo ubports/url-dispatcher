@@ -198,8 +198,8 @@ TEST_F(DirectoryUpdateTest, VariedItems)
 	g_spawn_command_line_sync(cmdline, NULL, NULL, NULL, NULL);
 	g_free(cmdline);
 
-	EXPECT_EQ(4, get_file_count(db));
-	EXPECT_EQ(11, get_url_count(db));
+	EXPECT_EQ(6, get_file_count(db));
+	EXPECT_EQ(13, get_url_count(db));
 
 	/* object-base.url-dispatcher */
 	EXPECT_TRUE(has_file(db, UPDATE_DIRECTORY_VARIED "/object-base.url-dispatcher"));
@@ -229,6 +229,12 @@ TEST_F(DirectoryUpdateTest, VariedItems)
 	/* duplicate.url-dispatcher */
 	EXPECT_TRUE(has_file(db, UPDATE_DIRECTORY_VARIED "/duplicate.url-dispatcher"));
 	EXPECT_TRUE(has_url(db, "duplicate", "dup.licate.com"));
+
+	/* dup-file-1.url-dispatcher */
+	/* dup-file-2.url-dispatcher */
+	EXPECT_TRUE(has_file(db, UPDATE_DIRECTORY_VARIED "/dup-file-1.url-dispatcher"));
+	EXPECT_TRUE(has_file(db, UPDATE_DIRECTORY_VARIED "/dup-file-2.url-dispatcher"));
+	EXPECT_FALSE(has_url(db, "dupfile", "this.is.in.two.file.org"));
 
 	sqlite3_close(db);
 };

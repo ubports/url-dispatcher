@@ -1,0 +1,6 @@
+[
+	{
+		"protocol": "dupfile",
+		"domain-suffix": "this.is.in.two.file.org"
+	}
+]
