@@ -37,6 +37,27 @@ class UrlDBTest : public ::testing::Test
 };
 
 TEST_F(UrlDBTest, CreateTest) {
+	sqlite3 * db = url_db_create_database();
 
+	ASSERT_TRUE(db != NULL);
 
+	gchar * dbfile = g_build_filename(cachedir, "url-dispatcher", "urls.db", NULL);
+	EXPECT_TRUE(g_file_test(dbfile, G_FILE_TEST_EXISTS));
+	g_free(dbfile);
+
+	const char * type = NULL;
+
+	EXPECT_EQ(SQLITE_OK, sqlite3_table_column_metadata(db, NULL, "configfiles", "name", &type, NULL, NULL, NULL, NULL));
+	EXPECT_STREQ("text", type);
+	EXPECT_EQ(SQLITE_OK, sqlite3_table_column_metadata(db, NULL, "configfiles", "timestamp", &type, NULL, NULL, NULL, NULL));
+	EXPECT_STREQ("bigint", type);
+
+	EXPECT_EQ(SQLITE_OK, sqlite3_table_column_metadata(db, NULL, "urls", "sourcefile", &type, NULL, NULL, NULL, NULL));
+	EXPECT_STREQ("integer", type);
+	EXPECT_EQ(SQLITE_OK, sqlite3_table_column_metadata(db, NULL, "urls", "protocol", &type, NULL, NULL, NULL, NULL));
+	EXPECT_STREQ("text", type);
+	EXPECT_EQ(SQLITE_OK, sqlite3_table_column_metadata(db, NULL, "urls", "domainsuffix", &type, NULL, NULL, NULL, NULL));
+	EXPECT_STREQ("text", type);
+
+	sqlite3_close(db);
 }
