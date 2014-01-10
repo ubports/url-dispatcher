@@ -100,6 +100,7 @@ add_test (NAME create-db-test
 
 add_definitions ( -DUPDATE_DIRECTORY_TOOL="${CMAKE_BINARY_DIR}/service/update-directory" )
 add_definitions ( -DUPDATE_DIRECTORY_URLS="${CMAKE_CURRENT_SOURCE_DIR}/test-urls-simple" )
+add_definitions ( -DUPDATE_DIRECTORY_VARIED="${CMAKE_CURRENT_SOURCE_DIR}/test-urls-varied" )
 
 add_executable (directory-update-test directory-update-test.cc)
 target_link_libraries (directory-update-test

@@ -190,4 +190,20 @@ TEST_F(DirectoryUpdateTest, SingleGoodItem)
 	sqlite3_close(db);
 };
 
+TEST_F(DirectoryUpdateTest, VariedItems)
+{
+	sqlite3 * db = url_db_create_database();
+
+	gchar * cmdline = g_strdup_printf("%s \"%s\"", UPDATE_DIRECTORY_TOOL, UPDATE_DIRECTORY_VARIED);
+	g_spawn_command_line_sync(cmdline, NULL, NULL, NULL, NULL);
+	g_free(cmdline);
+
+	EXPECT_EQ(1, get_file_count(db));
+	EXPECT_EQ(0, get_url_count(db));
+
+	EXPECT_TRUE(has_file(db, UPDATE_DIRECTORY_VARIED "/object-base.url-dispatcher"));
+	EXPECT_FALSE(has_url(db, "object", "object-base.com"));
+
+	sqlite3_close(db);
+};
 
