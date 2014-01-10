@@ -122,6 +122,41 @@ class DirectoryUpdateTest : public ::testing::Test
 
 			return retval == 1;
 		}
+
+		bool has_url (sqlite3 * db, const char * protocol, const char * domainsuffix) {
+			sqlite3_stmt * stmt;
+			if (sqlite3_prepare_v2(db,
+					"select count(*) from urls where protocol = ?1 and domainsuffix = ?2",
+					-1, /* length */
+					&stmt,
+					NULL) != SQLITE_OK) {
+				g_warning("Unable to parse SQL to get file times");
+				return false;
+			}
+
+			sqlite3_bind_text(stmt, 1, protocol, -1, SQLITE_TRANSIENT);
+			sqlite3_bind_text(stmt, 2, domainsuffix, -1, SQLITE_TRANSIENT);
+
+			int retval = 0;
+			int exec_status = SQLITE_ROW;
+			while ((exec_status = sqlite3_step(stmt)) == SQLITE_ROW) {
+				retval = sqlite3_column_int(stmt, 0);
+			}
+
+			sqlite3_finalize(stmt);
+
+			if (exec_status != SQLITE_DONE) {
+				g_warning("Unable to execute insert");
+				return false;
+			}
+
+			if (retval > 1) {
+				g_warning("Database contains more than one instance of prtocol '%s'", protocol);
+				return false;
+			}
+
+			return retval == 1;
+		}
 };
 
 TEST_F(DirectoryUpdateTest, DirDoesntExist)
@@ -148,6 +183,7 @@ TEST_F(DirectoryUpdateTest, SingleGoodItem)
 	EXPECT_EQ(1, get_url_count(db));
 
 	EXPECT_TRUE(has_file(db, UPDATE_DIRECTORY_URLS "/single-good.url-dispatcher"));
+	EXPECT_TRUE(has_url(db, "http", "ubuntu.com"));
 
 	sqlite3_close(db);
 };
