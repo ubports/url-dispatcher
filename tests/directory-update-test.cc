@@ -88,6 +88,40 @@ class DirectoryUpdateTest : public ::testing::Test
 
 			return retval;
 		}
+
+		bool has_file (sqlite3 * db, const char * filename) {
+			sqlite3_stmt * stmt;
+			if (sqlite3_prepare_v2(db,
+					"select count(*) from configfiles where name = ?1",
+					-1, /* length */
+					&stmt,
+					NULL) != SQLITE_OK) {
+				g_warning("Unable to parse SQL to get file times");
+				return false;
+			}
+
+			sqlite3_bind_text(stmt, 1, filename, -1, SQLITE_TRANSIENT);
+
+			int retval = 0;
+			int exec_status = SQLITE_ROW;
+			while ((exec_status = sqlite3_step(stmt)) == SQLITE_ROW) {
+				retval = sqlite3_column_int(stmt, 0);
+			}
+
+			sqlite3_finalize(stmt);
+
+			if (exec_status != SQLITE_DONE) {
+				g_warning("Unable to execute insert");
+				return false;
+			}
+
+			if (retval > 1) {
+				g_warning("Database contains more than one instance of '%s'", filename);
+				return false;
+			}
+
+			return retval == 1;
+		}
 };
 
 TEST_F(DirectoryUpdateTest, DirDoesntExist)
@@ -112,6 +146,8 @@ TEST_F(DirectoryUpdateTest, SingleGoodItem)
 	sqlite3 * db = url_db_create_database();
 	EXPECT_EQ(1, get_file_count(db));
 	EXPECT_EQ(1, get_url_count(db));
+
+	EXPECT_TRUE(has_file(db, UPDATE_DIRECTORY_URLS "/single-good.url-dispatcher"));
 
 	sqlite3_close(db);
 };
