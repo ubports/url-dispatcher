@@ -138,9 +138,13 @@ main (int argc, char * argv[])
 	const gchar * name = NULL;
 	while ((name = g_dir_read_name(dir)) != NULL) {
 		if (g_str_has_suffix(name, ".url-dispatcher")) {
-			if (check_file_uptodate(name, db)) {
-				insert_urls_from_file(name, db);
+			gchar * fullname = g_build_filename(argv[1], name, NULL);
+
+			if (check_file_uptodate(fullname, db)) {
+				insert_urls_from_file(fullname, db);
 			}
+
+			g_free(fullname);
 		}
 	}
 
