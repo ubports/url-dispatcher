@@ -97,6 +97,7 @@ url_db_get_file_motification_time (sqlite3 * db, const gchar * filename, GTimeVa
 
 	sqlite3_bind_text(stmt, 1, filename, -1, SQLITE_TRANSIENT);
 
+	gboolean valueset = FALSE;
 	int exec_status = SQLITE_ROW;
 	while ((exec_status = sqlite3_step(stmt)) == SQLITE_ROW) {
 		if (timeval->tv_sec != 0) {
@@ -104,6 +105,7 @@ url_db_get_file_motification_time (sqlite3 * db, const gchar * filename, GTimeVa
 		}
 
 		timeval->tv_sec = sqlite3_column_int(stmt, 0);
+		valueset = TRUE;
 	}
 
 	sqlite3_finalize(stmt);
@@ -113,7 +115,7 @@ url_db_get_file_motification_time (sqlite3 * db, const gchar * filename, GTimeVa
 		return FALSE;
 	}
 
-	return TRUE;
+	return valueset;
 }
 
 gboolean
