@@ -4,8 +4,7 @@
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License version 3, as published by
  * the Free Software Foundation.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
+ * * This program is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranties of MERCHANTABILITY,
  * SATISFACTORY QUALITY, or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
@@ -16,6 +15,7 @@
  */
 
 #include <gtest/gtest.h>
+#include "url-db.h"
 #include <glib.h>
 
 class DirectoryUpdateTest : public ::testing::Test
@@ -34,11 +34,71 @@ class DirectoryUpdateTest : public ::testing::Test
 			g_free(cmdline);
 			g_free(cachedir);
 		}
+
+		int get_file_count (sqlite3 * db) {
+			sqlite3_stmt * stmt;
+			if (sqlite3_prepare_v2(db,
+					"select count(*) from configfiles",
+					-1, /* length */
+					&stmt,
+					NULL) != SQLITE_OK) {
+				g_warning("Unable to parse SQL to get file times");
+				return 0;
+			}
+
+			int retval = 0;
+			int exec_status = SQLITE_ROW;
+			while ((exec_status = sqlite3_step(stmt)) == SQLITE_ROW) {
+				retval = sqlite3_column_int(stmt, 0);
+			}
+
+			sqlite3_finalize(stmt);
+
+			if (exec_status != SQLITE_DONE) {
+				g_warning("Unable to execute insert");
+				return 0;
+			}
+
+			return retval;
+		}
+
+		int get_url_count (sqlite3 * db) {
+			sqlite3_stmt * stmt;
+			if (sqlite3_prepare_v2(db,
+					"select count(*) from urls",
+					-1, /* length */
+					&stmt,
+					NULL) != SQLITE_OK) {
+				g_warning("Unable to parse SQL to get file times");
+				return 0;
+			}
+
+			int retval = 0;
+			int exec_status = SQLITE_ROW;
+			while ((exec_status = sqlite3_step(stmt)) == SQLITE_ROW) {
+				retval = sqlite3_column_int(stmt, 0);
+			}
+
+			sqlite3_finalize(stmt);
+
+			if (exec_status != SQLITE_DONE) {
+				g_warning("Unable to execute insert");
+				return 0;
+			}
+
+			return retval;
+		}
 };
 
 TEST_F(DirectoryUpdateTest, DirDoesntExist)
 {
+	gchar * cmdline = g_strdup_printf("%s \"%s\"", UPDATE_DIRECTORY_TOOL, CMAKE_SOURCE_DIR "/this-does-not-exist");
+	g_spawn_command_line_sync(cmdline, NULL, NULL, NULL, NULL);
+	g_free(cmdline);
 
+	sqlite3 * db = url_db_create_database();
+	EXPECT_EQ(0, get_file_count(db));
+	EXPECT_EQ(0, get_url_count(db));
 
-
+	sqlite3_close(db);
 };
