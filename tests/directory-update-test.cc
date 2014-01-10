@@ -161,11 +161,12 @@ class DirectoryUpdateTest : public ::testing::Test
 
 TEST_F(DirectoryUpdateTest, DirDoesntExist)
 {
+	sqlite3 * db = url_db_create_database();
+
 	gchar * cmdline = g_strdup_printf("%s \"%s\"", UPDATE_DIRECTORY_TOOL, CMAKE_SOURCE_DIR "/this-does-not-exist");
 	g_spawn_command_line_sync(cmdline, NULL, NULL, NULL, NULL);
 	g_free(cmdline);
 
-	sqlite3 * db = url_db_create_database();
 	EXPECT_EQ(0, get_file_count(db));
 	EXPECT_EQ(0, get_url_count(db));
 
@@ -174,11 +175,12 @@ TEST_F(DirectoryUpdateTest, DirDoesntExist)
 
 TEST_F(DirectoryUpdateTest, SingleGoodItem)
 {
+	sqlite3 * db = url_db_create_database();
+
 	gchar * cmdline = g_strdup_printf("%s \"%s\"", UPDATE_DIRECTORY_TOOL, UPDATE_DIRECTORY_URLS);
 	g_spawn_command_line_sync(cmdline, NULL, NULL, NULL, NULL);
 	g_free(cmdline);
 
-	sqlite3 * db = url_db_create_database();
 	EXPECT_EQ(1, get_file_count(db));
 	EXPECT_EQ(1, get_url_count(db));
 
@@ -187,3 +189,5 @@ TEST_F(DirectoryUpdateTest, SingleGoodItem)
 
 	sqlite3_close(db);
 };
+
+
