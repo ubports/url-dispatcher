@@ -94,5 +94,13 @@ TEST_F(UrlDBTest, UrlTest) {
 	EXPECT_STREQ("foo", url_db_find_url(db, "bar", "foo.com"));
 	EXPECT_STREQ("foo", url_db_find_url(db, "bar", "www.foo.com"));
 
+	/* Two to compete */
+	timeval.tv_sec = 67890;
+	EXPECT_TRUE(url_db_set_file_motification_time(db, "/bar.url-dispatcher", &timeval));
+	EXPECT_TRUE(url_db_insert_url(db, "/bar.url-dispatcher", "bar", "more.foo.com"));
+	EXPECT_STREQ("foo", url_db_find_url(db, "bar", "www.foo.com"));
+	EXPECT_STREQ("bar", url_db_find_url(db, "bar", "more.foo.com"));
+	EXPECT_STREQ("bar", url_db_find_url(db, "bar", "www.more.foo.com"));
+
 	sqlite3_close(db);
 }
