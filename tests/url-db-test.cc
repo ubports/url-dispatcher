@@ -87,7 +87,7 @@ TEST_F(UrlDBTest, UrlTest) {
 
 	GTimeVal timeval = {0};
 	timeval.tv_sec = 12345;
-	EXPECT_TRUE(url_db_set_file_motification_time(db, "/foo", &timeval));
+	EXPECT_TRUE(url_db_set_file_motification_time(db, "/foo.url-dispatcher", &timeval));
 
 	/* Insert and find */
 	EXPECT_TRUE(url_db_insert_url(db, "/foo.url-dispatcher", "bar", "foo.com"));

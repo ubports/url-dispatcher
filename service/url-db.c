@@ -220,6 +220,7 @@ url_db_find_url (sqlite3 * db, const gchar * protocol, const gchar * domainsuffi
 
 	gchar * output = NULL;
 	if (filename != NULL) {
+		g_debug("Found file: %s", filename);
 		gchar * basename = g_path_get_basename((const gchar *)filename);
 		gchar * suffix = g_strrstr(basename, ".url-dispatcher");
 		if (suffix != NULL) /* This should never not happen, but it's too scary not to throw this 'if' in */
