@@ -201,7 +201,7 @@ url_db_find_url (sqlite3 * db, const gchar * protocol, const gchar * domainsuffi
 
 	sqlite3_stmt * stmt;
 	if (sqlite3_prepare_v2(db,
-			"select configfiles.name from configfiles, urls where urls.sourcefile = configfiles.rowid and urls.protocol = ?1 and ?2 like '%' || urls.domainsuffix order by length(urls.domainsuffix) limit 1",
+			"select configfiles.name from configfiles, urls where urls.sourcefile = configfiles.rowid and urls.protocol = ?1 and ?2 like '%' || urls.domainsuffix order by length(urls.domainsuffix) desc limit 1",
 			-1, /* length */
 			&stmt,
 			NULL) != SQLITE_OK) {
