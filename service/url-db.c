@@ -192,6 +192,49 @@ url_db_insert_url (sqlite3 * db, const gchar * filename, const gchar * protocol,
 gchar *
 url_db_find_url (sqlite3 * db, const gchar * protocol, const gchar * domainsuffix)
 {
+	g_return_val_if_fail(db != NULL, FALSE);
+	g_return_val_if_fail(protocol != NULL, FALSE);
 
-	return NULL;
+	if (domainsuffix == NULL) {
+		domainsuffix = "";
+	}
+
+	sqlite3_stmt * stmt;
+	if (sqlite3_prepare_v2(db,
+			"select configfiles.name from configfiles, urls where urls.sourcefile = confingfiles.rowid and urls.protocol = ?1 and urls.domainsuffix = ?2",
+			-1, /* length */
+			&stmt,
+			NULL) != SQLITE_OK) {
+		g_warning("Unable to parse SQL to insert");
+		return FALSE;
+	}
+
+	sqlite3_bind_text(stmt, 1, protocol, -1, SQLITE_TRANSIENT);
+	sqlite3_bind_text(stmt, 2, domainsuffix, -1, SQLITE_TRANSIENT);
+
+	const unsigned char * filename = NULL;
+	int exec_status = SQLITE_ROW;
+	while ((exec_status = sqlite3_step(stmt)) == SQLITE_ROW && filename == NULL) {
+		filename = sqlite3_column_text(stmt, 0);
+	}
+
+	gchar * output = NULL;
+	if (filename != NULL) {
+		gchar * basename = g_path_get_basename((const gchar *)filename);
+		gchar * suffix = g_strrstr(basename, ".url-dispatcher");
+		if (suffix != NULL) /* This should never not happen, but it's too scary not to throw this 'if' in */
+			suffix[0] = '\0';
+		output = g_strdup(basename);
+		g_free(basename);
+	}
+
+	sqlite3_finalize(stmt);
+
+	if (exec_status != SQLITE_DONE) {
+		g_warning("Unable to execute insert");
+		g_free(output);
+		return NULL;
+	}
+
+	return output;
 }
