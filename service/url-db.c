@@ -192,8 +192,8 @@ url_db_insert_url (sqlite3 * db, const gchar * filename, const gchar * protocol,
 gchar *
 url_db_find_url (sqlite3 * db, const gchar * protocol, const gchar * domainsuffix)
 {
-	g_return_val_if_fail(db != NULL, FALSE);
-	g_return_val_if_fail(protocol != NULL, FALSE);
+	g_return_val_if_fail(db != NULL, NULL);
+	g_return_val_if_fail(protocol != NULL, NULL);
 
 	if (domainsuffix == NULL) {
 		domainsuffix = "";
@@ -201,12 +201,12 @@ url_db_find_url (sqlite3 * db, const gchar * protocol, const gchar * domainsuffi
 
 	sqlite3_stmt * stmt;
 	if (sqlite3_prepare_v2(db,
-			"select configfiles.name from configfiles, urls where urls.sourcefile = confingfiles.rowid and urls.protocol = ?1 and urls.domainsuffix = ?2",
+			"select configfiles.name from configfiles, urls where urls.sourcefile = configfiles.rowid and urls.protocol = ?1 and urls.domainsuffix = ?2",
 			-1, /* length */
 			&stmt,
 			NULL) != SQLITE_OK) {
-		g_warning("Unable to parse SQL to insert");
-		return FALSE;
+		g_warning("Unable to parse SQL to find url");
+		return NULL;
 	}
 
 	sqlite3_bind_text(stmt, 1, protocol, -1, SQLITE_TRANSIENT);
