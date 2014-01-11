@@ -212,21 +212,22 @@ url_db_find_url (sqlite3 * db, const gchar * protocol, const gchar * domainsuffi
 	sqlite3_bind_text(stmt, 1, protocol, -1, SQLITE_TRANSIENT);
 	sqlite3_bind_text(stmt, 2, domainsuffix, -1, SQLITE_TRANSIENT);
 
-	const unsigned char * filename = NULL;
+	gchar * filename = NULL;
 	int exec_status = SQLITE_ROW;
 	while ((exec_status = sqlite3_step(stmt)) == SQLITE_ROW && filename == NULL) {
-		filename = sqlite3_column_text(stmt, 0);
+		filename = g_strdup((const gchar *)sqlite3_column_text(stmt, 0));
 	}
 
 	gchar * output = NULL;
 	if (filename != NULL) {
-		g_debug("Found file: %s", filename);
-		gchar * basename = g_path_get_basename((const gchar *)filename);
+		g_debug("Found file: '%s'", filename);
+		gchar * basename = g_path_get_basename(filename);
 		gchar * suffix = g_strrstr(basename, ".url-dispatcher");
 		if (suffix != NULL) /* This should never not happen, but it's too scary not to throw this 'if' in */
 			suffix[0] = '\0';
 		output = g_strdup(basename);
 		g_free(basename);
+		g_free(filename);
 	}
 
 	sqlite3_finalize(stmt);
