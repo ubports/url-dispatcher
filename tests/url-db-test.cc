@@ -92,6 +92,7 @@ TEST_F(UrlDBTest, UrlTest) {
 	/* Insert and find */
 	EXPECT_TRUE(url_db_insert_url(db, "/foo.url-dispatcher", "bar", "foo.com"));
 	EXPECT_STREQ("foo", url_db_find_url(db, "bar", "foo.com"));
+	EXPECT_STREQ("foo", url_db_find_url(db, "bar", "www.foo.com"));
 
 	sqlite3_close(db);
 }
