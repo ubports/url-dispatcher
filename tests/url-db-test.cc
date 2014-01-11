@@ -89,7 +89,9 @@ TEST_F(UrlDBTest, UrlTest) {
 	timeval.tv_sec = 12345;
 	EXPECT_TRUE(url_db_set_file_motification_time(db, "/foo", &timeval));
 
-	EXPECT_TRUE(url_db_insert_url(db, "/foo", "bar", "foo.com"));
+	/* Insert and find */
+	EXPECT_TRUE(url_db_insert_url(db, "/foo.url-dispatcher", "bar", "foo.com"));
+	EXPECT_STREQ("foo", url_db_find_url(db, "bar", "foo.com"));
 
 	sqlite3_close(db);
 }
