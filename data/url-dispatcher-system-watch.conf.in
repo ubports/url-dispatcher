@@ -1,5 +1,0 @@
-description "URL Dispatcher System Directory Watch"
-
-start on file FILE=@datadir@/url-dispatcher/urls/
-
-exec @pkglibexecdir@/update-directory "@datadir@/url-dispatcher/urls"

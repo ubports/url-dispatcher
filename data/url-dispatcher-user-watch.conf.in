@@ -1,5 +1,0 @@
-description "URL Dispatcher User Directory Watch"
-
-start on file FILE=~/.config/url-dispatcher/urls/
-
-exec @pkglibexecdir@/update-directory "$MATCH"
