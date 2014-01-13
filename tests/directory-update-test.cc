@@ -282,3 +282,43 @@ TEST_F(DirectoryUpdateTest, RemoveFile)
 
 	sqlite3_close(db);
 }
+
+TEST_F(DirectoryUpdateTest, RemoveDirectory)
+{
+	gchar * cmdline;
+	sqlite3 * db = url_db_create_database();
+
+	/* A temporary directory to put files in */
+	gchar * datadir = g_build_filename(CMAKE_BINARY_DIR, "remove-directory-data", NULL);
+	g_mkdir_with_parents(datadir,  1 << 6 | 1 << 7 | 1 << 8); // 700
+	ASSERT_TRUE(g_file_test(datadir, (GFileTest)(G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR)));
+
+	/* Copy the files */
+	cmdline = g_strdup_printf("cp \"%s/%s\" \"%s\"", UPDATE_DIRECTORY_URLS, "single-good.url-dispatcher", datadir);
+	g_spawn_command_line_sync(cmdline, NULL, NULL, NULL, NULL);
+	g_free(cmdline);
+
+	/* Run the tool */
+	cmdline = g_strdup_printf("%s \"%s\"", UPDATE_DIRECTORY_TOOL, datadir);
+	g_spawn_command_line_sync(cmdline, NULL, NULL, NULL, NULL);
+	g_free(cmdline);
+
+	EXPECT_EQ(1, get_file_count(db));
+	EXPECT_EQ(1, get_url_count(db));
+
+	/* Kill the dir */
+	cmdline = g_strdup_printf("rm -rf \"%s\"", datadir);
+	g_spawn_command_line_sync(cmdline, NULL, NULL, NULL, NULL);
+	g_free(cmdline);
+
+	/* Run the tool */
+	cmdline = g_strdup_printf("%s \"%s\"", UPDATE_DIRECTORY_TOOL, datadir);
+	g_spawn_command_line_sync(cmdline, NULL, NULL, NULL, NULL);
+	g_free(cmdline);
+
+	EXPECT_EQ(0, get_file_count(db));
+	EXPECT_EQ(0, get_url_count(db));
+
+	/* Cleanup */
+	sqlite3_close(db);
+}
