@@ -1,7 +1,5 @@
-description "URL Dispatcher"
+description "URL Dispatcher System Directory Watch"
 
-start on file FILE=@datadir@/url-dispatcher/urls/*.url-list
+start on file FILE=@datadir@/url-dispatcher/urls/
 
-instance $MATCH
-
-exec @pkglibexecdir@/url-dispatcher-update "$MATCH"
+exec @pkglibexecdir@/update-directory "@datadir@/url-dispatcher/urls"

@@ -16,7 +16,7 @@ script
 	for directory in $DIRECTORIES; do
 		if [ -d $directory ] ; then
 			for element in $directory/*.url-list ; do
-				@pkglibexecdir@/url-dispatcher-update "$element"
+				@pkglibexecdir@/update-directory "$element"
 			done
 		else
 			echo "Defined directory $directory is not one"
