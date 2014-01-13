@@ -37,6 +37,8 @@ gboolean      url_db_insert_url                     (sqlite3 *      db,
 gchar *       url_db_find_url                       (sqlite3 *      db,
                                                      const gchar *  protocol,
                                                      const gchar *  domainsuffix);
+GList *       url_db_files_for_dir                  (sqlite3 *      db,
+                                                     const gchar *  dir);
 
 G_END_DECLS
 

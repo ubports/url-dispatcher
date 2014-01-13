@@ -240,3 +240,42 @@ url_db_find_url (sqlite3 * db, const gchar * protocol, const gchar * domainsuffi
 
 	return output;
 }
+
+GList *
+url_db_files_for_dir (sqlite3 * db, const gchar * dir)
+{
+	g_return_val_if_fail(db != NULL, NULL);
+
+	if (dir == NULL) {
+		dir = "";
+	}
+
+	sqlite3_stmt * stmt;
+	if (sqlite3_prepare_v2(db,
+			"select name from configfiles where name like ?1 || %",
+			-1, /* length */
+			&stmt,
+			NULL) != SQLITE_OK) {
+		g_warning("Unable to parse SQL to find url");
+		return NULL;
+	}
+
+	sqlite3_bind_text(stmt, 1, dir, -1, SQLITE_TRANSIENT);
+
+	GList * filelist = NULL;
+	int exec_status = SQLITE_ROW;
+	while ((exec_status = sqlite3_step(stmt)) == SQLITE_ROW) {
+		gchar * name = g_strdup((const gchar *)sqlite3_column_text(stmt, 0));
+		filelist = g_list_prepend(filelist, name);
+	}
+
+	sqlite3_finalize(stmt);
+
+	if (exec_status != SQLITE_DONE) {
+		g_warning("Unable to execute insert");
+		g_list_free_full(filelist, g_free);
+		return NULL;
+	}
+
+	return filelist;
+}
