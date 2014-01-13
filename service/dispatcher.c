@@ -507,7 +507,7 @@ dispatcher_init (GMainLoop * mainloop)
 
 	applicationre = g_regex_new("^application:///([a-zA-Z0-9_\\.-]*)\\.desktop$", 0, 0, NULL);
 	appidre = g_regex_new("^appid://([a-z0-9\\.-]*)/([a-zA-Z0-9-]*)/([a-zA-Z0-9\\.-]*)$", 0, 0, NULL);
-	genericre = g_regex_new("^(.*)://([a-z0-9\\.-]*)(/.*)$", 0, 0, NULL);
+	genericre = g_regex_new("^(.*)://([a-z0-9\\.-]*)?/?(.*)?$", 0, 0, NULL);
 
 	/* FIXME: Legacy */
 	musicfilere = g_regex_new("^file:///home/" USERNAME_REGEX "/Music/", 0, 0, NULL);

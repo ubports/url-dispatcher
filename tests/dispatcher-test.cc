@@ -114,9 +114,9 @@ TEST_F(DispatcherTest, CalendarTest)
 	ASSERT_STREQ("com.ubuntu.calendar_calendar_9.8.2343", upstart_app_launch_mock_get_last_app_id());
 	upstart_app_launch_mock_clear_last_app_id();
 
-	/* Two Slash Calendar */
-	dispatch_url("calendar://?starttime=196311221830Z");
-	ASSERT_TRUE(NULL == upstart_app_launch_mock_get_last_app_id());
+	/* Two Slash, nothing else */
+	dispatch_url("calendar://");
+	ASSERT_STREQ("com.ubuntu.calendar_calendar_9.8.2343", upstart_app_launch_mock_get_last_app_id());
 	upstart_app_launch_mock_clear_last_app_id();
 
 	return;
