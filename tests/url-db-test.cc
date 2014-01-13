@@ -131,14 +131,14 @@ TEST_F(UrlDBTest, FileListTest) {
 	timeval.tv_sec = 12345;
 
 	/* One Dir */
-	EXPECT_TRUE(url_db_set_file_motification_time(db, "/base/direcory/for/us/one.url-dispatcher", &timeval));
-	EXPECT_TRUE(url_db_set_file_motification_time(db, "/base/direcory/for/us/two.url-dispatcher", &timeval));
+	EXPECT_TRUE(url_db_set_file_motification_time(db, "/base/directory/for/us/one.url-dispatcher", &timeval));
+	EXPECT_TRUE(url_db_set_file_motification_time(db, "/base/directory/for/us/two.url-dispatcher", &timeval));
 	/* No three! */
-	EXPECT_TRUE(url_db_set_file_motification_time(db, "/base/direcory/for/us/four.url-dispatcher", &timeval));
-	EXPECT_TRUE(url_db_set_file_motification_time(db, "/base/direcory/for/us/five.url-dispatcher", &timeval));
+	EXPECT_TRUE(url_db_set_file_motification_time(db, "/base/directory/for/us/four.url-dispatcher", &timeval));
+	EXPECT_TRUE(url_db_set_file_motification_time(db, "/base/directory/for/us/five.url-dispatcher", &timeval));
 
 	/* Another Dir */
-	EXPECT_TRUE(url_db_set_file_motification_time(db, "/base/direcory/for/them/six.url-dispatcher", &timeval));
+	EXPECT_TRUE(url_db_set_file_motification_time(db, "/base/directory/for/them/six.url-dispatcher", &timeval));
 
 	GList * files = url_db_files_for_dir(db, "/base/directory/for/us");
 	EXPECT_TRUE(file_list_has(files, "one.url-dispatcher"));
