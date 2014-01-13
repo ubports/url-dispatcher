@@ -135,7 +135,7 @@ main (int argc, char * argv[])
 	}
 
 	if (!g_file_test(argv[1], G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR)) {
-		g_print("Directory '%s' is up-to-date because it doesn't exist", argv[1]);
+		g_print("Directory '%s' is up-to-date because it doesn't exist\n", argv[1]);
 		return 0;
 	}
 
