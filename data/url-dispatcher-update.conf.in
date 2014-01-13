@@ -1,6 +1,6 @@
 description "URL Dispatcher Directory Watch"
 
-start on (file FILE=~/.config/url-dispatcher/urls/) or (file FILE=@datadir@/url-dispatcher/urls/)
+start on (file FILE=~/.config/url-dispatcher/urls/) or (file FILE=@datadir@/url-dispatcher/urls/) or url-dispatcher-update
 
 instance $MATCH
 
