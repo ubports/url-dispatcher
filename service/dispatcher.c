@@ -28,6 +28,7 @@ static GCancellable * cancellable = NULL;
 static ServiceIfaceComCanonicalURLDispatcher * skel = NULL;
 static GRegex * applicationre = NULL;
 static GRegex * appidre = NULL;
+static GRegex * genericre = NULL;
 static gchar * click_exec = NULL;
 static sqlite3 * urldb = NULL;
 
@@ -393,7 +394,29 @@ dispatch_url (const gchar * url)
 	}
 	g_match_info_free(appmatch);
 
-	/* TODO: Use the Databse */
+	/* Check the URL db */
+	GMatchInfo * genericmatch = NULL;
+	if (g_regex_match(genericre, url, 0, &appmatch)) {
+		gboolean found = FALSE;
+		gchar * protocol = g_match_info_fetch(genericmatch, 1);
+		gchar * domain = g_match_info_fetch(genericmatch, 2);
+
+		gchar * appid = url_db_find_url(urldb, protocol, domain);
+
+		if (appid != NULL) {
+			found = TRUE;
+			pass_url_to_app(appid, url);
+			g_free(appid);
+		}
+
+		g_free(protocol);
+		g_free(domain);
+
+		g_match_info_free(genericmatch);
+
+		return found;
+	}
+	g_match_info_free(genericmatch);
 
 	return FALSE;
 }
@@ -458,6 +481,7 @@ dispatcher_init (GMainLoop * mainloop)
 
 	applicationre = g_regex_new("^application:///([a-zA-Z0-9_\\.-]*)\\.desktop$", 0, 0, NULL);
 	appidre = g_regex_new("^appid://([a-z0-9\\.-]*)/([a-zA-Z0-9-]*)/([a-zA-Z0-9\\.-]*)$", 0, 0, NULL);
+	genericre = g_regex_new("^(.*)://([a-z0-9\\.-]*)(/.*)$", 0, 0, NULL);
 
 	if (g_getenv("URL_DISPATCHER_CLICK_EXEC") != NULL) {
 		click_exec = g_strdup(g_getenv("URL_DISPATCHER_CLICK_EXEC"));
@@ -481,6 +505,7 @@ dispatcher_shutdown (void)
 	g_object_unref(skel);
 	g_regex_unref(applicationre);
 	g_regex_unref(appidre);
+	g_regex_unref(genericre);
 	g_free(click_exec);
 	sqlite3_close(urldb);
 
