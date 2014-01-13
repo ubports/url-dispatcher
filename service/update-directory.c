@@ -147,16 +147,27 @@ main (int argc, char * argv[])
 	}
 	g_list_free(files);
 
+	/* Check out what we got and recover */
+	gchar * dirname = NULL;
+	if (g_file_test(argv[1], G_FILE_TEST_EXISTS)) {
+		if (g_file_test(argv[1], G_FILE_TEST_IS_DIR)) {
+			dirname = g_strdup(argv[1]);
+		} else {
+			/* We get passed a file match by Upstart, handle it */
+			dirname = g_path_get_dirname(argv[1]);
+		}
+	}
+
 	/* Open the directory on the file system and start going
 	   through it */
-	if (g_file_test(argv[1], G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR)) {
-		GDir * dir = g_dir_open(argv[1], 0, NULL);
+	if (dirname != NULL) {
+		GDir * dir = g_dir_open(dirname, 0, NULL);
 		g_return_val_if_fail(dir != NULL, -1);
 
 		const gchar * name = NULL;
 		while ((name = g_dir_read_name(dir)) != NULL) {
 			if (g_str_has_suffix(name, ".url-dispatcher")) {
-				gchar * fullname = g_build_filename(argv[1], name, NULL);
+				gchar * fullname = g_build_filename(dirname, name, NULL);
 
 				if (check_file_uptodate(fullname, db)) {
 					insert_urls_from_file(fullname, db);
@@ -176,6 +187,8 @@ main (int argc, char * argv[])
 
 	sqlite3_close(db);
 
-	g_debug("Directory '%s' is up-to-date", argv[1]);
+	g_debug("Directory '%s' is up-to-date", dirname);
+	g_free(dirname);
+
 	return 0;
 }
