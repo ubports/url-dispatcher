@@ -116,6 +116,16 @@ check_file_uptodate (const gchar * filename, sqlite3 * db)
 	return TRUE;
 }
 
+/* Remove a file from the database */
+static void
+remove_file (gpointer key, gpointer value, gpointer user_data)
+{
+	if (!url_db_remove_file((sqlite3*)user_data, (gchar *)key)) {
+		g_warning("Unable to remove file: %s", (gchar *)key);
+	}
+}
+
+/* In the beginning, there was main, and that was good */
 int
 main (int argc, char * argv[])
 {
@@ -132,6 +142,18 @@ main (int argc, char * argv[])
 	sqlite3 * db = url_db_create_database();
 	g_return_val_if_fail(db != NULL, -1);
 
+	/* Get the current files in the directory in the DB so we
+	   know if any got dropped */
+	GHashTable * startingdb = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, NULL);
+	GList * files = url_db_files_for_dir(db, argv[1]);
+	GList * cur;
+	for (cur = files; cur != NULL; cur = g_list_next(cur)) {
+		g_hash_table_add(startingdb, cur->data);
+	}
+	g_list_free(files);
+
+	/* Open the directory on the file system and start going
+	   through it */
 	GDir * dir = g_dir_open(argv[1], 0, NULL);
 	g_return_val_if_fail(dir != NULL, -1);
 
@@ -144,11 +166,17 @@ main (int argc, char * argv[])
 				insert_urls_from_file(fullname, db);
 			}
 
+			g_hash_table_remove(startingdb, fullname);
 			g_free(fullname);
 		}
 	}
 
 	g_dir_close(dir);
+
+	/* Remove deleted files */
+	g_hash_table_foreach(startingdb, remove_file, db);
+	g_hash_table_destroy(startingdb);
+
 	sqlite3_close(db);
 
 	g_debug("Directory '%s' is up-to-date", argv[1]);
