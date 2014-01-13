@@ -73,3 +73,12 @@ FILES
 DESTINATION "/usr/share/upstart/sessions"
 )
 
+###########################
+# Click Hook
+###########################
+
+configure_file("url-dispatcher.click-hook.in"
+	"${CMAKE_SOURCE_DIR}/debian/url-dispatcher.click-hook"
+	@ONLY
+)
+
