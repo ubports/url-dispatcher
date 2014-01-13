@@ -2,24 +2,15 @@ description "Ensure the URL dispatcher database is up-to-date, likely at session
 
 start on started url-dispatcher
 
-DIRECTORIES="@datadir@/url-dispatcher/urls/ $HOME/.config/url-dispatcher/urls/"
-
 pre-start script
 # If we're starting with url-dispatcher let's let the rest of the
 # system have a chance to settle.
-	if [ $UPSTART_EVENTS == "started" ] ; then
+	if [ "$UPSTART_EVENTS" = "started" ] ; then
 		sleep 60
 	fi
 end script
 
 script
-	for directory in $DIRECTORIES; do
-		if [ -d $directory ] ; then
-			for element in $directory/*.url-list ; do
-				initctl start url-dispatcher-update "MATCH=$element"
-			done
-		else
-			echo "Defined directory $directory is not one"
-		fi
-	done
+	initctl start url-dispatcher-update "MATCH=$HOME/.config/url-dispatcher/urls/"
+	initctl start url-dispatcher-update "MATCH=@datadir@/url-dispatcher/urls/"
 end script
