@@ -137,30 +137,35 @@ main (int argc, char * argv[])
 	sqlite3 * db = url_db_create_database();
 	g_return_val_if_fail(db != NULL, -1);
 
+	/* Check out what we got and recover */
+	gchar * dirname = g_strdup(argv[1]);
+	if (!g_file_test(dirname, G_FILE_TEST_IS_DIR) && !g_str_has_suffix(dirname, "/")) {
+		gchar * upone = g_path_get_dirname(dirname);
+		/* Upstart will give us filenames a bit, let's handle them */
+		if (g_file_test(upone, G_FILE_TEST_IS_DIR)) {
+			g_free(dirname);
+			dirname = upone;
+		} else {
+			/* If the dirname function doesn't help, stick with what
+			   we were given, the whole thing coulda been deleted */
+			g_free(upone);
+		}
+	}
+
 	/* Get the current files in the directory in the DB so we
 	   know if any got dropped */
 	GHashTable * startingdb = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, NULL);
-	GList * files = url_db_files_for_dir(db, argv[1]);
+	GList * files = url_db_files_for_dir(db, dirname);
 	GList * cur;
 	for (cur = files; cur != NULL; cur = g_list_next(cur)) {
 		g_hash_table_add(startingdb, cur->data);
 	}
 	g_list_free(files);
 
-	/* Check out what we got and recover */
-	gchar * dirname = NULL;
-	if (g_file_test(argv[1], G_FILE_TEST_EXISTS)) {
-		if (g_file_test(argv[1], G_FILE_TEST_IS_DIR)) {
-			dirname = g_strdup(argv[1]);
-		} else {
-			/* We get passed a file match by Upstart, handle it */
-			dirname = g_path_get_dirname(argv[1]);
-		}
-	}
 
 	/* Open the directory on the file system and start going
 	   through it */
-	if (dirname != NULL) {
+	if (g_file_test(dirname, G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR)) {
 		GDir * dir = g_dir_open(dirname, 0, NULL);
 		g_return_val_if_fail(dir != NULL, -1);
 

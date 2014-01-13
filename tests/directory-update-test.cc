@@ -328,7 +328,7 @@ TEST_F(DirectoryUpdateTest, RemoveDirectory)
 	g_free(cmdline);
 
 	/* Run the tool */
-	cmdline = g_strdup_printf("%s \"%s\"", UPDATE_DIRECTORY_TOOL, datadir);
+	cmdline = g_strdup_printf("%s \"%s/\"", UPDATE_DIRECTORY_TOOL, datadir);
 	g_spawn_command_line_sync(cmdline, NULL, NULL, NULL, NULL);
 	g_free(cmdline);
 
@@ -341,7 +341,7 @@ TEST_F(DirectoryUpdateTest, RemoveDirectory)
 	g_free(cmdline);
 
 	/* Run the tool */
-	cmdline = g_strdup_printf("%s \"%s\"", UPDATE_DIRECTORY_TOOL, datadir);
+	cmdline = g_strdup_printf("%s \"%s/\"", UPDATE_DIRECTORY_TOOL, datadir);
 	g_spawn_command_line_sync(cmdline, NULL, NULL, NULL, NULL);
 	g_free(cmdline);
 
