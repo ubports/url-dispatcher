@@ -120,8 +120,10 @@ check_file_uptodate (const gchar * filename, sqlite3 * db)
 static void
 remove_file (gpointer key, gpointer value, gpointer user_data)
 {
-	if (!url_db_remove_file((sqlite3*)user_data, (gchar *)key)) {
-		g_warning("Unable to remove file: %s", (gchar *)key);
+	const gchar * filename = (const gchar *)key;
+	g_debug("  Removing file: %s", filename);
+	if (!url_db_remove_file((sqlite3*)user_data, filename)) {
+		g_warning("Unable to remove file: %s", filename);
 	}
 }
 
