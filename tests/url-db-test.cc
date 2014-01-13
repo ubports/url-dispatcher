@@ -156,9 +156,30 @@ TEST_F(UrlDBTest, FileListTest) {
 
 	g_list_free_full(files, g_free);
 
-
 	files = url_db_files_for_dir(db, "/dir/not/there");
 	EXPECT_EQ(0, g_list_length(files));
 
 	sqlite3_close(db);
 }
+
+TEST_F(UrlDBTest, RemoveFile) {
+	sqlite3 * db = url_db_create_database();
+
+	ASSERT_TRUE(db != NULL);
+
+	GTimeVal timeval = {0};
+	timeval.tv_sec = 12345;
+	EXPECT_TRUE(url_db_set_file_motification_time(db, "/foo.url-dispatcher", &timeval));
+
+	/* Insert and find */
+	EXPECT_TRUE(url_db_insert_url(db, "/foo.url-dispatcher", "bar", "foo.com"));
+	EXPECT_STREQ("foo", url_db_find_url(db, "bar", "foo.com"));
+
+	/* Remove and not find */
+	EXPECT_TRUE(url_db_remove_file(db, "/foo.url-dispatcher"));
+	EXPECT_FALSE(url_db_get_file_motification_time(db, "/foo.url-dispatcher", &timeval));
+	EXPECT_STREQ(NULL, url_db_find_url(db, "bar", "foo.com"));
+
+	sqlite3_close(db);
+}
+
