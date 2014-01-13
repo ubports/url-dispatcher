@@ -152,13 +152,3 @@ TEST_F(DispatcherTest, MusicTest)
 	return;
 }
 
-TEST_F(DispatcherTest, AlarmTest)
-{
-	/* Base Alarm */
-	dispatch_url("alarm:///?starttime=196311221830Z");
-	ASSERT_STREQ("com.ubuntu.clock_clock_3.23455.1", upstart_app_launch_mock_get_last_app_id());
-	upstart_app_launch_mock_clear_last_app_id();
-
-	return;
-}
-
