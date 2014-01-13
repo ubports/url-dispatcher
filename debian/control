@@ -2,7 +2,8 @@ Source: url-dispatcher
 Section: gnome
 Priority: optional
 Maintainer: Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>
-Build-Depends: cmake,
+Build-Depends: click-dev,
+               cmake,
                dbus-test-runner,
                debhelper (>= 9),
                dh-autoreconf,

@@ -4,4 +4,4 @@ export DPKG_GENSYMBOLS_CHECK_LEVEL = 4
 export G_MESSAGES_DEBUG=all
 
 %:
-	dh $@ --fail-missing
+	dh $@ --fail-missing --with click
