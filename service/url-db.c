@@ -283,22 +283,29 @@ url_db_files_for_dir (sqlite3 * db, const gchar * dir)
 	return filelist;
 }
 
+/* Remove a file from the database along with all URLs that were
+   built because of it. */
 gboolean
 url_db_remove_file (sqlite3 * db, const gchar * path)
 {
 	g_return_val_if_fail(db != NULL, FALSE);
 	g_return_val_if_fail(path != NULL, FALSE);
 
+	/* Start a transaction so the database doesn't end up
+	   in an inconsistent state */
+	if (sqlite3_exec(db, "begin", NULL, NULL, NULL) != SQLITE_OK) {
+		g_warning("Unable to start transaction to delete");
+		return FALSE;
+	}
+
+	/* Remove all URLs for file */
 	sqlite3_stmt * stmt;
 	if (sqlite3_prepare_v2(db,
-			"begin transaction;"
-			"delete from urls where sourcefile in (select rowid from configfiles where name = ?1);"
-			"delete from configfiles where name = ?1;"
-			"commit transaction;",
+			"delete from urls where sourcefile in (select rowid from configfiles where name = ?1);",
 			-1, /* length */
 			&stmt,
 			NULL) != SQLITE_OK) {
-		g_warning("Unable to parse SQL to remove files");
+		g_warning("Unable to parse SQL to remove urls");
 		return FALSE;
 	}
 
@@ -311,7 +318,38 @@ url_db_remove_file (sqlite3 * db, const gchar * path)
 	sqlite3_finalize(stmt);
 
 	if (exec_status != SQLITE_DONE) {
-		g_warning("Unable to execute removal");
+		g_warning("Unable to execute removal of URLs");
+		return FALSE;
+	}
+
+	/* Remove references to the file */
+	stmt = NULL;
+
+	if (sqlite3_prepare_v2(db,
+			"delete from configfiles where name = ?1;",
+			-1, /* length */
+			&stmt,
+			NULL) != SQLITE_OK) {
+		g_warning("Unable to parse SQL to remove urls");
+		return FALSE;
+	}
+
+	sqlite3_bind_text(stmt, 1, path, -1, SQLITE_TRANSIENT);
+
+	exec_status = SQLITE_ROW;
+	while ((exec_status = sqlite3_step(stmt)) == SQLITE_ROW) {
+	}
+
+	sqlite3_finalize(stmt);
+
+	if (exec_status != SQLITE_DONE) {
+		g_warning("Unable to execute removal of file");
+		return FALSE;
+	}
+
+	/* Commit the full transaction */
+	if (sqlite3_exec(db, "commit", NULL, NULL, NULL) != SQLITE_OK) {
+		g_warning("Unable to commit transaction to delete");
 		return FALSE;
 	}
 
