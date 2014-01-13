@@ -29,6 +29,8 @@ static ServiceIfaceComCanonicalURLDispatcher * skel = NULL;
 static GRegex * applicationre = NULL;
 static GRegex * appidre = NULL;
 static GRegex * genericre = NULL;
+static GRegex * musicfilere = NULL; /* FIXME */
+static GRegex * videofilere = NULL; /* FIXME */
 static gchar * click_exec = NULL;
 static sqlite3 * urldb = NULL;
 
@@ -394,6 +396,28 @@ dispatch_url (const gchar * url)
 	}
 	g_match_info_free(appmatch);
 
+	/* start FIXME: These are needed work arounds until everything migrates away
+	   from them.  Ewww */
+	GMatchInfo * musicmatch = NULL;
+	if (g_regex_match(musicfilere, url, 0, &musicmatch)) {
+		gboolean retval = FALSE;
+		retval = app_id_discover("com.ubuntu.music", "music", CURRENT, url);
+
+		g_match_info_free(musicmatch);
+		return retval;
+	}
+	g_match_info_free(musicmatch);
+
+	GMatchInfo * videomatch = NULL;
+	if (g_regex_match(videofilere, url, 0, &videomatch)) {
+		pass_url_to_app("mediaplayer-app", url);
+
+		g_match_info_free(videomatch);
+		return TRUE;
+	}
+	g_match_info_free(videomatch);
+	/* end FIXME: Making the ugly stop */
+
 	/* Check the URL db */
 	GMatchInfo * genericmatch = NULL;
 	if (g_regex_match(genericre, url, 0, &genericmatch)) {
@@ -471,6 +495,8 @@ bus_got (GObject * obj, GAsyncResult * res, gpointer user_data)
 	return;
 }
 
+#define USERNAME_REGEX  "[a-zA-Z0-9_\\-]*"
+
 /* Initialize all the globals */
 gboolean
 dispatcher_init (GMainLoop * mainloop)
@@ -482,6 +508,10 @@ dispatcher_init (GMainLoop * mainloop)
 	applicationre = g_regex_new("^application:///([a-zA-Z0-9_\\.-]*)\\.desktop$", 0, 0, NULL);
 	appidre = g_regex_new("^appid://([a-z0-9\\.-]*)/([a-zA-Z0-9-]*)/([a-zA-Z0-9\\.-]*)$", 0, 0, NULL);
 	genericre = g_regex_new("^(.*)://([a-z0-9\\.-]*)(/.*)$", 0, 0, NULL);
+
+	/* FIXME: Legacy */
+	musicfilere = g_regex_new("^file:///home/" USERNAME_REGEX "/Music/", 0, 0, NULL);
+	videofilere = g_regex_new("^file:///home/" USERNAME_REGEX "/Videos/", 0, 0, NULL);
 
 	if (g_getenv("URL_DISPATCHER_CLICK_EXEC") != NULL) {
 		click_exec = g_strdup(g_getenv("URL_DISPATCHER_CLICK_EXEC"));
@@ -506,6 +536,8 @@ dispatcher_shutdown (void)
 	g_regex_unref(applicationre);
 	g_regex_unref(appidre);
 	g_regex_unref(genericre);
+	g_regex_unref(musicfilere); /* FIXME */
+	g_regex_unref(videofilere); /* FIXME */
 	g_free(click_exec);
 	sqlite3_close(urldb);
 
