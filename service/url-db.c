@@ -19,6 +19,8 @@
 #include "url-db.h"
 #include "create-db-sql.h"
 
+#define DB_SCHEMA_VERSION "1"
+
 sqlite3 *
 url_db_create_database (void)
 {
@@ -39,7 +41,7 @@ url_db_create_database (void)
 		}
 	}
 
-	gchar * dbfilename = g_build_filename(urldispatchercachedir, "urls.db", NULL);
+	gchar * dbfilename = g_build_filename(urldispatchercachedir, "urls-" DB_SCHEMA_VERSION ".db", NULL);
 	g_free(urldispatchercachedir);
 
 	gboolean dbexists = g_file_test(dbfilename, G_FILE_TEST_EXISTS);

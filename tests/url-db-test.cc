@@ -58,7 +58,7 @@ TEST_F(UrlDBTest, CreateTest) {
 
 	ASSERT_TRUE(db != NULL);
 
-	gchar * dbfile = g_build_filename(cachedir, "url-dispatcher", "urls.db", NULL);
+	gchar * dbfile = g_build_filename(cachedir, "url-dispatcher", "urls-1.db", NULL);
 	EXPECT_TRUE(g_file_test(dbfile, G_FILE_TEST_EXISTS));
 	g_free(dbfile);
 
