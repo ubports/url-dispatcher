@@ -396,7 +396,7 @@ dispatch_url (const gchar * url)
 
 	/* Check the URL db */
 	GMatchInfo * genericmatch = NULL;
-	if (g_regex_match(genericre, url, 0, &appmatch)) {
+	if (g_regex_match(genericre, url, 0, &genericmatch)) {
 		gboolean found = FALSE;
 		gchar * protocol = g_match_info_fetch(genericmatch, 1);
 		gchar * domain = g_match_info_fetch(genericmatch, 2);
