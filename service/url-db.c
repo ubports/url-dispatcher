@@ -282,3 +282,38 @@ url_db_files_for_dir (sqlite3 * db, const gchar * dir)
 
 	return filelist;
 }
+
+gboolean
+url_db_remove_file (sqlite3 * db, const gchar * path)
+{
+	g_return_val_if_fail(db != NULL, FALSE);
+	g_return_val_if_fail(path != NULL, FALSE);
+
+	sqlite3_stmt * stmt;
+	if (sqlite3_prepare_v2(db,
+			"begin transaction;"
+			"delete from urls where sourcefile in (select rowid from configfiles where name = ?1);"
+			"delete from configfiles where name = ?1;"
+			"commit transaction;",
+			-1, /* length */
+			&stmt,
+			NULL) != SQLITE_OK) {
+		g_warning("Unable to parse SQL to remove files");
+		return FALSE;
+	}
+
+	sqlite3_bind_text(stmt, 1, path, -1, SQLITE_TRANSIENT);
+
+	int exec_status = SQLITE_ROW;
+	while ((exec_status = sqlite3_step(stmt)) == SQLITE_ROW) {
+	}
+
+	sqlite3_finalize(stmt);
+
+	if (exec_status != SQLITE_DONE) {
+		g_warning("Unable to execute removal");
+		return FALSE;
+	}
+
+	return TRUE;
+}

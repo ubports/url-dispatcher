@@ -39,6 +39,8 @@ gchar *       url_db_find_url                       (sqlite3 *      db,
                                                      const gchar *  domainsuffix);
 GList *       url_db_files_for_dir                  (sqlite3 *      db,
                                                      const gchar *  dir);
+gboolean      url_db_remove_file                    (sqlite3 *      db,
+                                                     const gchar *  path);
 
 G_END_DECLS
 
