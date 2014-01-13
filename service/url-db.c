@@ -250,17 +250,19 @@ url_db_files_for_dir (sqlite3 * db, const gchar * dir)
 		dir = "";
 	}
 
+	gchar * dir_search = g_strdup_printf("%s%%", dir);
+
 	sqlite3_stmt * stmt;
 	if (sqlite3_prepare_v2(db,
-			"select name from configfiles where name like ?1 || %",
+			"select name from configfiles where name like ?1",
 			-1, /* length */
 			&stmt,
 			NULL) != SQLITE_OK) {
-		g_warning("Unable to parse SQL to find url");
+		g_warning("Unable to parse SQL to find files");
 		return NULL;
 	}
 
-	sqlite3_bind_text(stmt, 1, dir, -1, SQLITE_TRANSIENT);
+	sqlite3_bind_text(stmt, 1, dir_search, -1, SQLITE_TRANSIENT);
 
 	GList * filelist = NULL;
 	int exec_status = SQLITE_ROW;
@@ -270,6 +272,7 @@ url_db_files_for_dir (sqlite3 * db, const gchar * dir)
 	}
 
 	sqlite3_finalize(stmt);
+	g_free(dir_search);
 
 	if (exec_status != SQLITE_DONE) {
 		g_warning("Unable to execute insert");
