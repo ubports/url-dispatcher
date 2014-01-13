@@ -134,11 +134,6 @@ main (int argc, char * argv[])
 		return 1;
 	}
 
-	if (!g_file_test(argv[1], G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR)) {
-		g_print("Directory '%s' is up-to-date because it doesn't exist\n", argv[1]);
-		return 0;
-	}
-
 	sqlite3 * db = url_db_create_database();
 	g_return_val_if_fail(db != NULL, -1);
 
@@ -154,24 +149,26 @@ main (int argc, char * argv[])
 
 	/* Open the directory on the file system and start going
 	   through it */
-	GDir * dir = g_dir_open(argv[1], 0, NULL);
-	g_return_val_if_fail(dir != NULL, -1);
+	if (g_file_test(argv[1], G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR)) {
+		GDir * dir = g_dir_open(argv[1], 0, NULL);
+		g_return_val_if_fail(dir != NULL, -1);
 
-	const gchar * name = NULL;
-	while ((name = g_dir_read_name(dir)) != NULL) {
-		if (g_str_has_suffix(name, ".url-dispatcher")) {
-			gchar * fullname = g_build_filename(argv[1], name, NULL);
+		const gchar * name = NULL;
+		while ((name = g_dir_read_name(dir)) != NULL) {
+			if (g_str_has_suffix(name, ".url-dispatcher")) {
+				gchar * fullname = g_build_filename(argv[1], name, NULL);
 
-			if (check_file_uptodate(fullname, db)) {
-				insert_urls_from_file(fullname, db);
+				if (check_file_uptodate(fullname, db)) {
+					insert_urls_from_file(fullname, db);
+				}
+
+				g_hash_table_remove(startingdb, fullname);
+				g_free(fullname);
 			}
-
-			g_hash_table_remove(startingdb, fullname);
-			g_free(fullname);
 		}
-	}
 
-	g_dir_close(dir);
+		g_dir_close(dir);
+	}
 
 	/* Remove deleted files */
 	g_hash_table_foreach(startingdb, remove_file, db);
