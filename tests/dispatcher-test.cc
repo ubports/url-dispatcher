@@ -20,17 +20,30 @@
 #include <gtest/gtest.h>
 #include "dispatcher.h"
 #include "upstart-app-launch-mock.h"
+#include "url-db.h"
 
 class DispatcherTest : public ::testing::Test
 {
 	private:
 		GTestDBus * testbus = NULL;
 		GMainLoop * mainloop = NULL;
+		gchar * cachedir = NULL;
 
 	protected:
 		virtual void SetUp() {
 			g_setenv("URL_DISPATCHER_CLICK_EXEC", CMAKE_SOURCE_DIR "/click-test.sh", TRUE);
 			g_setenv("URL_DISPATCHER_TEST_CLICK_DIR", CMAKE_SOURCE_DIR "/click-data/", TRUE);
+
+			cachedir = g_build_filename(CMAKE_BINARY_DIR, "dispatcher-test-cache", NULL);
+			g_setenv("URL_DISPATCHER_CACHE_DIR", cachedir, TRUE);
+
+			sqlite3 * db = url_db_create_database();
+			GTimeVal timestamp = { .tv_sec = 12345 };
+
+			url_db_set_file_motification_time(db, "/testdir/com.ubuntu.calendar_calendar_9.8.2343.url-dispatcher", &timestamp);
+			url_db_insert_url(db, "/testdir/com.ubuntu.calendar_calendar_9.8.2343.url-dispatcher", "calendar", NULL);
+
+			sqlite3_close(db);
 
 			testbus = g_test_dbus_new(G_TEST_DBUS_NONE);
 			g_test_dbus_up(testbus);
@@ -55,6 +68,11 @@ class DispatcherTest : public ::testing::Test
 
 			g_test_dbus_down(testbus);
 			g_object_unref(testbus);
+
+			gchar * cmdline = g_strdup_printf("rm -rf \"%s\"", cachedir);
+			g_spawn_command_line_sync(cmdline, NULL, NULL, NULL, NULL);
+			g_free(cmdline);
+			g_free(cachedir);
 			return;
 		}
 };
