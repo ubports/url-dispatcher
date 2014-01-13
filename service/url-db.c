@@ -131,7 +131,7 @@ url_db_set_file_motification_time (sqlite3 * db, const gchar * filename, GTimeVa
 			-1, /* length */
 			&stmt,
 			NULL) != SQLITE_OK) {
-		g_warning("Unable to parse SQL to get file times");
+		g_warning("Unable to parse SQL to set file times");
 		return FALSE;
 	}
 
