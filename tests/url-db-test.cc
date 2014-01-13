@@ -155,5 +155,10 @@ TEST_F(UrlDBTest, FileListTest) {
 	EXPECT_TRUE(file_list_has(files, "six.url-dispatcher"));
 
 	g_list_free_full(files, g_free);
+
+
+	files = url_db_files_for_dir(db, "/dir/not/there");
+	EXPECT_EQ(0, g_list_length(files));
+
 	sqlite3_close(db);
 }
