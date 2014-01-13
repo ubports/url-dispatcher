@@ -26,11 +26,15 @@ class AppIdTest : public ::testing::Test
 	private:
 		GTestDBus * testbus = NULL;
 		GMainLoop * mainloop = NULL;
+		gchar * cachedir = NULL;
 
 	protected:
 		virtual void SetUp() {
 			g_setenv("URL_DISPATCHER_CLICK_EXEC", CMAKE_SOURCE_DIR "/click-test.sh", TRUE);
 			g_setenv("URL_DISPATCHER_TEST_CLICK_DIR", CMAKE_SOURCE_DIR "/click-data/", TRUE);
+
+			cachedir = g_build_filename(CMAKE_BINARY_DIR, "app-id-test-cache", NULL);
+			g_setenv("URL_DISPATCHER_CACHE_DIR", cachedir, TRUE);
 
 			testbus = g_test_dbus_new(G_TEST_DBUS_NONE);
 			g_test_dbus_up(testbus);
@@ -55,6 +59,11 @@ class AppIdTest : public ::testing::Test
 
 			g_test_dbus_down(testbus);
 			g_object_unref(testbus);
+
+			gchar * cmdline = g_strdup_printf("rm -rf \"%s\"", cachedir);
+			g_spawn_command_line_sync(cmdline, NULL, NULL, NULL, NULL);
+			g_free(cmdline);
+			g_free(cachedir);
 			return;
 		}
 };
