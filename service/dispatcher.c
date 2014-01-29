@@ -31,7 +31,6 @@ static GRegex * appidre = NULL;
 static GRegex * genericre = NULL;
 static GRegex * musicfilere = NULL; /* FIXME */
 static GRegex * videofilere = NULL; /* FIXME */
-static gchar * click_exec = NULL;
 static sqlite3 * urldb = NULL;
 
 /* Errors */
@@ -321,10 +320,6 @@ dispatcher_init (GMainLoop * mainloop)
 	musicfilere = g_regex_new("^file:///home/" USERNAME_REGEX "/Music/", 0, 0, NULL);
 	videofilere = g_regex_new("^file:///home/" USERNAME_REGEX "/Videos/", 0, 0, NULL);
 
-	if (g_getenv("URL_DISPATCHER_CLICK_EXEC") != NULL) {
-		click_exec = g_strdup(g_getenv("URL_DISPATCHER_CLICK_EXEC"));
-	}
-
 	g_bus_get(G_BUS_TYPE_SESSION, cancellable, bus_got, mainloop);
 
 	skel = service_iface_com_canonical_urldispatcher_skeleton_new();
@@ -346,7 +341,6 @@ dispatcher_shutdown (void)
 	g_regex_unref(genericre);
 	g_regex_unref(musicfilere); /* FIXME */
 	g_regex_unref(videofilere); /* FIXME */
-	g_free(click_exec);
 	sqlite3_close(urldb);
 
 	return TRUE;
