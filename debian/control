@@ -32,7 +32,6 @@ Architecture: any
 Multi-Arch: same
 Pre-Depends: ${misc:Pre-Depends},
 Depends: upstart-app-launch,
-         click (>= 0.4.9),
          ${misc:Depends},
          ${shlibs:Depends},
 Description: service to allow sending of URLs and get handlers started
