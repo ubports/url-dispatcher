@@ -30,7 +30,7 @@ class AppIdTest : public ::testing::Test
 
 	protected:
 		virtual void SetUp() {
-			g_setenv("URL_DISPATCHER_CLICK_EXEC", CMAKE_SOURCE_DIR "/click-test.sh", TRUE);
+			g_setenv("UAL_CLICK_EXEC", CMAKE_SOURCE_DIR "/click-test.sh", TRUE);
 			g_setenv("URL_DISPATCHER_TEST_CLICK_DIR", CMAKE_SOURCE_DIR "/click-data/", TRUE);
 
 			cachedir = g_build_filename(CMAKE_BINARY_DIR, "app-id-test-cache", NULL);
