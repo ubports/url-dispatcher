@@ -26,7 +26,7 @@ sig_term (gpointer user_data)
 {
 	g_debug("SIGTERM");
 	g_main_loop_quit((GMainLoop *)user_data);
-	return G_SOURCE_REMOVE;
+	return G_SOURCE_CONTINUE;
 }
 
 /* Where it all begins */
