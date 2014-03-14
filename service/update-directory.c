@@ -20,6 +20,7 @@
 #include <gio/gio.h>
 #include <json-glib/json-glib.h>
 #include "url-db.h"
+#include "recoverable-problem.h"
 
 typedef struct {
 	const gchar * filename;
@@ -195,7 +196,19 @@ main (int argc, char * argv[])
 	g_hash_table_foreach(startingdb, remove_file, db);
 	g_hash_table_destroy(startingdb);
 
-	sqlite3_close(db);
+	int close_status = sqlite3_close(db);
+	if (close_status != SQLITE_OK) {
+		gchar * additional[3] = {
+			"SQLiteStatus",
+			NULL,
+			NULL
+		};
+		gchar * status = g_strdup_printf("%d", close_status);
+		additional[1] = status;
+
+		report_recoverable_problem("url-dispatcher-sqlite-close-error", 0, TRUE, additional);
+		g_free(status);
+	}
 
 	g_debug("Directory '%s' is up-to-date", dirname);
 	g_free(dirname);
