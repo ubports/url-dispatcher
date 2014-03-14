@@ -13,6 +13,8 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
+ * Author: Ted Gould <ted@canonical.com>
+ *
  */
 
 #include <glib.h>
@@ -26,7 +28,7 @@ sig_term (gpointer user_data)
 {
 	g_debug("SIGTERM");
 	g_main_loop_quit((GMainLoop *)user_data);
-	return G_SOURCE_REMOVE;
+	return G_SOURCE_CONTINUE;
 }
 
 /* Where it all begins */

@@ -27,6 +27,7 @@ class ServiceTest : public ::testing::Test
 		DbusTestService * service = NULL;
 		DbusTestDbusMock * mock = NULL;
 		DbusTestDbusMockObject * obj = NULL;
+		DbusTestDbusMockObject * jobobj = NULL;
 		DbusTestProcess * dispatcher = NULL;
 		GDBusConnection * bus = NULL;
 
@@ -44,10 +45,19 @@ class ServiceTest : public ::testing::Test
 			obj = dbus_test_dbus_mock_get_object(mock, "/com/ubuntu/Upstart", "com.ubuntu.Upstart0_6", NULL);
 
 			dbus_test_dbus_mock_object_add_method(mock, obj,
-				"EmitEvent",
-				G_VARIANT_TYPE("(sasb)"),
-				NULL, /* out */
-				"", /* python */
+				"GetJobByName",
+				G_VARIANT_TYPE_STRING,
+				G_VARIANT_TYPE_OBJECT_PATH, /* out */
+				"ret = dbus.ObjectPath('/job')", /* python */
+				NULL); /* error */
+
+			jobobj = dbus_test_dbus_mock_get_object(mock, "/job", "com.ubuntu.Upstart0_6.Job", NULL);
+
+			dbus_test_dbus_mock_object_add_method(mock, jobobj,
+				"Start",
+				G_VARIANT_TYPE("(asb)"),
+				G_VARIANT_TYPE_OBJECT_PATH, /* out */
+				"ret = dbus.ObjectPath('/instance')", /* python */
 				NULL); /* error */
 
 			dbus_test_service_add_task(service, DBUS_TEST_TASK(mock));
@@ -98,7 +108,7 @@ TEST_F(ServiceTest, InvalidTest) {
 	g_main_loop_unref(main);
 
 	guint callslen = 0;
-	const DbusTestDbusMockCall * calls = dbus_test_dbus_mock_object_get_method_calls(mock, obj, "EmitEvent", &callslen, NULL);
+	const DbusTestDbusMockCall * calls = dbus_test_dbus_mock_object_get_method_calls(mock, jobobj, "Start", &callslen, NULL);
 
 	ASSERT_EQ(callslen, 0);
 }
@@ -114,14 +124,14 @@ TEST_F(ServiceTest, ApplicationTest) {
 	g_main_loop_unref(main);
 
 	guint callslen = 0;
-	const DbusTestDbusMockCall * calls = dbus_test_dbus_mock_object_get_method_calls(mock, obj, "EmitEvent", &callslen, NULL);
+	const DbusTestDbusMockCall * calls = dbus_test_dbus_mock_object_get_method_calls(mock, jobobj, "Start", &callslen, NULL);
 
 	ASSERT_EQ(callslen, 1);
 
 	/* Making sure the APP_ID is here.  We're not testing more to
 	   make it so the tests break less, that should be tested in
 	   Upstart App Launch, we don't need to retest */
-	GVariant * env = g_variant_get_child_value(calls->params, 1);
+	GVariant * env = g_variant_get_child_value(calls->params, 0);
 	GVariantIter iter;
 	bool found_appid = false;
 	g_variant_iter_init(&iter, env);

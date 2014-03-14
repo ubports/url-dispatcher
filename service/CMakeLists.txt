@@ -90,7 +90,7 @@ target_link_libraries(service-exec dispatcher-lib ${UPSTART_APP_LAUNCH_LIBRARIES
 # Update Directory
 ###########################
 
-add_executable(update-directory update-directory.c)
+add_executable(update-directory update-directory.c recoverable-problem.c)
 set_target_properties(update-directory PROPERTIES OUTPUT_NAME "update-directory")
 target_link_libraries(update-directory ${GIO2_LIBRARIES} ${JSONGLIB_LIBRARIES} url-db-lib)
 

@@ -13,6 +13,8 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
+ * Author: Ted Gould <ted@canonical.com>
+ *
  */
 
 #include <glib.h>
@@ -68,6 +70,7 @@ url_db_create_database (void)
 
 		if (exec_status != SQLITE_OK) {
 			g_warning("Unable to create tables: %s", failstring);
+			sqlite3_free(failstring);
 			sqlite3_close(db);
 			return NULL;
 		}

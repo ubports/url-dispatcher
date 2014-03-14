@@ -13,11 +13,14 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
+ * Author: Ted Gould <ted@canonical.com>
+ *
  */
 
 #include <gio/gio.h>
 #include <json-glib/json-glib.h>
 #include "url-db.h"
+#include "recoverable-problem.h"
 
 typedef struct {
 	const gchar * filename;
@@ -47,8 +50,8 @@ each_url (JsonArray * array, guint index, JsonNode * value, gpointer user_data)
 		suffix = json_object_get_string_member(obj, "domain-suffix");
 	}
 
-	if (protocol == NULL && suffix == NULL) {
-		g_warning("File %s: Array entry %d doesn't contain one of 'protocol' or 'domain-suffix'", urldata->filename, index);
+	if (protocol == NULL) {
+		g_warning("File %s: Array entry %d doesn't contain a 'protocol'", urldata->filename, index);
 		return;
 	}
 
@@ -65,6 +68,7 @@ insert_urls_from_file (const gchar * filename, sqlite3 * db)
 	if (error != NULL) {
 		g_warning("Unable to parse JSON in '%s': %s", filename, error->message);
 		g_object_unref(parser);
+		g_error_free(error);
 		return;
 	}
 
@@ -88,7 +92,7 @@ insert_urls_from_file (const gchar * filename, sqlite3 * db)
 }
 
 static gboolean
-check_file_uptodate (const gchar * filename, sqlite3 * db)
+check_file_outofdate (const gchar * filename, sqlite3 * db)
 {
 	g_debug("Processing file: %s", filename);
 
@@ -167,7 +171,7 @@ main (int argc, char * argv[])
 
 	/* Open the directory on the file system and start going
 	   through it */
-	if (g_file_test(dirname, G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR)) {
+	if (g_file_test(dirname, G_FILE_TEST_IS_DIR)) {
 		GDir * dir = g_dir_open(dirname, 0, NULL);
 		g_return_val_if_fail(dir != NULL, -1);
 
@@ -176,7 +180,7 @@ main (int argc, char * argv[])
 			if (g_str_has_suffix(name, ".url-dispatcher")) {
 				gchar * fullname = g_build_filename(dirname, name, NULL);
 
-				if (check_file_uptodate(fullname, db)) {
+				if (check_file_outofdate(fullname, db)) {
 					insert_urls_from_file(fullname, db);
 				}
 
@@ -192,7 +196,19 @@ main (int argc, char * argv[])
 	g_hash_table_foreach(startingdb, remove_file, db);
 	g_hash_table_destroy(startingdb);
 
-	sqlite3_close(db);
+	int close_status = sqlite3_close(db);
+	if (close_status != SQLITE_OK) {
+		gchar * additional[3] = {
+			"SQLiteStatus",
+			NULL,
+			NULL
+		};
+		gchar * status = g_strdup_printf("%d", close_status);
+		additional[1] = status;
+
+		report_recoverable_problem("url-dispatcher-sqlite-close-error", 0, TRUE, additional);
+		g_free(status);
+	}
 
 	g_debug("Directory '%s' is up-to-date", dirname);
 	g_free(dirname);
