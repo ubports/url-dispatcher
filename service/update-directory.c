@@ -91,7 +91,7 @@ insert_urls_from_file (const gchar * filename, sqlite3 * db)
 }
 
 static gboolean
-check_file_uptodate (const gchar * filename, sqlite3 * db)
+check_file_outofdate (const gchar * filename, sqlite3 * db)
 {
 	g_debug("Processing file: %s", filename);
 
@@ -179,7 +179,7 @@ main (int argc, char * argv[])
 			if (g_str_has_suffix(name, ".url-dispatcher")) {
 				gchar * fullname = g_build_filename(dirname, name, NULL);
 
-				if (check_file_uptodate(fullname, db)) {
+				if (check_file_outofdate(fullname, db)) {
 					insert_urls_from_file(fullname, db);
 				}
 
