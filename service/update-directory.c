@@ -49,8 +49,8 @@ each_url (JsonArray * array, guint index, JsonNode * value, gpointer user_data)
 		suffix = json_object_get_string_member(obj, "domain-suffix");
 	}
 
-	if (protocol == NULL && suffix == NULL) {
-		g_warning("File %s: Array entry %d doesn't contain one of 'protocol' or 'domain-suffix'", urldata->filename, index);
+	if (protocol == NULL) {
+		g_warning("File %s: Array entry %d doesn't contain a 'protocol'", urldata->filename, index);
 		return;
 	}
 
