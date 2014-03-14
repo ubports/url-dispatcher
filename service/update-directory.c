@@ -67,6 +67,7 @@ insert_urls_from_file (const gchar * filename, sqlite3 * db)
 	if (error != NULL) {
 		g_warning("Unable to parse JSON in '%s': %s", filename, error->message);
 		g_object_unref(parser);
+		g_error_free(error);
 		return;
 	}
 
