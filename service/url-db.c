@@ -70,6 +70,7 @@ url_db_create_database (void)
 
 		if (exec_status != SQLITE_OK) {
 			g_warning("Unable to create tables: %s", failstring);
+			sqlite3_free(failstring);
 			sqlite3_close(db);
 			return NULL;
 		}
