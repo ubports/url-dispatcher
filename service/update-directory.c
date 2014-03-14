@@ -170,7 +170,7 @@ main (int argc, char * argv[])
 
 	/* Open the directory on the file system and start going
 	   through it */
-	if (g_file_test(dirname, G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR)) {
+	if (g_file_test(dirname, G_FILE_TEST_IS_DIR)) {
 		GDir * dir = g_dir_open(dirname, 0, NULL);
 		g_return_val_if_fail(dir != NULL, -1);
 
