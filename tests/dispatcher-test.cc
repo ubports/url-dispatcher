@@ -66,6 +66,9 @@ class DispatcherTest : public ::testing::Test
 
 			upstart_app_launch_mock_clear_last_app_id();
 
+			/* let other threads settle */
+			g_usleep(500000);
+
 			g_test_dbus_down(testbus);
 			g_object_unref(testbus);
 
