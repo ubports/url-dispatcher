@@ -30,8 +30,8 @@ class AppIdTest : public ::testing::Test
 
 	protected:
 		virtual void SetUp() {
-			g_setenv("UAL_CLICK_EXEC", CMAKE_SOURCE_DIR "/click-test.sh", TRUE);
-			g_setenv("URL_DISPATCHER_TEST_CLICK_DIR", CMAKE_SOURCE_DIR "/click-data/", TRUE);
+			g_setenv("TEST_CLICK_DB", "click-db", TRUE);
+			g_setenv("TEST_CLICK_USER", "test-user", TRUE);
 
 			cachedir = g_build_filename(CMAKE_BINARY_DIR, "app-id-test-cache", NULL);
 			g_setenv("URL_DISPATCHER_CACHE_DIR", cachedir, TRUE);
@@ -130,7 +130,7 @@ TEST_F(AppIdTest, OrderingUrl)
 
 TEST_F(AppIdTest, BadDirectory)
 {
-	g_setenv("URL_DISPATCHER_TEST_CLICK_DIR", CMAKE_SOURCE_DIR "/not-a-real-directory/", TRUE);
+	g_setenv("TEST_CLICK_DB", "not-click-db", TRUE);
 
 	dispatch_url("appid://com.test.good/app1/current-user-version");
 	ASSERT_TRUE(NULL == upstart_app_launch_mock_get_last_app_id());
@@ -139,9 +139,9 @@ TEST_F(AppIdTest, BadDirectory)
 	return;
 }
 
-TEST_F(AppIdTest, BadClick)
+TEST_F(AppIdTest, BadUser)
 {
-	g_unsetenv("URL_DISPATCHER_TEST_CLICK_DIR");
+	g_setenv("TEST_CLICK_USER", "not-test-user", TRUE);
 
 	dispatch_url("appid://com.test.good/app1/current-user-version");
 	ASSERT_TRUE(NULL == upstart_app_launch_mock_get_last_app_id());

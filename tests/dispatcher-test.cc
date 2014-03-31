@@ -31,8 +31,8 @@ class DispatcherTest : public ::testing::Test
 
 	protected:
 		virtual void SetUp() {
-			g_setenv("UAL_CLICK_EXEC", CMAKE_SOURCE_DIR "/click-test.sh", TRUE);
-			g_setenv("URL_DISPATCHER_TEST_CLICK_DIR", CMAKE_SOURCE_DIR "/click-data/", TRUE);
+			g_setenv("TEST_CLICK_DB", "click-db", TRUE);
+			g_setenv("TEST_CLICK_USER", "test-user", TRUE);
 
 			cachedir = g_build_filename(CMAKE_BINARY_DIR, "dispatcher-test-cache", NULL);
 			g_setenv("URL_DISPATCHER_CACHE_DIR", cachedir, TRUE);
@@ -65,6 +65,9 @@ class DispatcherTest : public ::testing::Test
 			g_main_loop_unref(mainloop);
 
 			upstart_app_launch_mock_clear_last_app_id();
+
+			/* let other threads settle */
+			g_usleep(500000);
 
 			g_test_dbus_down(testbus);
 			g_object_unref(testbus);
