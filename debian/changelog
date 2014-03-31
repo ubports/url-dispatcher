@@ -1,3 +1,12 @@
+url-dispatcher (0.1+14.04.20140331.1-0ubuntu1) trusty; urgency=low
+
+  [ Ted Gould ]
+  * Make it so that URLs can be installed with configuration files.
+  * Switch to using libupstart-app-launch for discovering AppIDs
+  * Migrate test suite to use libclick based libual
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Mon, 31 Mar 2014 17:18:43 +0000
+
 url-dispatcher (0.1+14.04.20140217.1-0ubuntu1) trusty; urgency=low
 
   [ Ted Gould ]
