@@ -1,0 +1,12 @@
+  file(READ "${input}" input_contents)
+  string(REGEX REPLACE "\n" " " input_on_one_line "${input_contents}") 
+  set(new_contents
+    "\#include \"${name}.h\"\nconst char * ${const_name} = \"${input_on_one_line}\";\n")
+  if (EXISTS "${file_target}")
+    file(READ "${file_target}" old_contents)
+    if(NOT new_contents EQUAL old_contents)
+      file(WRITE "${file_target}" "${new_contents}")
+    endif()
+  else()
+    file(WRITE "${file_target}" "${new_contents}")
+  endif()

@@ -1,4 +1,6 @@
 
+add_definitions ( -DCMAKE_BINARY_DIR="${CMAKE_CURRENT_BINARY_DIR}" )
+
 ###########################
 # Google Test
 ###########################
@@ -70,7 +72,7 @@ target_link_libraries (lib-test
 add_test (lib-test lib-test)
 
 ###########################
-# lib test
+# service test
 ###########################
 
 add_definitions ( -DURL_DISPATCHER_SERVICE="${CMAKE_BINARY_DIR}/service/url-dispatcher" )
@@ -83,4 +85,40 @@ target_link_libraries (service-test
 	${GTEST_LIBS})
 
 add_test (service-test service-test)
+
+
+###########################
+# create db test 
+###########################
+
+add_test (NAME create-db-test
+          COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/test-sql.sh" "${CMAKE_SOURCE_DIR}/service/create-db.sql")
+
+###########################
+# update directory test
+###########################
+
+add_definitions ( -DUPDATE_DIRECTORY_TOOL="${CMAKE_BINARY_DIR}/service/update-directory" )
+add_definitions ( -DUPDATE_DIRECTORY_URLS="${CMAKE_CURRENT_SOURCE_DIR}/test-urls-simple" )
+add_definitions ( -DUPDATE_DIRECTORY_VARIED="${CMAKE_CURRENT_SOURCE_DIR}/test-urls-varied" )
+
+add_executable (directory-update-test directory-update-test.cc)
+target_link_libraries (directory-update-test
+	url-db-lib
+	gtest
+	${GTEST_LIBS})
+
+add_test (directory-update-test directory-update-test)
+
+###########################
+# url db test
+###########################
+
+add_executable (url-db-test url-db-test.cc)
+target_link_libraries (url-db-test
+	url-db-lib
+	gtest
+	${GTEST_LIBS})
+
+add_test (url-db-test url-db-test)
 

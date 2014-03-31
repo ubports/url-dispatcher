@@ -13,6 +13,8 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
+ * Author: Ted Gould <ted@canonical.com>
+ *
  */
 
 #include <gio/gio.h>
@@ -21,13 +23,18 @@
 #include "dispatcher.h"
 #include "service-iface.h"
 #include "recoverable-problem.h"
+#include "url-db.h"
 
 /* Globals */
 static GCancellable * cancellable = NULL;
 static ServiceIfaceComCanonicalURLDispatcher * skel = NULL;
 static GRegex * applicationre = NULL;
 static GRegex * appidre = NULL;
+static GRegex * genericre = NULL;
+static GRegex * musicfilere = NULL; /* FIXME */
+static GRegex * videofilere = NULL; /* FIXME */
 static gchar * click_exec = NULL;
+static sqlite3 * urldb = NULL;
 
 #define CURRENT "current-user-version"
 
@@ -337,124 +344,6 @@ app_id_discover (const gchar * pkg, const gchar * app, const gchar * version, co
 	return TRUE;
 }
 
-/* URL handlers need to be identified */
-typedef struct _url_type_t url_type_t;
-struct _url_type_t {
-	gchar * regex_patern;
-	GRegex * regex_object;
-	gchar * app_id;
-	gchar * package;
-	gchar * application;
-	gchar * version;
-};
-
-#define USERNAME_REGEX  "[a-zA-Z0-9_\\-]*"
-
-/* TODO: Make these come from registrations, but this works for now */
-url_type_t url_types[] = {
-#ifdef APP_ID_TEST_URI
-	{
-		.regex_patern = "^appidtest:///",
-		.regex_object = NULL,
-		.package = "com.test.good",
-		.application = "first-listed-app",
-		.version = CURRENT,
-		.app_id = NULL
-	},
-#endif
-	/* Alarms */
-	{
-		.regex_patern = "^alarm:///",
-		.regex_object = NULL,
-		.app_id = NULL,
-		.package = "com.ubuntu.clock",
-		.application = "clock",
-		.version = CURRENT
-	},
-	/* Address Book */
-	{
-		.regex_patern = "^addressbook:///",
-		.regex_object = NULL,
-		.package = NULL, .application = NULL, .version = NULL,
-		.app_id = "address-book-app"
-	},
-	/* Calendar */
-	{
-		.regex_patern = "^calendar:///",
-		.regex_object = NULL,
-		.app_id = NULL,
-		.package = "com.ubuntu.calendar",
-		.application = "calendar",
-		.version = CURRENT
-	},
-	/* Messages */
-	{
-		.regex_patern = "^message:///",
-		.regex_object = NULL,
-		.package = NULL, .application = NULL, .version = NULL,
-		.app_id = "messaging-app"
-	},
-	/* Music */
-	{
-		.regex_patern = "^music:///",
-		.regex_object = NULL,
-		.app_id = NULL,
-		.package = "com.ubuntu.music",
-		.application = "music",
-		.version = CURRENT
-	},
-	{
-		/* TODO: This is temporary for 13.10, we expect to be smarter in the future */
-		.regex_patern = "^file:///home/" USERNAME_REGEX "/Music/",
-		.regex_object = NULL,
-		.app_id = NULL,
-		.package = "com.ubuntu.music",
-		.application = "music",
-		.version = CURRENT
-	},
-	/* Phone Numbers */
-	{
-		.regex_patern = "^tel:///[\\d\\.+x,\\(\\)-]*$",
-		.regex_object = NULL,
-		.package = NULL, .application = NULL, .version = NULL,
-		.app_id = "dialer-app"
-	},
-	/* Settings */
-	{
-		.regex_patern = "^settings:///system/",
-		.regex_object = NULL,
-		.package = NULL, .application = NULL, .version = NULL,
-		.app_id = "ubuntu-system-settings"
-	},
-	/* Video */
-	{
-		.regex_patern = "^video:///",
-		.regex_object = NULL,
-		.package = NULL, .application = NULL, .version = NULL,
-		.app_id = "mediaplayer-app"
-	},
-	{
-		/* TODO: This is temporary for 13.10, we expect to be smarter in the future */
-		.regex_patern = "^file:///home/" USERNAME_REGEX "/Videos/",
-		.regex_object = NULL,
-		.package = NULL, .application = NULL, .version = NULL,
-		.app_id = "mediaplayer-app"
-	},
-	/* Web Stuff */
-	{
-		.regex_patern = "^http://",
-		.regex_object = NULL,
-		.package = NULL, .application = NULL, .version = NULL,
-		.app_id = "webbrowser-app"
-	},
-	{
-		.regex_patern = "^https://",
-		.regex_object = NULL,
-		.package = NULL, .application = NULL, .version = NULL,
-		.app_id = "webbrowser-app"
-	}
-};
-
 /* Get a URL off of the bus */
 static gboolean
 dispatch_url_cb (GObject * skel, GDBusMethodInvocation * invocation, const gchar * url, gpointer user_data)
@@ -509,22 +398,51 @@ dispatch_url (const gchar * url)
 	}
 	g_match_info_free(appmatch);
 
-	int i;
-	for (i = 0; i < G_N_ELEMENTS(url_types); i++) {
-		if (url_types[i].regex_object == NULL) {
-			url_types[i].regex_object = g_regex_new(url_types[i].regex_patern, 0, 0, NULL);
-		}
+	/* start FIXME: These are needed work arounds until everything migrates away
+	   from them.  Ewww */
+	GMatchInfo * musicmatch = NULL;
+	if (g_regex_match(musicfilere, url, 0, &musicmatch)) {
+		gboolean retval = FALSE;
+		retval = app_id_discover("com.ubuntu.music", "music", CURRENT, url);
 
-		if (g_regex_match(url_types[i].regex_object, url, 0, NULL)) {
-			if (url_types[i].app_id != NULL) {
-				pass_url_to_app(url_types[i].app_id, url);
-			} else {
-				app_id_discover(url_types[i].package, url_types[i].application, url_types[i].version, url);
-			}
-
-			return TRUE;
-		}
+		g_match_info_free(musicmatch);
+		return retval;
 	}
+	g_match_info_free(musicmatch);
+
+	GMatchInfo * videomatch = NULL;
+	if (g_regex_match(videofilere, url, 0, &videomatch)) {
+		pass_url_to_app("mediaplayer-app", url);
+
+		g_match_info_free(videomatch);
+		return TRUE;
+	}
+	g_match_info_free(videomatch);
+	/* end FIXME: Making the ugly stop */
+
+	/* Check the URL db */
+	GMatchInfo * genericmatch = NULL;
+	if (g_regex_match(genericre, url, 0, &genericmatch)) {
+		gboolean found = FALSE;
+		gchar * protocol = g_match_info_fetch(genericmatch, 1);
+		gchar * domain = g_match_info_fetch(genericmatch, 2);
+
+		gchar * appid = url_db_find_url(urldb, protocol, domain);
+
+		if (appid != NULL) {
+			found = TRUE;
+			pass_url_to_app(appid, url);
+			g_free(appid);
+		}
+
+		g_free(protocol);
+		g_free(domain);
+
+		g_match_info_free(genericmatch);
+
+		return found;
+	}
+	g_match_info_free(genericmatch);
 
 	return FALSE;
 }
@@ -579,14 +497,23 @@ bus_got (GObject * obj, GAsyncResult * res, gpointer user_data)
 	return;
 }
 
+#define USERNAME_REGEX  "[a-zA-Z0-9_\\-]*"
+
 /* Initialize all the globals */
 gboolean
 dispatcher_init (GMainLoop * mainloop)
 {
 	cancellable = g_cancellable_new();
 
+	urldb = url_db_create_database();
+
 	applicationre = g_regex_new("^application:///([a-zA-Z0-9_\\.-]*)\\.desktop$", 0, 0, NULL);
 	appidre = g_regex_new("^appid://([a-z0-9\\.-]*)/([a-zA-Z0-9-]*)/([a-zA-Z0-9\\.-]*)$", 0, 0, NULL);
+	genericre = g_regex_new("^(.*)://([a-z0-9\\.-]*)?/?(.*)?$", 0, 0, NULL);
+
+	/* FIXME: Legacy */
+	musicfilere = g_regex_new("^file:///home/" USERNAME_REGEX "/Music/", 0, 0, NULL);
+	videofilere = g_regex_new("^file:///home/" USERNAME_REGEX "/Videos/", 0, 0, NULL);
 
 	if (g_getenv("URL_DISPATCHER_CLICK_EXEC") != NULL) {
 		click_exec = g_strdup(g_getenv("URL_DISPATCHER_CLICK_EXEC"));
@@ -610,12 +537,11 @@ dispatcher_shutdown (void)
 	g_object_unref(skel);
 	g_regex_unref(applicationre);
 	g_regex_unref(appidre);
+	g_regex_unref(genericre);
+	g_regex_unref(musicfilere); /* FIXME */
+	g_regex_unref(videofilere); /* FIXME */
 	g_free(click_exec);
-
-	int i;
-	for (i = 0; i < G_N_ELEMENTS(url_types); i++) {
-		g_clear_pointer(&url_types[i].regex_object, g_regex_unref);
-	}
+	sqlite3_close(urldb);
 
 	return TRUE;
 }

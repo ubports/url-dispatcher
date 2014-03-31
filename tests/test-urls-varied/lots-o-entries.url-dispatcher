@@ -1,0 +1,42 @@
+[
+	{
+		"protocol": "lots0",
+		"domain-suffix": "lots.com"
+	},
+	{
+		"protocol": "lots1",
+		"domain-suffix": "lots.com"
+	},
+	{
+		"protocol": "lots2",
+		"domain-suffix": "lots.com"
+	},
+	{
+		"protocol": "lots3",
+		"domain-suffix": "lots.com"
+	},
+	{
+		"protocol": "lots4",
+		"domain-suffix": "lots.com"
+	},
+	{
+		"protocol": "lots5",
+		"domain-suffix": "lots.com"
+	},
+	{
+		"protocol": "lots6",
+		"domain-suffix": "lots.com"
+	},
+	{
+		"protocol": "lots7",
+		"domain-suffix": "lots.com"
+	},
+	{
+		"protocol": "lots8",
+		"domain-suffix": "lots.com"
+	},
+	{
+		"protocol": "lots9",
+		"domain-suffix": "lots.com"
+	}
+]

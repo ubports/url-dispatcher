@@ -1,7 +1,11 @@
 
+include(UseConstantBuilder)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+
 ###########################
 # Generated Lib
 ###########################
+
 
 set(SERVICE_GENERATED_HEADERS
 service-iface.h
@@ -37,10 +41,37 @@ add_library(dispatcher-lib STATIC
 	dispatcher.c)
 
 target_link_libraries(dispatcher-lib
+	url-db-lib
 	service-generated
 	${GLIB2_LIBRARIES}
 	${GOBJECT2_LIBRARIES}
 	${GIO2_LIBRARIES}
+	${SQLITE_LIBRARIES}
+)
+
+###########################
+# URL DB Lib
+###########################
+
+set(URL_DB_SOURCES
+	url-db.c
+	url-db.h
+	create-db-sql.h
+)
+
+add_constant_template(URL_DB_SOURCES
+	create-db-sql
+	create_db_sql
+	"${CMAKE_CURRENT_SOURCE_DIR}/create-db.sql"
+)
+
+add_library(url-db-lib STATIC
+	${URL_DB_SOURCES}
+)
+
+target_link_libraries(url-db-lib
+	${GLIB2_LIBRARIES}
+	${SQLITE_LIBRARIES}
 )
 
 ###########################
@@ -56,10 +87,19 @@ set_target_properties(service-exec PROPERTIES OUTPUT_NAME "url-dispatcher")
 target_link_libraries(service-exec dispatcher-lib ${UPSTART_APP_LAUNCH_LIBRARIES})
 
 ###########################
+# Update Directory
+###########################
+
+add_executable(update-directory update-directory.c recoverable-problem.c)
+set_target_properties(update-directory PROPERTIES OUTPUT_NAME "update-directory")
+target_link_libraries(update-directory ${GIO2_LIBRARIES} ${JSONGLIB_LIBRARIES} url-db-lib)
+
+###########################
 # Installation
 ###########################
 
 install(
-  TARGETS service-exec
+  TARGETS service-exec update-directory
   RUNTIME DESTINATION "${CMAKE_INSTALL_FULL_LIBEXECDIR}/url-dispatcher"
 )
+
