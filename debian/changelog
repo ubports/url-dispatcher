@@ -1,3 +1,10 @@
+url-dispatcher (0.1+14.04.20140403-0ubuntu1) trusty; urgency=low
+
+  [ Ted Gould ]
+  * Fix cache directory permissions if they got messed up (LP: #1290997)
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Thu, 03 Apr 2014 21:17:00 +0000
+
 url-dispatcher (0.1+14.04.20140331.1-0ubuntu1) trusty; urgency=low
 
   [ Ted Gould ]
