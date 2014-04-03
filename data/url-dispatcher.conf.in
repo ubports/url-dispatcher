@@ -6,6 +6,19 @@ stop on stopping dbus
 
 respawn
 
+# Work around for: https://bugs.launchpad.net/upstart/+bug/1302117
+
+umask 0022
+
+pre-start script
+	if [ -d "$HOME/.cache/url-dispatcher" ] && [ ! -x "$HOME/.cache/url-dispatcher" ] ; then
+		echo "Fixing cache directory permissions"
+		chmod 700 "$HOME/.cache/url-dispatcher"
+	fi
+end script
+
+# end work around
+
 emits application-start
 
 exec @pkglibexecdir@/url-dispatcher
