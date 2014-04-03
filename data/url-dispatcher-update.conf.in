@@ -1,5 +1,11 @@
 description "URL Dispatcher Directory Watch"
 
+# Work around for: https://bugs.launchpad.net/upstart/+bug/1302117
+
+umask 0022
+
+# end work around
+
 start on (file FILE=~/.config/url-dispatcher/urls/*.url-dispatcher) or (file FILE=@datadir@/url-dispatcher/urls/*.url-dispatcher) or url-dispatcher-update
 
 instance $MATCH
