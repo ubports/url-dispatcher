@@ -6,6 +6,16 @@ stop on stopping dbus
 
 respawn
 
+# Seems in some cases the cache directory is getting created
+# with 600, trying to track that down, but fix it as well
+# Work around for: https://bugs.launchpad.net/ubuntu/+source/url-dispatcher/+bug/1290997
+pre-start script
+	if [ -d "$HOME/.cache/url-dispatcher" ] && [ ! -x "$HOME/.cache/url-dispatcher" ] ; then
+		echo "Fixing cache directory permissions"
+		chmod 700 "$HOME/.cache/url-dispatcher"
+	fi
+end script
+
 emits application-start
 
 exec @pkglibexecdir@/url-dispatcher
