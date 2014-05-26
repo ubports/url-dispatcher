@@ -43,7 +43,7 @@ target_link_libraries (dispatcher-test
 	dispatcher-lib
 	mock-lib
 	gtest
-	${UPSTART_APP_LAUNCH_LIBRARIES}
+	${UBUNTU_APP_LAUNCH_LIBRARIES}
 	${GTEST_LIBS})
 
 add_test (dispatcher-test dispatcher-test)
@@ -62,7 +62,7 @@ target_link_libraries (app-id-test
 	dispatcher-lib
 	mock-lib
 	gtest
-	${UPSTART_APP_LAUNCH_LIBRARIES}
+	${UBUNTU_APP_LAUNCH_LIBRARIES}
 	${GTEST_LIBS})
 
 add_test (app-id-test app-id-test)
@@ -91,7 +91,7 @@ target_link_libraries (service-test
 	dispatcher
 	gtest
 	${DBUSTEST_LIBRARIES}
-	${UPSTART_APP_LAUNCH_LIBRARIES}
+	${UBUNTU_APP_LAUNCH_LIBRARIES}
 	${GTEST_LIBS})
 
 add_test (service-test service-test)
