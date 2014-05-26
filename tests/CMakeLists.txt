@@ -25,8 +25,8 @@ add_library (gtest STATIC
 
 add_library(mock-lib STATIC
 	recoverable-problem-mock.c
-	upstart-app-launch-mock.h
-	upstart-app-launch-mock.c)
+	ubuntu-app-launch-mock.h
+	ubuntu-app-launch-mock.c)
 
 target_link_libraries(mock-lib
 	${GLIB2_LIBRARIES}
