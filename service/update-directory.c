@@ -130,7 +130,17 @@ check_file_outofdate (const gchar * filename, sqlite3 * db)
 		}
 	}
 
-	url_db_set_file_motification_time(db, filename, &filetime);
+	if (!url_db_set_file_motification_time(db, filename, &filetime)) {
+		const gchar * additional[7] = {
+			"Filename",
+			NULL,
+			NULL
+		};
+		additional[1] = filename;
+
+		report_recoverable_problem("url-dispatcher-update-sqlite-fileupdate-error", 0, TRUE, additional);
+		return FALSE;
+	}
 
 	return TRUE;
 }
