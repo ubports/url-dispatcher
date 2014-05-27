@@ -29,8 +29,8 @@ endif()
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Werror")
 
-pkg_check_modules(UPSTART_APP_LAUNCH REQUIRED upstart-app-launch-2)
-include_directories(${UPSTART_APP_LAUNCH_INCLUDE_DIRS})
+pkg_check_modules(UBUNTU_APP_LAUNCH REQUIRED ubuntu-app-launch-2)
+include_directories(${UBUNTU_APP_LAUNCH_INCLUDE_DIRS})
 
 pkg_check_modules(GLIB2 REQUIRED glib-2.0)
 include_directories(${GLIB2_INCLUDE_DIRS})

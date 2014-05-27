@@ -19,7 +19,7 @@
 #include <gio/gio.h>
 #include <gtest/gtest.h>
 #include "dispatcher.h"
-#include "upstart-app-launch-mock.h"
+#include "ubuntu-app-launch-mock.h"
 #include "url-db.h"
 
 class DispatcherTest : public ::testing::Test
@@ -64,7 +64,7 @@ class DispatcherTest : public ::testing::Test
 
 			g_main_loop_unref(mainloop);
 
-			upstart_app_launch_mock_clear_last_app_id();
+			ubuntu_app_launch_mock_clear_last_app_id();
 
 			/* let other threads settle */
 			g_usleep(500000);
@@ -84,28 +84,28 @@ TEST_F(DispatcherTest, ApplicationTest)
 {
 	/* Good sanity check */
 	dispatch_url("application:///foo.desktop");
-	ASSERT_STREQ("foo", upstart_app_launch_mock_get_last_app_id());
-	upstart_app_launch_mock_clear_last_app_id();
+	ASSERT_STREQ("foo", ubuntu_app_launch_mock_get_last_app_id());
+	ubuntu_app_launch_mock_clear_last_app_id();
 
 	/* No .desktop */
 	dispatch_url("application:///foo");
-	ASSERT_TRUE(NULL == upstart_app_launch_mock_get_last_app_id());
-	upstart_app_launch_mock_clear_last_app_id();
+	ASSERT_TRUE(NULL == ubuntu_app_launch_mock_get_last_app_id());
+	ubuntu_app_launch_mock_clear_last_app_id();
 
 	/* Missing a / */
 	dispatch_url("application://foo.desktop");
-	ASSERT_TRUE(NULL == upstart_app_launch_mock_get_last_app_id());
-	upstart_app_launch_mock_clear_last_app_id();
+	ASSERT_TRUE(NULL == ubuntu_app_launch_mock_get_last_app_id());
+	ubuntu_app_launch_mock_clear_last_app_id();
 
 	/* Good with hyphens */
 	dispatch_url("application:///my-really-cool-app.desktop");
-	ASSERT_STREQ("my-really-cool-app", upstart_app_launch_mock_get_last_app_id());
-	upstart_app_launch_mock_clear_last_app_id();
+	ASSERT_STREQ("my-really-cool-app", ubuntu_app_launch_mock_get_last_app_id());
+	ubuntu_app_launch_mock_clear_last_app_id();
 
 	/* Good Click Style */
 	dispatch_url("application:///com.test.foo_bar-app_0.3.4.desktop");
-	ASSERT_STREQ("com.test.foo_bar-app_0.3.4", upstart_app_launch_mock_get_last_app_id());
-	upstart_app_launch_mock_clear_last_app_id();
+	ASSERT_STREQ("com.test.foo_bar-app_0.3.4", ubuntu_app_launch_mock_get_last_app_id());
+	ubuntu_app_launch_mock_clear_last_app_id();
 
 	return;
 }
@@ -114,13 +114,13 @@ TEST_F(DispatcherTest, CalendarTest)
 {
 	/* Base Calendar */
 	dispatch_url("calendar:///?starttime=196311221830Z");
-	ASSERT_STREQ("com.ubuntu.calendar_calendar_9.8.2343", upstart_app_launch_mock_get_last_app_id());
-	upstart_app_launch_mock_clear_last_app_id();
+	ASSERT_STREQ("com.ubuntu.calendar_calendar_9.8.2343", ubuntu_app_launch_mock_get_last_app_id());
+	ubuntu_app_launch_mock_clear_last_app_id();
 
 	/* Two Slash, nothing else */
 	dispatch_url("calendar://");
-	ASSERT_STREQ("com.ubuntu.calendar_calendar_9.8.2343", upstart_app_launch_mock_get_last_app_id());
-	upstart_app_launch_mock_clear_last_app_id();
+	ASSERT_STREQ("com.ubuntu.calendar_calendar_9.8.2343", ubuntu_app_launch_mock_get_last_app_id());
+	ubuntu_app_launch_mock_clear_last_app_id();
 
 	return;
 }
@@ -130,13 +130,13 @@ TEST_F(DispatcherTest, FixmeTest)
 {
 	/* File Video */
 	dispatch_url("file:///home/bar/Videos/foo.mp4");
-	ASSERT_STREQ("mediaplayer-app", upstart_app_launch_mock_get_last_app_id());
-	upstart_app_launch_mock_clear_last_app_id();
+	ASSERT_STREQ("mediaplayer-app", ubuntu_app_launch_mock_get_last_app_id());
+	ubuntu_app_launch_mock_clear_last_app_id();
 
 	/* File Video */
 	dispatch_url("file:///home/bar/Music/The_Bars_Live.mp3");
-	ASSERT_STREQ("com.ubuntu.music_music_1.5.4", upstart_app_launch_mock_get_last_app_id());
-	upstart_app_launch_mock_clear_last_app_id();
+	ASSERT_STREQ("com.ubuntu.music_music_1.5.4", ubuntu_app_launch_mock_get_last_app_id());
+	ubuntu_app_launch_mock_clear_last_app_id();
 
 	return;
 }
