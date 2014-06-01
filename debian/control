@@ -15,7 +15,7 @@ Build-Depends: click-dev,
                libjson-glib-dev,
                libgtest-dev,
                libsqlite3-dev,
-               libupstart-app-launch2-dev (>= 0.3),
+               libubuntu-app-launch2-dev (>= 0.3),
                python,
                python3-dbusmock,
                sqlite3,
@@ -31,7 +31,7 @@ Package: url-dispatcher
 Architecture: any
 Multi-Arch: same
 Pre-Depends: ${misc:Pre-Depends},
-Depends: upstart-app-launch,
+Depends: ubuntu-app-launch,
          ${misc:Depends},
          ${shlibs:Depends},
 Description: service to allow sending of URLs and get handlers started

@@ -19,7 +19,7 @@
 
 #include <gio/gio.h>
 #include <json-glib/json-glib.h>
-#include <upstart-app-launch.h>
+#include <ubuntu-app-launch.h>
 #include "dispatcher.h"
 #include "service-iface.h"
 #include "recoverable-problem.h"
@@ -131,7 +131,7 @@ pass_url_to_app (const gchar * app_id, const gchar * url)
 		NULL
 	};
 
-	if (!upstart_app_launch_start_application(app_id, urls)) {
+	if (!ubuntu_app_launch_start_application(app_id, urls)) {
 		g_warning("Unable to start application '%s' with URL '%s'", app_id, url);
 	}
 
@@ -170,7 +170,7 @@ dispatch_url (const gchar * url)
 		gchar * appid = NULL;
 		gboolean retval = FALSE;
 
-		appid = upstart_app_launch_triplet_to_app_id(package, app, version);
+		appid = ubuntu_app_launch_triplet_to_app_id(package, app, version);
 		if (appid != NULL) {
 			pass_url_to_app(appid, NULL);
 			retval = TRUE;
@@ -205,7 +205,7 @@ dispatch_url (const gchar * url)
 		gboolean retval = FALSE;
 		gchar * appid = NULL;
 
-		appid = upstart_app_launch_triplet_to_app_id("com.ubuntu.music", "music", NULL);
+		appid = ubuntu_app_launch_triplet_to_app_id("com.ubuntu.music", "music", NULL);
 		if (appid != NULL) {
 			pass_url_to_app(appid, url);
 			retval = TRUE;

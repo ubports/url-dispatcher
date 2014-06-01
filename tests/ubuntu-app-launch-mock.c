@@ -15,16 +15,29 @@
  *
  */
 
-#include <glib.h>
+#include <ubuntu-app-launch.h>
+#include "ubuntu-app-launch-mock.h"
 
-#ifndef __UPSTART_APP_LAUNCH_MOCK__
-#define __UPSTART_APP_LAUNCH_MOCK__ 1
+static gchar * last_appid = NULL;
 
-G_BEGIN_DECLS
+gboolean
+ubuntu_app_launch_start_application (const gchar * appid, const gchar * const * uris)
+{
+	ubuntu_app_launch_mock_clear_last_app_id();
+	last_appid = g_strdup(appid);
+	return TRUE;
+}
 
-void upstart_app_launch_mock_clear_last_app_id (void);
-gchar * upstart_app_launch_mock_get_last_app_id (void);
+void
+ubuntu_app_launch_mock_clear_last_app_id (void)
+{
+	g_free(last_appid);
+	last_appid = NULL;
+	return;
+}
 
-G_END_DECLS
-
-#endif /* __UPSTART_APP_LAUNCH_MOCK__ */
+gchar *
+ubuntu_app_launch_mock_get_last_app_id (void)
+{
+	return last_appid;
+}

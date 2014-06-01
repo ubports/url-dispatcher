@@ -32,7 +32,7 @@ class ServiceTest : public ::testing::Test
 		GDBusConnection * bus = NULL;
 
 		virtual void SetUp() {
-			g_setenv("UPSTART_APP_LAUNCH_USE_SESSION", "1", TRUE);
+			g_setenv("UBUNTU_APP_LAUNCH_USE_SESSION", "1", TRUE);
 			g_setenv("URL_DISPATCHER_DISABLE_RECOVERABLE_ERROR", "1", TRUE);
 
 			service = dbus_test_service_new(NULL);
