@@ -55,7 +55,22 @@ each_url (JsonArray * array, guint index, JsonNode * value, gpointer user_data)
 		return;
 	}
 
-	url_db_insert_url(urldata->db, urldata->filename, protocol, suffix);
+	if (!url_db_insert_url(urldata->db, urldata->filename, protocol, suffix)) {
+		const gchar * additional[7] = {
+			"Filename",
+			NULL,
+			"Protocol",
+			NULL,
+			"Suffix",
+			NULL,
+			NULL
+		};
+		additional[1] = urldata->filename;
+		additional[3] = protocol;
+		additional[5] = suffix;
+
+		report_recoverable_problem("url-dispatcher-update-sqlite-insert-error", 0, TRUE, additional);
+	}
 }
 
 static void
@@ -115,7 +130,17 @@ check_file_outofdate (const gchar * filename, sqlite3 * db)
 		}
 	}
 
-	url_db_set_file_motification_time(db, filename, &filetime);
+	if (!url_db_set_file_motification_time(db, filename, &filetime)) {
+		const gchar * additional[7] = {
+			"Filename",
+			NULL,
+			NULL
+		};
+		additional[1] = filename;
+
+		report_recoverable_problem("url-dispatcher-update-sqlite-fileupdate-error", 0, TRUE, additional);
+		return FALSE;
+	}
 
 	return TRUE;
 }
@@ -128,6 +153,14 @@ remove_file (gpointer key, gpointer value, gpointer user_data)
 	g_debug("  Removing file: %s", filename);
 	if (!url_db_remove_file((sqlite3*)user_data, filename)) {
 		g_warning("Unable to remove file: %s", filename);
+		const gchar * additional[3] = {
+			"Filename",
+			NULL,
+			NULL
+		};
+		additional[1] = filename;
+
+		report_recoverable_problem("url-dispatcher-update-remove-file-error", 0, TRUE, additional);
 	}
 }
 
@@ -198,7 +231,7 @@ main (int argc, char * argv[])
 
 	int close_status = sqlite3_close(db);
 	if (close_status != SQLITE_OK) {
-		gchar * additional[3] = {
+		const gchar * additional[3] = {
 			"SQLiteStatus",
 			NULL,
 			NULL

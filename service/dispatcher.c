@@ -72,7 +72,7 @@ recoverable_problem_file (GObject * obj, GAsyncResult * res, gpointer user_data)
 	g_variant_unref(pid_tuple);
 
 	gchar * signature = g_strdup_printf("url-dispatcher;bad-url;%s", badurl);
-	gchar * additional[3] = {
+	const gchar * additional[3] = {
 		"BadURL",
 		badurl,
 		NULL
