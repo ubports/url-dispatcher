@@ -1,3 +1,11 @@
+url-dispatcher (0.1+14.10.20140604-0ubuntu1) utopic; urgency=low
+
+  [ Ted Gould ]
+  * Merge and review policies
+  * Recoverable errors on DB errors on update
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Wed, 04 Jun 2014 19:07:02 +0000
+
 url-dispatcher (0.1+14.10.20140601-0ubuntu1) utopic; urgency=low
 
   [ Ted Gould ]
