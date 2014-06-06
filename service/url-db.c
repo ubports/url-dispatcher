@@ -255,8 +255,6 @@ url_db_files_for_dir (sqlite3 * db, const gchar * dir)
 		dir = "";
 	}
 
-	gchar * dir_search = g_strdup_printf("%s%%", dir);
-
 	sqlite3_stmt * stmt;
 	if (sqlite3_prepare_v2(db,
 			"select name from configfiles where name like ?1",
@@ -267,6 +265,7 @@ url_db_files_for_dir (sqlite3 * db, const gchar * dir)
 		return NULL;
 	}
 
+	gchar * dir_search = g_strdup_printf("%s%%", dir);
 	sqlite3_bind_text(stmt, 1, dir_search, -1, SQLITE_TRANSIENT);
 
 	GList * filelist = NULL;
