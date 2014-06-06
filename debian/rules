@@ -5,3 +5,11 @@ export G_MESSAGES_DEBUG=all
 
 %:
 	dh $@ --fail-missing --with click
+
+override_dh_install:
+	mkdir -p debian/url-dispatcher/usr/share/apport/package-hooks/
+	install -m 644 debian/source_url-dispatcher.py debian/url-dispatcher/usr/share/apport/package-hooks/
+	mkdir -p debian/url-dispatcher/etc/apport/crashdb.conf.d/
+	install -m 644 debian/url-dispatcher-crashdb.conf debian/url-dispatcher/etc/apport/crashdb.conf.d/
+	dh_install --fail-missing
+
