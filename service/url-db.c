@@ -52,7 +52,7 @@ url_db_create_database (void)
 
 	open_status = sqlite3_open(dbfilename, &db);
 	if (open_status != SQLITE_OK) {
-		g_warning("Unable to open URL database");
+		g_warning("Unable to open URL database: %s", sqlite3_errmsg(db));
 		g_free(dbfilename);
 		if (db != NULL) {
 			sqlite3_close(db);
@@ -96,7 +96,7 @@ url_db_get_file_motification_time (sqlite3 * db, const gchar * filename, GTimeVa
 			-1, /* length */
 			&stmt,
 			NULL) != SQLITE_OK) {
-		g_warning("Unable to parse SQL to get file times");
+		g_warning("Unable to parse SQL to get file times: %s", sqlite3_errmsg(db));
 		return FALSE;
 	}
 
@@ -136,7 +136,7 @@ url_db_set_file_motification_time (sqlite3 * db, const gchar * filename, GTimeVa
 			-1, /* length */
 			&stmt,
 			NULL) != SQLITE_OK) {
-		g_warning("Unable to parse SQL to set file times");
+		g_warning("Unable to parse SQL to set file times: %s", sqlite3_errmsg(db));
 		return FALSE;
 	}
 
@@ -187,7 +187,7 @@ url_db_insert_url (sqlite3 * db, const gchar * filename, const gchar * protocol,
 	sqlite3_finalize(stmt);
 
 	if (exec_status != SQLITE_DONE) {
-		g_warning("Unable to execute insert");
+		g_warning("Unable to execute insert: %s", sqlite3_errmsg(db));
 		return FALSE;
 	}
 
@@ -210,7 +210,7 @@ url_db_find_url (sqlite3 * db, const gchar * protocol, const gchar * domainsuffi
 			-1, /* length */
 			&stmt,
 			NULL) != SQLITE_OK) {
-		g_warning("Unable to parse SQL to find url");
+		g_warning("Unable to parse SQL to find url: %s", sqlite3_errmsg(db));
 		return NULL;
 	}
 
@@ -238,7 +238,7 @@ url_db_find_url (sqlite3 * db, const gchar * protocol, const gchar * domainsuffi
 	sqlite3_finalize(stmt);
 
 	if (exec_status != SQLITE_DONE) {
-		g_warning("Unable to execute insert");
+		g_warning("Unable to execute insert: %s", sqlite3_errmsg(db));
 		g_free(output);
 		return NULL;
 	}
@@ -261,7 +261,7 @@ url_db_files_for_dir (sqlite3 * db, const gchar * dir)
 			-1, /* length */
 			&stmt,
 			NULL) != SQLITE_OK) {
-		g_warning("Unable to parse SQL to find files");
+		g_warning("Unable to parse SQL to find files: %s", sqlite3_errmsg(db));
 		return NULL;
 	}
 
@@ -279,7 +279,7 @@ url_db_files_for_dir (sqlite3 * db, const gchar * dir)
 	g_free(dir_search);
 
 	if (exec_status != SQLITE_DONE) {
-		g_warning("Unable to execute insert");
+		g_warning("Unable to execute insert: %s", sqlite3_errmsg(db));
 		g_list_free_full(filelist, g_free);
 		return NULL;
 	}
@@ -298,7 +298,7 @@ url_db_remove_file (sqlite3 * db, const gchar * path)
 	/* Start a transaction so the database doesn't end up
 	   in an inconsistent state */
 	if (sqlite3_exec(db, "begin", NULL, NULL, NULL) != SQLITE_OK) {
-		g_warning("Unable to start transaction to delete");
+		g_warning("Unable to start transaction to delete: %s", sqlite3_errmsg(db));
 		return FALSE;
 	}
 
@@ -309,7 +309,7 @@ url_db_remove_file (sqlite3 * db, const gchar * path)
 			-1, /* length */
 			&stmt,
 			NULL) != SQLITE_OK) {
-		g_warning("Unable to parse SQL to remove urls");
+		g_warning("Unable to parse SQL to remove urls: %s", sqlite3_errmsg(db));
 		return FALSE;
 	}
 
@@ -322,7 +322,7 @@ url_db_remove_file (sqlite3 * db, const gchar * path)
 	sqlite3_finalize(stmt);
 
 	if (exec_status != SQLITE_DONE) {
-		g_warning("Unable to execute removal of URLs");
+		g_warning("Unable to execute removal of URLs: %s", sqlite3_errmsg(db));
 		return FALSE;
 	}
 
@@ -334,7 +334,7 @@ url_db_remove_file (sqlite3 * db, const gchar * path)
 			-1, /* length */
 			&stmt,
 			NULL) != SQLITE_OK) {
-		g_warning("Unable to parse SQL to remove urls");
+		g_warning("Unable to parse SQL to remove urls: %s", sqlite3_errmsg(db));
 		return FALSE;
 	}
 
@@ -347,13 +347,13 @@ url_db_remove_file (sqlite3 * db, const gchar * path)
 	sqlite3_finalize(stmt);
 
 	if (exec_status != SQLITE_DONE) {
-		g_warning("Unable to execute removal of file");
+		g_warning("Unable to execute removal of file: %s", sqlite3_errmsg(db));
 		return FALSE;
 	}
 
 	/* Commit the full transaction */
 	if (sqlite3_exec(db, "commit", NULL, NULL, NULL) != SQLITE_OK) {
-		g_warning("Unable to commit transaction to delete");
+		g_warning("Unable to commit transaction to delete: %s", sqlite3_errmsg(db));
 		return FALSE;
 	}
 
