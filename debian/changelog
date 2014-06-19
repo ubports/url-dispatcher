@@ -1,3 +1,10 @@
+url-dispatcher (0.1+14.10.20140619-0ubuntu1) utopic; urgency=low
+
+  [ Ted Gould ]
+  * Improving error messages and collecting more data
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Thu, 19 Jun 2014 02:43:30 +0000
+
 url-dispatcher (0.1+14.10.20140604-0ubuntu1) utopic; urgency=low
 
   [ Ted Gould ]
