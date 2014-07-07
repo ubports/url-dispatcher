@@ -9,5 +9,6 @@ umask 0022
 start on (file FILE=~/.config/url-dispatcher/urls/*.url-dispatcher) or (file FILE=@datadir@/url-dispatcher/urls/*.url-dispatcher) or url-dispatcher-update
 
 instance $MATCH
+task
 
 exec @pkglibexecdir@/update-directory "$MATCH"

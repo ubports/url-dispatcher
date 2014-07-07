@@ -19,6 +19,6 @@ pre-start script
 end script
 
 script
-	initctl emit --no-wait url-dispatcher-update "MATCH=$HOME/.config/url-dispatcher/urls/"
-	initctl emit --no-wait url-dispatcher-update "MATCH=@datadir@/url-dispatcher/urls/"
+	initctl emit url-dispatcher-update "MATCH=$HOME/.config/url-dispatcher/urls/"
+	initctl emit url-dispatcher-update "MATCH=@datadir@/url-dispatcher/urls/"
 end script
