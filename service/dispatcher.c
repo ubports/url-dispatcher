@@ -148,7 +148,13 @@ dispatch_url_cb (GObject * skel, GDBusMethodInvocation * invocation, const gchar
 		return bad_url(invocation, url);
 	}
 
-	if (dispatch_url(url)) {
+	gchar * appid = NULL;
+	const gchar * outurl = NULL;
+
+	if (dispatch_url(url, &appid, &outurl)) {
+		pass_url_to_app(appid, outurl);
+		g_free(appid);
+
 		g_dbus_method_invocation_return_value(invocation, NULL);
 	} else {
 		bad_url(invocation, url);
@@ -159,7 +165,7 @@ dispatch_url_cb (GObject * skel, GDBusMethodInvocation * invocation, const gchar
 
 /* The core of the URL handling */
 gboolean
-dispatch_url (const gchar * url)
+dispatch_url (const gchar * url, gchar ** out_appid, const gchar ** out_url)
 {
 	/* Special case the app id */
 	GMatchInfo * appidmatch = NULL;
@@ -167,16 +173,13 @@ dispatch_url (const gchar * url)
 		gchar * package = g_match_info_fetch(appidmatch, 1);
 		gchar * app = g_match_info_fetch(appidmatch, 2);
 		gchar * version = g_match_info_fetch(appidmatch, 3);
-		gchar * appid = NULL;
 		gboolean retval = FALSE;
 
-		appid = ubuntu_app_launch_triplet_to_app_id(package, app, version);
-		if (appid != NULL) {
-			pass_url_to_app(appid, NULL);
+		*out_appid = ubuntu_app_launch_triplet_to_app_id(package, app, version);
+		if (*out_appid != NULL) {
 			retval = TRUE;
 		}
 
-		g_free(appid);
 		g_free(package);
 		g_free(app);
 		g_free(version);
@@ -188,10 +191,8 @@ dispatch_url (const gchar * url)
 	/* Special case the application URL */
 	GMatchInfo * appmatch = NULL;
 	if (g_regex_match(applicationre, url, 0, &appmatch)) {
-		gchar * appid = g_match_info_fetch(appmatch, 1);
-		pass_url_to_app(appid, NULL);
+		*out_appid = g_match_info_fetch(appmatch, 1);
 
-		g_free(appid);
 		g_match_info_free(appmatch);
 
 		return TRUE;
@@ -203,15 +204,13 @@ dispatch_url (const gchar * url)
 	GMatchInfo * musicmatch = NULL;
 	if (g_regex_match(musicfilere, url, 0, &musicmatch)) {
 		gboolean retval = FALSE;
-		gchar * appid = NULL;
 
-		appid = ubuntu_app_launch_triplet_to_app_id("com.ubuntu.music", "music", NULL);
-		if (appid != NULL) {
-			pass_url_to_app(appid, url);
+		*out_appid = ubuntu_app_launch_triplet_to_app_id("com.ubuntu.music", "music", NULL);
+		if (*out_appid != NULL) {
+			*out_url = url;
 			retval = TRUE;
 		}
 
-		g_free(appid);
 		g_match_info_free(musicmatch);
 		return retval;
 	}
@@ -219,7 +218,8 @@ dispatch_url (const gchar * url)
 
 	GMatchInfo * videomatch = NULL;
 	if (g_regex_match(videofilere, url, 0, &videomatch)) {
-		pass_url_to_app("mediaplayer-app", url);
+		*out_appid = g_strdup("mediaplayer-app");
+		*out_url = url;
 
 		g_match_info_free(videomatch);
 		return TRUE;
@@ -234,12 +234,11 @@ dispatch_url (const gchar * url)
 		gchar * protocol = g_match_info_fetch(genericmatch, 1);
 		gchar * domain = g_match_info_fetch(genericmatch, 2);
 
-		gchar * appid = url_db_find_url(urldb, protocol, domain);
+		*out_appid = url_db_find_url(urldb, protocol, domain);
 
-		if (appid != NULL) {
+		if (*out_appid != NULL) {
 			found = TRUE;
-			pass_url_to_app(appid, url);
-			g_free(appid);
+			*out_url = url;
 		}
 
 		g_free(protocol);
