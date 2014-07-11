@@ -163,6 +163,31 @@ dispatch_url_cb (GObject * skel, GDBusMethodInvocation * invocation, const gchar
 	return TRUE;
 }
 
+/* Test a URL to find it's AppID */
+static gboolean
+test_url_cb (GObject * skel, GDBusMethodInvocation * invocation, const gchar * url, gpointer user_data)
+{
+	g_debug("Testing URL: %s", url);
+
+	if (url == NULL || url[0] == '\0') {
+		return bad_url(invocation, url);
+	}
+
+	gchar * appid = NULL;
+	const gchar * outurl = NULL;
+
+	if (dispatch_url(url, &appid, &outurl)) {
+		GVariant * vappid = g_variant_new_take_string(appid);
+		GVariant * tuple = g_variant_new_tuple(&vappid, 1);
+
+		g_dbus_method_invocation_return_value(invocation, tuple);
+	} else {
+		bad_url(invocation, url);
+	}
+
+	return TRUE;
+}
+
 /* The core of the URL handling */
 gboolean
 dispatch_url (const gchar * url, gchar ** out_appid, const gchar ** out_url)
@@ -325,6 +350,7 @@ dispatcher_init (GMainLoop * mainloop)
 
 	skel = service_iface_com_canonical_urldispatcher_skeleton_new();
 	g_signal_connect(skel, "handle-dispatch-url", G_CALLBACK(dispatch_url_cb), NULL);
+	g_signal_connect(skel, "handle-test-url", G_CALLBACK(test_url_cb), NULL);
 
 	return TRUE;
 }
