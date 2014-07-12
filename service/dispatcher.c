@@ -121,8 +121,8 @@ bad_url (GDBusMethodInvocation * invocation, const gchar * url)
 }
 
 /* Handles taking an application and an URL and sending them to Upstart */
-static void
-pass_url_to_app (const gchar * app_id, const gchar * url)
+gboolean
+dispatcher_send_to_app (const gchar * app_id, const gchar * url)
 {
 	g_debug("Emitting 'application-start' for APP_ID='%s' and URLS='%s'", app_id, url);
 
@@ -135,7 +135,7 @@ pass_url_to_app (const gchar * app_id, const gchar * url)
 		g_warning("Unable to start application '%s' with URL '%s'", app_id, url);
 	}
 
-	return;
+	return TRUE;
 }
 
 /* Get a URL off of the bus */
@@ -152,7 +152,7 @@ dispatch_url_cb (GObject * skel, GDBusMethodInvocation * invocation, const gchar
 	const gchar * outurl = NULL;
 
 	if (dispatcher_url_to_appid(url, &appid, &outurl)) {
-		pass_url_to_app(appid, outurl);
+		dispatcher_send_to_app(appid, outurl);
 		g_free(appid);
 
 		g_dbus_method_invocation_return_value(invocation, NULL);
