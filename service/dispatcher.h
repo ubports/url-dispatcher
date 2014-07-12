@@ -26,7 +26,7 @@ G_BEGIN_DECLS
 
 gboolean dispatcher_init (GMainLoop * mainloop);
 gboolean dispatcher_shutdown (void);
-gboolean dispatch_url (const gchar * url, gchar ** out_appid, const gchar ** out_url);
+gboolean dispatcher_url_to_appid (const gchar * url, gchar ** out_appid, const gchar ** out_url);
 
 G_END_DECLS
 

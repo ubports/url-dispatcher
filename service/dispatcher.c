@@ -151,7 +151,7 @@ dispatch_url_cb (GObject * skel, GDBusMethodInvocation * invocation, const gchar
 	gchar * appid = NULL;
 	const gchar * outurl = NULL;
 
-	if (dispatch_url(url, &appid, &outurl)) {
+	if (dispatcher_url_to_appid(url, &appid, &outurl)) {
 		pass_url_to_app(appid, outurl);
 		g_free(appid);
 
@@ -176,7 +176,7 @@ test_url_cb (GObject * skel, GDBusMethodInvocation * invocation, const gchar * u
 	gchar * appid = NULL;
 	const gchar * outurl = NULL;
 
-	if (dispatch_url(url, &appid, &outurl)) {
+	if (dispatcher_url_to_appid(url, &appid, &outurl)) {
 		GVariant * vappid = g_variant_new_take_string(appid);
 		GVariant * tuple = g_variant_new_tuple(&vappid, 1);
 
@@ -190,7 +190,7 @@ test_url_cb (GObject * skel, GDBusMethodInvocation * invocation, const gchar * u
 
 /* The core of the URL handling */
 gboolean
-dispatch_url (const gchar * url, gchar ** out_appid, const gchar ** out_url)
+dispatcher_url_to_appid (const gchar * url, gchar ** out_appid, const gchar ** out_url)
 {
 	/* Special case the app id */
 	GMatchInfo * appidmatch = NULL;
