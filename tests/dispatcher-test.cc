@@ -82,28 +82,36 @@ class DispatcherTest : public ::testing::Test
 
 TEST_F(DispatcherTest, ApplicationTest)
 {
+	gchar * out_appid = NULL;
+	const gchar * out_url = NULL;
+
 	/* Good sanity check */
-	dispatch_url("application:///foo.desktop");
+	dispatcher_url_to_appid("application:///foo.desktop", &out_appid, &out_url);
+	dispatcher_send_to_app(out_appid, out_url);
 	ASSERT_STREQ("foo", ubuntu_app_launch_mock_get_last_app_id());
 	ubuntu_app_launch_mock_clear_last_app_id();
 
 	/* No .desktop */
-	dispatch_url("application:///foo");
+	dispatcher_url_to_appid("application:///foo", &out_appid, &out_url);
+	dispatcher_send_to_app(out_appid, out_url);
 	ASSERT_TRUE(NULL == ubuntu_app_launch_mock_get_last_app_id());
 	ubuntu_app_launch_mock_clear_last_app_id();
 
 	/* Missing a / */
-	dispatch_url("application://foo.desktop");
+	dispatcher_url_to_appid("application://foo.desktop", &out_appid, &out_url);
+	dispatcher_send_to_app(out_appid, out_url);
 	ASSERT_TRUE(NULL == ubuntu_app_launch_mock_get_last_app_id());
 	ubuntu_app_launch_mock_clear_last_app_id();
 
 	/* Good with hyphens */
-	dispatch_url("application:///my-really-cool-app.desktop");
+	dispatcher_url_to_appid("application:///my-really-cool-app.desktop", &out_appid, &out_url);
+	dispatcher_send_to_app(out_appid, out_url);
 	ASSERT_STREQ("my-really-cool-app", ubuntu_app_launch_mock_get_last_app_id());
 	ubuntu_app_launch_mock_clear_last_app_id();
 
 	/* Good Click Style */
-	dispatch_url("application:///com.test.foo_bar-app_0.3.4.desktop");
+	dispatcher_url_to_appid("application:///com.test.foo_bar-app_0.3.4.desktop", &out_appid, &out_url);
+	dispatcher_send_to_app(out_appid, out_url);
 	ASSERT_STREQ("com.test.foo_bar-app_0.3.4", ubuntu_app_launch_mock_get_last_app_id());
 	ubuntu_app_launch_mock_clear_last_app_id();
 
@@ -112,13 +120,18 @@ TEST_F(DispatcherTest, ApplicationTest)
 
 TEST_F(DispatcherTest, CalendarTest)
 {
+	gchar * out_appid = NULL;
+	const gchar * out_url = NULL;
+
 	/* Base Calendar */
-	dispatch_url("calendar:///?starttime=196311221830Z");
+	dispatcher_url_to_appid("calendar:///?starttime=196311221830Z", &out_appid, &out_url);
+	dispatcher_send_to_app(out_appid, out_url);
 	ASSERT_STREQ("com.ubuntu.calendar_calendar_9.8.2343", ubuntu_app_launch_mock_get_last_app_id());
 	ubuntu_app_launch_mock_clear_last_app_id();
 
 	/* Two Slash, nothing else */
-	dispatch_url("calendar://");
+	dispatcher_url_to_appid("calendar://", &out_appid, &out_url);
+	dispatcher_send_to_app(out_appid, out_url);
 	ASSERT_STREQ("com.ubuntu.calendar_calendar_9.8.2343", ubuntu_app_launch_mock_get_last_app_id());
 	ubuntu_app_launch_mock_clear_last_app_id();
 
@@ -128,13 +141,18 @@ TEST_F(DispatcherTest, CalendarTest)
 /* FIXME: These should go away */
 TEST_F(DispatcherTest, FixmeTest)
 {
+	gchar * out_appid = NULL;
+	const gchar * out_url = NULL;
+
 	/* File Video */
-	dispatch_url("file:///home/bar/Videos/foo.mp4");
+	dispatcher_url_to_appid("file:///home/bar/Videos/foo.mp4", &out_appid, &out_url);
+	dispatcher_send_to_app(out_appid, out_url);
 	ASSERT_STREQ("mediaplayer-app", ubuntu_app_launch_mock_get_last_app_id());
 	ubuntu_app_launch_mock_clear_last_app_id();
 
 	/* File Video */
-	dispatch_url("file:///home/bar/Music/The_Bars_Live.mp3");
+	dispatcher_url_to_appid("file:///home/bar/Music/The_Bars_Live.mp3", &out_appid, &out_url);
+	dispatcher_send_to_app(out_appid, out_url);
 	ASSERT_STREQ("com.ubuntu.music_music_1.5.4", ubuntu_app_launch_mock_get_last_app_id());
 	ubuntu_app_launch_mock_clear_last_app_id();
 
