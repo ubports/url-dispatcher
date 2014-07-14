@@ -109,3 +109,45 @@ url_dispatch_send (const gchar * url, URLDispatchCallback cb, gpointer user_data
 
 	return;
 }
+
+gchar *
+url_dispatcher_url_appid (const gchar * url)
+{
+	GError * error = NULL;
+	GDBusConnection * bus = g_bus_get_sync(G_BUS_TYPE_SESSION, NULL, &error);
+
+	if (error != NULL) {
+		g_warning("Unable to get session bus: %s", error->message);
+		g_error_free(error);
+		return NULL;
+	}
+
+	GVariant * retval = NULL;
+	retval = g_dbus_connection_call_sync(bus,
+	                                     "com.canonical.URLDispatcher",
+	                                     "/com/canonical/URLDispatcher",
+	                                     "com.canonical.URLDispatcher",
+	                                     "TestURL",
+	                                     g_variant_new("(s)", url),
+	                                     G_VARIANT_TYPE("(s)"),
+	                                     G_DBUS_CALL_FLAGS_NO_AUTO_START,
+	                                     -1, /* timeout */
+	                                     NULL, /* cancelable */
+	                                     &error);
+
+	if (error != NULL) {
+		g_warning("Unable to test URL with URL Dispatcher: %s", error->message);
+		g_error_free(error);
+		g_object_unref(bus);
+		return NULL;
+	}
+
+	GVariant * varstr = g_variant_get_child_value(retval, 0);
+	gchar * appid = g_variant_dup_string(varstr, NULL);
+	g_variant_unref(varstr);
+	g_variant_unref(retval);
+
+	g_object_unref(bus);
+
+	return appid;
+}
