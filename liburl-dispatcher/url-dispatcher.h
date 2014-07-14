@@ -30,7 +30,7 @@ void   url_dispatch_send    (const gchar *         url,
                              URLDispatchCallback   cb,
                              gpointer              user_data);
 
-gchar * url_dispatcher_url_appid (const gchar *    url);
+gchar * url_dispatch_url_appid (const gchar *    url);
 
 G_END_DECLS
 
