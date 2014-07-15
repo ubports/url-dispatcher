@@ -3,6 +3,7 @@
 	<interface name="com.canonical.URLDispatcher">
 		<method name="DispatchURL">
 			<arg type="s" name="url" direction="in" />
+			<arg type="s" name="package" direction="in" />
 		</method>
 		<method name="TestURL">
 			<arg type="as" name="urls" direction="in" />
