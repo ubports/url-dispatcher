@@ -125,19 +125,3 @@ TEST_F(DispatcherTest, CalendarTest)
 	return;
 }
 
-/* FIXME: These should go away */
-TEST_F(DispatcherTest, FixmeTest)
-{
-	/* File Video */
-	dispatch_url("file:///home/bar/Videos/foo.mp4");
-	ASSERT_STREQ("mediaplayer-app", ubuntu_app_launch_mock_get_last_app_id());
-	ubuntu_app_launch_mock_clear_last_app_id();
-
-	/* File Video */
-	dispatch_url("file:///home/bar/Music/The_Bars_Live.mp3");
-	ASSERT_STREQ("com.ubuntu.music_music_1.5.4", ubuntu_app_launch_mock_get_last_app_id());
-	ubuntu_app_launch_mock_clear_last_app_id();
-
-	return;
-}
-
