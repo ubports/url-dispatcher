@@ -132,3 +132,15 @@ target_link_libraries (url-db-test
 
 add_test (url-db-test url-db-test)
 
+###########################
+# fake url dispatcher
+###########################
+
+set(INSTALL_DIR url_dispatcher_testability)
+
+execute_process(COMMAND python3 -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())"
+    OUTPUT_VARIABLE PYTHON_PACKAGE_DIR OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+install(DIRECTORY ${INSTALL_DIR}
+    DESTINATION ${PYTHON_PACKAGE_DIR}
+)

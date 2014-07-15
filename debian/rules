@@ -13,3 +13,5 @@ override_dh_install:
 	install -m 644 debian/url-dispatcher-crashdb.conf debian/url-dispatcher/etc/apport/crashdb.conf.d/
 	dh_install --fail-missing
 
+override_dh_auto_test:
+	dbus-launch --exit-with-session nosetests3 tests/url_dispatcher_testability
