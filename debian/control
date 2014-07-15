@@ -19,6 +19,7 @@ Build-Depends: click-dev,
                python,
                python3-dbusmock,
                python3-nose,
+               python3-testtools,
                sqlite3,
 Standards-Version: 3.9.4
 Homepage: http://launchpad.net/url-dispatcher
