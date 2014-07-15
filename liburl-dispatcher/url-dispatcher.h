@@ -26,11 +26,16 @@ G_BEGIN_DECLS
 
 typedef void (*URLDispatchCallback) (const gchar * url, gboolean success, gpointer user_data);
 
-void   url_dispatch_send    (const gchar *         url,
-                             URLDispatchCallback   cb,
-                             gpointer              user_data);
+void       url_dispatch_send            (const gchar *         url,
+                                         URLDispatchCallback   cb,
+                                         gpointer              user_data);
 
-gchar ** url_dispatch_url_appid (const gchar **   urls);
+void       url_dispatch_send_restricted (const gchar *         url,
+                                         const gchar *         package,
+                                         URLDispatchCallback   cb,
+                                         gpointer              user_data);
+
+gchar **   url_dispatch_url_appid       (const gchar **        urls);
 
 G_END_DECLS
 
