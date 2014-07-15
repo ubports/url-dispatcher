@@ -44,9 +44,9 @@ class LibTest : public ::testing::Test
 
 			dbus_test_dbus_mock_object_add_method(mock, obj,
 				"TestURL",
-				G_VARIANT_TYPE_STRING,
-				G_VARIANT_TYPE_STRING,
-				"ret = 'appid'", /* python */
+				G_VARIANT_TYPE("as"),
+				G_VARIANT_TYPE("as"),
+				"ret = ['appid']", /* python */
 				NULL); /* error */
 
 			dbus_test_service_add_task(service, DBUS_TEST_TASK(mock));
@@ -102,17 +102,23 @@ TEST_F(LibTest, BaseTest) {
 }
 
 TEST_F(LibTest, TestTest) {
-	gchar * appid = url_dispatch_url_appid("foo://bar/barish");
+	const gchar * urls[2] = {
+		"foo://bar/barish",
+		NULL
+	};
 
-	EXPECT_STREQ("appid", appid);
-	g_free(appid);
+	gchar ** appids = url_dispatch_url_appid(urls);
+
+	EXPECT_EQ(1, g_strv_length(appids));
+	EXPECT_STREQ("appid", appids[0]);
+	g_strfreev(appids);
 
 	guint callslen = 0;
 	const DbusTestDbusMockCall * calls = dbus_test_dbus_mock_object_get_method_calls(mock, obj, "TestURL", &callslen, NULL);
 
 	// ASSERT_NE(calls, nullptr);
 	ASSERT_EQ(callslen, 1);
-	GVariant * check = g_variant_new_parsed("('foo://bar/barish',)");
+	GVariant * check = g_variant_new_parsed("(['foo://bar/barish'],)");
 	g_variant_ref_sink(check);
 	ASSERT_TRUE(g_variant_equal(calls->params, check));
 	g_variant_unref(check);
