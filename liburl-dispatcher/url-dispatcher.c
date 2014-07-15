@@ -110,8 +110,8 @@ url_dispatch_send (const gchar * url, URLDispatchCallback cb, gpointer user_data
 	return;
 }
 
-gchar *
-url_dispatch_url_appid (const gchar * url)
+gchar **
+url_dispatch_url_appid (const gchar ** urls)
 {
 	GError * error = NULL;
 	GDBusConnection * bus = g_bus_get_sync(G_BUS_TYPE_SESSION, NULL, &error);
@@ -122,14 +122,17 @@ url_dispatch_url_appid (const gchar * url)
 		return NULL;
 	}
 
+	GVariant * vurls = g_variant_new_strv(urls, -1);
+	GVariant * vparam = g_variant_new_tuple(&vurls, 1);
+
 	GVariant * retval = NULL;
 	retval = g_dbus_connection_call_sync(bus,
 	                                     "com.canonical.URLDispatcher",
 	                                     "/com/canonical/URLDispatcher",
 	                                     "com.canonical.URLDispatcher",
 	                                     "TestURL",
-	                                     g_variant_new("(s)", url),
-	                                     G_VARIANT_TYPE("(s)"),
+	                                     vparam,
+	                                     G_VARIANT_TYPE("(as)"),
 	                                     G_DBUS_CALL_FLAGS_NO_AUTO_START,
 	                                     -1, /* timeout */
 	                                     NULL, /* cancelable */
@@ -143,11 +146,11 @@ url_dispatch_url_appid (const gchar * url)
 	}
 
 	GVariant * varstr = g_variant_get_child_value(retval, 0);
-	gchar * appid = g_variant_dup_string(varstr, NULL);
+	gchar ** appids = g_variant_dup_strv(varstr, NULL);
 	g_variant_unref(varstr);
 	g_variant_unref(retval);
 
 	g_object_unref(bus);
 
-	return appid;
+	return appids;
 }

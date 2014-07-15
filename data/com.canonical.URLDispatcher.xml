@@ -5,8 +5,8 @@
 			<arg type="s" name="url" direction="in" />
 		</method>
 		<method name="TestURL">
-			<arg type="s" name="url" direction="in" />
-			<arg type="s" name="appid" direction="out" />
+			<arg type="as" name="urls" direction="in" />
+			<arg type="as" name="appids" direction="out" />
 		</method>
 	</interface>
 </node>
