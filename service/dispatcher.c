@@ -165,25 +165,40 @@ dispatch_url_cb (GObject * skel, GDBusMethodInvocation * invocation, const gchar
 
 /* Test a URL to find it's AppID */
 static gboolean
-test_url_cb (GObject * skel, GDBusMethodInvocation * invocation, const gchar * url, gpointer user_data)
+test_url_cb (GObject * skel, GDBusMethodInvocation * invocation, const gchar * const * urls, gpointer user_data)
 {
-	g_debug("Testing URL: %s", url);
-
-	if (url == NULL || url[0] == '\0') {
-		return bad_url(invocation, url);
+	if (urls == NULL || urls[0] == NULL || urls[0][0] == '\0') {
+		/* Right off the bat, let's deal with these */
+		return bad_url(invocation, NULL);
 	}
 
-	gchar * appid = NULL;
-	const gchar * outurl = NULL;
+	GVariantBuilder builder;
+	g_variant_builder_init(&builder, G_VARIANT_TYPE_ARRAY);
 
-	if (dispatcher_url_to_appid(url, &appid, &outurl)) {
-		GVariant * vappid = g_variant_new_take_string(appid);
-		GVariant * tuple = g_variant_new_tuple(&vappid, 1);
+	const gchar * url;
+	for (url = urls[0]; url != NULL; url++) {
+		g_debug("Testing URL: %s", url);
 
-		g_dbus_method_invocation_return_value(invocation, tuple);
-	} else {
-		bad_url(invocation, url);
+		if (url == NULL || url[0] == '\0') {
+			g_variant_builder_clear(&builder);
+			return bad_url(invocation, url);
+		}
+
+		gchar * appid = NULL;
+		const gchar * outurl = NULL;
+
+		if (dispatcher_url_to_appid(url, &appid, &outurl)) {
+			GVariant * vappid = g_variant_new_take_string(appid);
+			g_variant_builder_add_value(&builder, vappid);
+		} else {
+			g_variant_builder_clear(&builder);
+			return bad_url(invocation, url);
+		}
 	}
+
+	GVariant * varray = g_variant_builder_end(&builder);
+	GVariant * tuple = g_variant_new_tuple(&varray, 1);
+	g_dbus_method_invocation_return_value(invocation, tuple);
 
 	return TRUE;
 }
