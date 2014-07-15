@@ -24,6 +24,7 @@ struct _dispatch_data_t {
 	URLDispatchCallback cb;
 	gpointer user_data;
 	gchar * url;
+	gchar * package;
 };
 
 static void
@@ -52,6 +53,7 @@ url_dispatched (GObject * obj, GAsyncResult * res, gpointer user_data)
 
 	g_clear_object(&dispatch_data->proxy);
 	g_free(dispatch_data->url);
+	g_free(dispatch_data->package);
 	g_free(dispatch_data);
 
 	return;
@@ -81,6 +83,7 @@ got_proxy (GObject * obj, GAsyncResult * res, gpointer user_data)
 	service_iface_com_canonical_urldispatcher_call_dispatch_url(
 		dispatch_data->proxy,
 		dispatch_data->url,
+		dispatch_data->package ? dispatch_data->package : NULL,
 		NULL, /* cancelable */
 		url_dispatched,
 		dispatch_data);
@@ -91,11 +94,18 @@ got_proxy (GObject * obj, GAsyncResult * res, gpointer user_data)
 void
 url_dispatch_send (const gchar * url, URLDispatchCallback cb, gpointer user_data)
 {
+	return url_dispatch_send_restricted(url, NULL, cb, user_data);
+}
+
+void
+url_dispatch_send_restricted (const gchar * url, const gchar * package, URLDispatchCallback cb, gpointer user_data)
+{
 	dispatch_data_t * dispatch_data = g_new0(dispatch_data_t, 1);
 
 	dispatch_data->cb = cb;
 	dispatch_data->user_data = user_data;
 	dispatch_data->url = g_strdup(url);
+	dispatch_data->package = g_strdup(package);
 
 	service_iface_com_canonical_urldispatcher_proxy_new_for_bus(
 		G_BUS_TYPE_SESSION,
