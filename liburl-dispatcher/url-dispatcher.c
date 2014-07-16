@@ -83,7 +83,7 @@ got_proxy (GObject * obj, GAsyncResult * res, gpointer user_data)
 	service_iface_com_canonical_urldispatcher_call_dispatch_url(
 		dispatch_data->proxy,
 		dispatch_data->url,
-		dispatch_data->package ? dispatch_data->package : NULL,
+		dispatch_data->package ? dispatch_data->package : "",
 		NULL, /* cancelable */
 		url_dispatched,
 		dispatch_data);
