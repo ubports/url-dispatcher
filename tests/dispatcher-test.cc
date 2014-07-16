@@ -118,6 +118,21 @@ TEST_F(DispatcherTest, ApplicationTest)
 	return;
 }
 
+TEST_F(DispatcherTest, RestrictionTest)
+{
+	/* NULL cases */
+	EXPECT_EQ(false, dispatcher_appid_restrict("foo-bar", NULL));
+	EXPECT_EQ(false, dispatcher_appid_restrict("foo-bar", ""));
+	/* Legacy case, full match */
+	EXPECT_EQ(false, dispatcher_appid_restrict("foo-bar", "foo-bar"));
+	EXPECT_EQ(false, dispatcher_appid_restrict("foo_bar", "foo_bar"));
+	EXPECT_EQ(true,  dispatcher_appid_restrict("foo_bar", "foo-bar"));
+	/* Click case, match package */
+	EXPECT_EQ(false, dispatcher_appid_restrict("com.test.foo_bar-app_0.3.4", "com.test.foo"));
+	EXPECT_EQ(true,  dispatcher_appid_restrict("com.test.foo_bar-app_0.3.4", "com.test.bar"));
+	EXPECT_EQ(true,  dispatcher_appid_restrict("com.test.foo_bar-app", "com.test.bar"));
+}
+
 TEST_F(DispatcherTest, CalendarTest)
 {
 	gchar * out_appid = NULL;
