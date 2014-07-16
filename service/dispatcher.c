@@ -156,47 +156,61 @@ dispatcher_send_to_app (const gchar * app_id, const gchar * url)
 	return TRUE;
 }
 
+/* Whether we should restrict this appid based on the package name */
+gboolean
+dispatcher_appid_restrict (const gchar * appid, const gchar * package)
+{
+	if (package == NULL || package[0] == '\0') {
+		return FALSE;
+	}
+
+	gchar * appackage = NULL;
+	gboolean match = FALSE;
+
+	if (ubuntu_app_launch_app_id_parse(appid, &appackage, NULL, NULL)) {
+		/* Click application */
+		match = (g_strcmp0(package, appackage) == 0);
+	} else {
+		/* Legacy application */
+		match = (g_strcmp0(package, appid) == 0);
+	}
+
+	g_free(appackage);
+
+	return !match;
+}
+
 /* Get a URL off of the bus */
 static gboolean
 dispatch_url_cb (GObject * skel, GDBusMethodInvocation * invocation, const gchar * url, const gchar * package, gpointer user_data)
 {
-	gboolean restricted = (package != NULL && package[0] != '\0');
-
-	if (!restricted) {
+	/* Nice debugging message depending on whether the @package variable
+	   is valid from DBus */
+	if (package == NULL || package[0] == '\0') {
 		g_debug("Dispatching URL: %s", url);
 	} else {
 		g_debug("Dispatching Restricted URL: %s", url);
 		g_debug("Package restriction: %s", package);
 	}
 
+	/* Check to ensure the URL is valid coming from DBus */
 	if (url == NULL || url[0] == '\0') {
 		return bad_url(invocation, url);
 	}
 
+	/* Actually do it */
 	gchar * appid = NULL;
 	const gchar * outurl = NULL;
 
+	/* Discover the AppID */
 	if (!dispatcher_url_to_appid(url, &appid, &outurl)) {
 		return bad_url(invocation, url);
 	}
 
-	if (restricted) {
-		gchar * appackage = NULL;
-		gboolean match = FALSE;
-
-		if (ubuntu_app_launch_app_id_parse(appid, &appackage, NULL, NULL)) {
-			/* Click application */
-			match = (g_strcmp0(package, appackage) == 0);
-		} else {
-			/* Legacy application */
-			match = (g_strcmp0(package, appid) == 0);
-		}
-
-		g_free(appackage);
-		if (!match) {
-			g_free(appid);
-			return restricted_appid(invocation, url, package);
-		}
+	/* Check to see if we're allowed to use it */
+	if (dispatcher_appid_restrict(appid, package)) {
+		g_free(appid);
+		return restricted_appid(invocation, url, package);
 	}
 
 	/* We're cleared to continue */
