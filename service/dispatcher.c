@@ -37,7 +37,8 @@ static sqlite3 * urldb = NULL;
 
 /* Errors */
 enum {
-	ERROR_BAD_URL
+	ERROR_BAD_URL,
+	ERROR_RESTRICTED_URL
 };
 
 G_DEFINE_QUARK(url_dispatcher, url_dispatcher_error);
@@ -47,6 +48,7 @@ static void
 register_dbus_errors (void)
 {
 	g_dbus_error_register_error(url_dispatcher_error_quark(), ERROR_BAD_URL, "com.canonical.URLDispatcher.BadURL");
+	g_dbus_error_register_error(url_dispatcher_error_quark(), ERROR_RESTRICTED_URL, "com.canonical.URLDispatcher.RestrictedURL");
 	return;
 }
 
@@ -92,9 +94,16 @@ recoverable_problem_file (GObject * obj, GAsyncResult * res, gpointer user_data)
 
 /* Error based on the fact that we're using a restricted launch but the package
    doesn't match */
+/* NOTE: Only sending back the data we were given. We don't want people to be
+   able to parse the error as an info leak */
 static gboolean
-restricted_appid (GDBusMethodInvocation * invocation, const gchar * appid, const gchar * url, const gchar * package)
+restricted_appid (GDBusMethodInvocation * invocation, const gchar * url, const gchar * package)
 {
+	g_dbus_method_invocation_return_error(invocation,
+		url_dispatcher_error_quark(),
+		ERROR_RESTRICTED_URL,
+		"URL '%s' does not have a handler in package '%s'",
+		url, package);
 
 	return TRUE;
 }
@@ -185,9 +194,8 @@ dispatch_url_cb (GObject * skel, GDBusMethodInvocation * invocation, const gchar
 
 		g_free(appackage);
 		if (!match) {
-			restricted_appid(invocation, appid, url, package);
 			g_free(appid);
-			return TRUE;
+			return restricted_appid(invocation, url, package);
 		}
 	}
 
