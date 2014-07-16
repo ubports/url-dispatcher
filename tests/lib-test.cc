@@ -37,7 +37,7 @@ class LibTest : public ::testing::Test
 
 			dbus_test_dbus_mock_object_add_method(mock, obj,
 				"DispatchURL",
-				G_VARIANT_TYPE_STRING,
+				G_VARIANT_TYPE("(ss)"),
 				NULL, /* out */
 				"", /* python */
 				NULL); /* error */
@@ -95,7 +95,7 @@ TEST_F(LibTest, BaseTest) {
 
 	// ASSERT_NE(calls, nullptr);
 	ASSERT_EQ(callslen, 1);
-	GVariant * check = g_variant_new_parsed("('foo://bar/barish',)");
+	GVariant * check = g_variant_new_parsed("('foo://bar/barish', '')");
 	g_variant_ref_sink(check);
 	ASSERT_TRUE(g_variant_equal(calls->params, check));
 	g_variant_unref(check);
