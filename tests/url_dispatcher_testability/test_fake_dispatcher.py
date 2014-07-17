@@ -1,7 +1,8 @@
 import testtools
-from url_dispatcher_testability import fixture_setup
+from url_dispatcher_testability import fixture_setup, fake_dispatcher
 
 from subprocess import call
+
 
 class FakeDispatcherTestCase(testtools.TestCase):
 
@@ -12,13 +13,8 @@ class FakeDispatcherTestCase(testtools.TestCase):
 
     def test_url_dispatcher(self):
         call(['url-dispatcher', 'test://testurl'])
-        def get_last_dispatch_url_call_parameter():
-            try:
-                return self.dispatcher.get_last_dispatch_url_call_parameter()
-            except fixture_setup.FakeDispatcherException:
-                return None
-        
-        self.assertEqual(
-            get_last_dispatch_url_call_parameter(),
-            'test://testurl')
-            
+        try:
+            last_url = self.dispatcher.get_last_dispatch_url_call_parameter()
+        except fake_dispatcher.FakeDispatcherException:
+            last_url = None
+        self.assertEqual(last_url, 'test://testurl')
