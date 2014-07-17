@@ -68,6 +68,9 @@ void       url_dispatch_send_restricted (const gchar *         url,
  * NOTE: This function is *not* available for confined applications and
  * only for trusted helpers. It could result in discovery of which 
  * applications are installed on the system if exposed.
+ *
+ * Return value: (transfer full): Returns the AppIDs that match the
+ *    same order as @urls. Full transfer, free with g_strfreev().
  */
 gchar **   url_dispatch_url_appid       (const gchar **        urls);
 
