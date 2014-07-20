@@ -1,7 +1,7 @@
 import testtools
 from url_dispatcher_testability import fixture_setup, fake_dispatcher
 
-from subprocess import call
+from subprocess import call, CalledProcessError
 
 
 class FakeDispatcherTestCase(testtools.TestCase):
@@ -12,7 +12,7 @@ class FakeDispatcherTestCase(testtools.TestCase):
         self.useFixture(self.dispatcher)
 
     def test_url_dispatcher(self):
-        call(['url-dispatcher', 'test://testurl'])
+        call(['../../tools/url-dispatcher', 'test://testurl'])
         try:
             last_url = self.dispatcher.get_last_dispatch_url_call_parameter()
         except fake_dispatcher.FakeDispatcherException:

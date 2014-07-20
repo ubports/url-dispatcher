@@ -16,13 +16,12 @@ Build-Depends: click-dev,
                libgtest-dev,
                libsqlite3-dev,
                libubuntu-app-launch2-dev (>= 0.3),
-               python,
+               python3,
                python3-dbusmock,
                python3-fixtures,
                python3-nose,
                python3-testtools,
                sqlite3,
-               url-dispatcher-tools,
 Standards-Version: 3.9.4
 Homepage: http://launchpad.net/url-dispatcher
 # If you aren't a member of ~indicator-applet-developers but need to upload
