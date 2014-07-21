@@ -41,7 +41,7 @@ class FakeURLDispatcherService:
             stdout=subprocess.PIPE)
         self.mock = self._get_mock_interface()
         self.mock.AddMethod(
-            'com.canonical.URLDispatcher', 'DispatchURL', 's', '', '')
+            'com.canonical.URLDispatcher', 'DispatchURL', 'ss', '', '')
 
     def _get_mock_interface(self):
         return dbus.Interface(
