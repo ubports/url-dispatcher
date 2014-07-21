@@ -1,5 +1,3 @@
-class FakeDispatcherException(Exception):
-    pass
 # -*- Mode: Python; coding: utf-8; indent-tabs-mode: nil; tab-width: 4 -*-
 #
 # Copyright (C) 2014 Canonical Ltd.
@@ -19,6 +17,10 @@ class FakeDispatcherException(Exception):
 import dbus
 import dbusmock
 import subprocess
+
+
+class FakeDispatcherException(Exception):
+    pass
 
 
 class FakeURLDispatcherService:
