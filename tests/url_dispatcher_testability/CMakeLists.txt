@@ -5,4 +5,9 @@ install(FILES fixture_setup.py fake_dispatcher.py test_fake_dispatcher.py
     DESTINATION ${PYTHON_PACKAGE_DIR}/url_dispatcher_testability
 )
 
+configure_file(
+  "${PROJECT_SOURCE_DIR}/tests/url_dispatcher_testability/test_fake_dispatcher.py.in"
+  "${PROJECT_SOURCE_DIR}/tests/url_dispatcher_testability/test_fake_dispatcher.py"
+  )
+
 add_test(fake-dispatcher dbus-launch --exit-with-session nosetests3 ${PROJECT_SOURCE_DIR}/tests/url_dispatcher_testability/test_fake_dispatcher.py)
