@@ -90,6 +90,7 @@ Description: developer files for sending requests to the url dispatcher
 Package: url-dispatcher-testability
 Architecture: all
 Depends: ${misc:Depends},
+         ${python3:Depends},
          python3-dbusmock,
          python3-dbus,
 Description: A fake URL dispatcher for use in testing.
