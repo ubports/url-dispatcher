@@ -234,8 +234,10 @@ test_url_cb (GObject * skel, GDBusMethodInvocation * invocation, const gchar * c
 	GVariantBuilder builder;
 	g_variant_builder_init(&builder, G_VARIANT_TYPE_ARRAY);
 
-	const gchar * url;
-	for (url = urls[0]; url != NULL; url++) {
+	int i;
+	for (i = 0; urls[i] != NULL; i++) {
+		const gchar * url = urls[i];
+
 		g_debug("Testing URL: %s", url);
 
 		if (url == NULL || url[0] == '\0') {
