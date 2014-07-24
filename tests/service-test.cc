@@ -177,5 +177,16 @@ TEST_F(ServiceTest, TestURLTest) {
 	EXPECT_STREQ("foo-bar", multiappids[1]);
 
 	g_strfreev(multiappids);
+
+	/* Error URL */
+	const char * errorurls[] = {
+		"foo://bar/no/url",
+		NULL
+	};
+
+	gchar ** errorappids = url_dispatch_url_appid(errorurls);
+	ASSERT_EQ(0, g_strv_length(errorappids));
+
+	g_strfreev(errorappids);
 }
 
