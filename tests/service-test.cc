@@ -150,6 +150,7 @@ TEST_F(ServiceTest, ApplicationTest) {
 }
 
 TEST_F(ServiceTest, TestURLTest) {
+	/* Simple */
 	const char * testurls[] = {
 		"application:///foo-bar.desktop",
 		NULL
@@ -161,5 +162,20 @@ TEST_F(ServiceTest, TestURLTest) {
 	EXPECT_STREQ("foo-bar", appids[0]);
 
 	g_strfreev(appids);
+
+	/* Multiple */
+	const char * multiurls[] = {
+		"application:///bar-foo.desktop",
+		"application:///foo-bar.desktop",
+		NULL
+	};
+
+	gchar ** multiappids = url_dispatch_url_appid(multiurls);
+	ASSERT_EQ(2, g_strv_length(multiappids));
+
+	EXPECT_STREQ("bar-foo", multiappids[0]);
+	EXPECT_STREQ("foo-bar", multiappids[1]);
+
+	g_strfreev(multiappids);
 }
 
