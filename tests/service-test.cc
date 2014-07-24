@@ -149,3 +149,17 @@ TEST_F(ServiceTest, ApplicationTest) {
 	ASSERT_TRUE(found_appid);
 }
 
+TEST_F(ServiceTest, TestURLTest) {
+	const char * testurls[] = {
+		"application:///foo-bar.desktop",
+		NULL
+	};
+
+	gchar ** appids = url_dispatch_url_appid(testurls);
+	ASSERT_EQ(1, g_strv_length(appids));
+
+	EXPECT_STREQ("foo-bar", appids[0]);
+
+	g_strfreev(appids);
+}
+
