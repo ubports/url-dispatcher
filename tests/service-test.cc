@@ -149,3 +149,44 @@ TEST_F(ServiceTest, ApplicationTest) {
 	ASSERT_TRUE(found_appid);
 }
 
+TEST_F(ServiceTest, TestURLTest) {
+	/* Simple */
+	const char * testurls[] = {
+		"application:///foo-bar.desktop",
+		NULL
+	};
+
+	gchar ** appids = url_dispatch_url_appid(testurls);
+	ASSERT_EQ(1, g_strv_length(appids));
+
+	EXPECT_STREQ("foo-bar", appids[0]);
+
+	g_strfreev(appids);
+
+	/* Multiple */
+	const char * multiurls[] = {
+		"application:///bar-foo.desktop",
+		"application:///foo-bar.desktop",
+		NULL
+	};
+
+	gchar ** multiappids = url_dispatch_url_appid(multiurls);
+	ASSERT_EQ(2, g_strv_length(multiappids));
+
+	EXPECT_STREQ("bar-foo", multiappids[0]);
+	EXPECT_STREQ("foo-bar", multiappids[1]);
+
+	g_strfreev(multiappids);
+
+	/* Error URL */
+	const char * errorurls[] = {
+		"foo://bar/no/url",
+		NULL
+	};
+
+	gchar ** errorappids = url_dispatch_url_appid(errorurls);
+	ASSERT_EQ(0, g_strv_length(errorappids));
+
+	g_strfreev(errorappids);
+}
+
