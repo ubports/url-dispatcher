@@ -131,4 +131,4 @@ target_link_libraries (url-db-test
 	${GTEST_LIBS})
 
 add_test (url-db-test url-db-test)
-
+add_subdirectory(url_dispatcher_testability)
