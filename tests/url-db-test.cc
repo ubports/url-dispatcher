@@ -183,3 +183,27 @@ TEST_F(UrlDBTest, RemoveFile) {
 	sqlite3_close(db);
 }
 
+TEST_F(UrlDBTest, ReplaceTest) {
+	sqlite3 * db = url_db_create_database();
+
+	ASSERT_TRUE(db != NULL);
+
+	GTimeVal timeval = {0};
+	GTimeVal timevaltest = {0};
+
+	timeval.tv_sec = 12345;
+	EXPECT_TRUE(url_db_set_file_motification_time(db, "/foo.url-dispatcher", &timeval));
+
+	url_db_get_file_motification_time(db, "/foo.url-dispatcher", &timevaltest);
+	EXPECT_EQ(12345, timevaltest.tv_sec);
+
+	/* Replace it */
+	timeval.tv_sec = 67890;
+	EXPECT_TRUE(url_db_set_file_motification_time(db, "/foo.url-dispatcher", &timeval));
+
+	url_db_get_file_motification_time(db, "/foo.url-dispatcher", &timevaltest);
+	EXPECT_EQ(67890, timevaltest.tv_sec);
+
+	sqlite3_close(db);
+}
+
