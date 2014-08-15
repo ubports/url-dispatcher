@@ -21,6 +21,5 @@
 int
 main (int argc, char * argv[]) {
 	url_dispatch_send("foo://bar/barish", NULL, NULL);
-	g_usleep(100000);
 	return 0;
 }
