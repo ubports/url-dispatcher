@@ -12,9 +12,11 @@ instance $MATCH
 task
 
 pre-start script
-	if [ ! -e ~/.cache/url-dispatcher/urls-1.db ] ; then
+	RUNNING=$(initctl status url-dispatcher | grep start/running 2> /dev/null)
+
+	if [ "x${RUNNING}" = "x" ]; then
 		echo "DEBUG: Started before URL Dispatcher, let it build the DB"
-		initctl start url-dispatcher || exit 0
+		initctl start url-dispatcher || exit 1
 		sleep 2
 	fi
 end script
