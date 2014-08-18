@@ -12,10 +12,10 @@ instance $MATCH
 task
 
 pre-start script
-	URL_DISPATCHER_STATE=$(gdbus call --session --dest com.ubuntu.Upstart --object-path /com/ubuntu/Upstart/jobs/url_2ddispatcher/_ --method org.freedesktop.DBus.Properties.Get com.ubuntu.Upstart0_6.Instance state 2> /dev/null)
-	if [ -z $URL_DISPATCHER_STATE ] || [ ${URL_DISPATCHER_STATE} != "(<'running'>,)" ] ; then
-		echo "Pausing to wait for URL Dispatcher to start"
-		sleep 10
+	if [ ! -e ~/.cache/url-dispatcher/urls-1.db ] ; then
+		echo "DEBUG: Started before URL Dispatcher, let it build the DB"
+		initctl start url-dispatcher || exit 0
+		sleep 2
 	fi
 end script
 
