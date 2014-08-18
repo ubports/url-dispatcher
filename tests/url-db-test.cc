@@ -204,6 +204,12 @@ TEST_F(UrlDBTest, ReplaceTest) {
 	url_db_get_file_motification_time(db, "/foo.url-dispatcher", &timevaltest);
 	EXPECT_EQ(67890, timevaltest.tv_sec);
 
+	/* Replace it again with the same value */
+	EXPECT_TRUE(url_db_set_file_motification_time(db, "/foo.url-dispatcher", &timeval));
+
+	url_db_get_file_motification_time(db, "/foo.url-dispatcher", &timevaltest);
+	EXPECT_EQ(67890, timevaltest.tv_sec);
+
 	sqlite3_close(db);
 }
 
