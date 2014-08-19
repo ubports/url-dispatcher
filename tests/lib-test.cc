@@ -101,6 +101,21 @@ TEST_F(LibTest, BaseTest) {
 	g_variant_unref(check);
 }
 
+TEST_F(LibTest, NoMain) {
+	/* Spawning a non-main caller */
+	g_spawn_command_line_sync(LIB_TEST_NO_MAIN_HELPER, NULL, NULL, NULL, NULL);
+
+	guint callslen = 0;
+	const DbusTestDbusMockCall * calls = dbus_test_dbus_mock_object_get_method_calls(mock, obj, "DispatchURL", &callslen, NULL);
+
+	// ASSERT_NE(calls, nullptr);
+	ASSERT_EQ(callslen, 1);
+	GVariant * check = g_variant_new_parsed("('foo://bar/barish', '')");
+	g_variant_ref_sink(check);
+	ASSERT_TRUE(g_variant_equal(calls->params, check));
+	g_variant_unref(check);
+}
+
 TEST_F(LibTest, RestrictedTest) {
 	GMainLoop * main = g_main_loop_new(NULL, FALSE);
 

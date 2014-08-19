@@ -10,4 +10,4 @@ configure_file(
   "${PROJECT_SOURCE_DIR}/tests/url_dispatcher_testability/test_fake_dispatcher.py"
   )
 
-add_test(fake-dispatcher dbus-launch --exit-with-session nosetests3 ${PROJECT_SOURCE_DIR}/tests/url_dispatcher_testability/test_fake_dispatcher.py)
+add_test(fake-dispatcher dbus-test-runner --task nosetests3 --parameter ${PROJECT_SOURCE_DIR}/tests/url_dispatcher_testability/test_fake_dispatcher.py)

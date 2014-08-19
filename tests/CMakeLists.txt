@@ -71,6 +71,10 @@ add_test (app-id-test app-id-test)
 # lib test
 ###########################
 
+add_executable (lib-test-no-main lib-test-no-main.c)
+target_link_libraries (lib-test-no-main dispatcher)
+add_definitions ( -DLIB_TEST_NO_MAIN_HELPER="${CMAKE_CURRENT_BINARY_DIR}/lib-test-no-main" )
+
 add_executable (lib-test lib-test.cc)
 target_link_libraries (lib-test
 	dispatcher
