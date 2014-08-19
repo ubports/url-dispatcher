@@ -1,3 +1,11 @@
+url-dispatcher (0.1+14.10.20140819.1-0ubuntu1) utopic; urgency=low
+
+  [ Ted Gould ]
+  * Ensure send works even without a mainloop (LP: #1356077)
+  * Test replacing a timestamp
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Tue, 19 Aug 2014 21:01:10 +0000
+
 url-dispatcher (0.1+14.10.20140724-0ubuntu1) utopic; urgency=low
 
   [ Ubuntu daily release ]
