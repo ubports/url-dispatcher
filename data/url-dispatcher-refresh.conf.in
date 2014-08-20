@@ -2,7 +2,7 @@ description "Ensure the URL dispatcher database is up-to-date, likely at session
 
 start on started url-dispatcher
 
-emits url-dispatcher-update
+emits url-dispatcher-update-user url-dispatcher-update-system
 
 pre-start script
 # If we're starting with url-dispatcher let's let the rest of the
@@ -13,6 +13,6 @@ pre-start script
 end script
 
 script
-	initctl emit url-dispatcher-update "MATCH=$HOME/.config/url-dispatcher/urls/"
-	initctl emit url-dispatcher-update "MATCH=@datadir@/url-dispatcher/urls/"
+	initctl emit url-dispatcher-update-system
+	initctl emit url-dispatcher-update-user
 end script

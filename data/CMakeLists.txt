@@ -36,21 +36,36 @@ DESTINATION "/usr/share/upstart/sessions"
 )
 
 ###########################
-# Upstart Update Job
+# Upstart Update Jobs
 ###########################
 
-set(DISPATCHER_UPDATE_UPSTART
-"${CMAKE_CURRENT_BINARY_DIR}/url-dispatcher-update.conf"
+set(DISPATCHER_UPDATE_USER_UPSTART
+"${CMAKE_CURRENT_BINARY_DIR}/url-dispatcher-update-user.conf"
 )
 
-configure_file("url-dispatcher-update.conf.in"
-  "${DISPATCHER_UPDATE_UPSTART}"
+configure_file("url-dispatcher-update-user.conf.in"
+  "${DISPATCHER_UPDATE_USER_UPSTART}"
   @ONLY
 )
 
 install(
 FILES
-"${DISPATCHER_UPDATE_UPSTART}"
+"${DISPATCHER_UPDATE_USER_UPSTART}"
+DESTINATION "/usr/share/upstart/sessions"
+)
+
+set(DISPATCHER_UPDATE_SYSTEM_UPSTART
+"${CMAKE_CURRENT_BINARY_DIR}/url-dispatcher-update-system.conf"
+)
+
+configure_file("url-dispatcher-update-system.conf.in"
+  "${DISPATCHER_UPDATE_SYSTEM_UPSTART}"
+  @ONLY
+)
+
+install(
+FILES
+"${DISPATCHER_UPDATE_SYSTEM_UPSTART}"
 DESTINATION "/usr/share/upstart/sessions"
 )
 
