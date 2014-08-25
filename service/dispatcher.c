@@ -314,7 +314,15 @@ dispatcher_url_to_appid (const gchar * url, gchar ** out_appid, const gchar ** o
 	g_match_info_free(appmatch);
 
 	/* Scope URI matching */
-	/* TODO */
+	GMatchInfo * scopematch = NULL;
+	if (g_regex_match(scopere, url, 0, &scopematch)) {
+		*out_appid = g_strdup("unity8-dash");
+
+		g_match_info_free(scopematch);
+
+		return TRUE;
+	}
+	g_match_info_free(scopematch);
 
 	/* start FIXME: These are needed work arounds until everything migrates away
 	   from them.  Ewww */
