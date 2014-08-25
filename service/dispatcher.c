@@ -31,6 +31,7 @@ static ServiceIfaceComCanonicalURLDispatcher * skel = NULL;
 static GRegex * applicationre = NULL;
 static GRegex * appidre = NULL;
 static GRegex * genericre = NULL;
+static GRegex * scopere = NULL;
 static GRegex * musicfilere = NULL; /* FIXME */
 static GRegex * videofilere = NULL; /* FIXME */
 static sqlite3 * urldb = NULL;
@@ -300,6 +301,9 @@ dispatcher_url_to_appid (const gchar * url, gchar ** out_appid, const gchar ** o
 	}
 	g_match_info_free(appmatch);
 
+	/* Scope URI matching */
+	/* TODO */
+
 	/* start FIXME: These are needed work arounds until everything migrates away
 	   from them.  Ewww */
 	GMatchInfo * musicmatch = NULL;
@@ -417,6 +421,7 @@ dispatcher_init (GMainLoop * mainloop)
 	applicationre = g_regex_new("^application:///([a-zA-Z0-9_\\.-]*)\\.desktop$", 0, 0, NULL);
 	appidre = g_regex_new("^appid://([a-z0-9\\.-]*)/([a-zA-Z0-9-]*)/([a-zA-Z0-9\\.-]*)$", 0, 0, NULL);
 	genericre = g_regex_new("^(.*)://([a-z0-9\\.-]*)?/?(.*)?$", 0, 0, NULL);
+	scopere = g_regex_new("^scope://", 0, 0, NULL);
 
 	/* FIXME: Legacy */
 	musicfilere = g_regex_new("^file:///home/" USERNAME_REGEX "/Music/", 0, 0, NULL);
@@ -442,6 +447,7 @@ dispatcher_shutdown (void)
 	g_regex_unref(applicationre);
 	g_regex_unref(appidre);
 	g_regex_unref(genericre);
+	g_regex_unref(scopere);
 	g_regex_unref(musicfilere); /* FIXME */
 	g_regex_unref(videofilere); /* FIXME */
 	sqlite3_close(urldb);
