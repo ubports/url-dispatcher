@@ -153,6 +153,27 @@ TEST_F(DispatcherTest, CalendarTest)
 	return;
 }
 
+TEST_F(DispatcherTest, ScopeURITests)
+{
+	gchar * out_appid = NULL;
+	const gchar * out_url = NULL;
+
+	/* Base URL */
+	dispatcher_url_to_appid("scope://", &out_appid, &out_url);
+	EXPECT_STREQ("unity8-dash", out_appid);
+	g_free(out_appid);
+
+	/* Specific URL */
+	dispatcher_url_to_appid("scope://music/album/Beautiful%20World", &out_appid, &out_url);
+	EXPECT_STREQ("unity8-dash", out_appid);
+	g_free(out_appid);
+
+	/* AppId scope */
+	dispatcher_url_to_appid("scope://com.ubuntu.developer.foo-man_bar_23.42.31", &out_appid, &out_url);
+	EXPECT_STREQ("unity8-dash", out_appid);
+	g_free(out_appid);
+}
+
 /* FIXME: These should go away */
 TEST_F(DispatcherTest, FixmeTest)
 {
