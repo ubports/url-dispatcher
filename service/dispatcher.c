@@ -139,11 +139,23 @@ bad_url (GDBusMethodInvocation * invocation, const gchar * url)
 	return TRUE;
 }
 
+/* Sends the URL to the dash, which isn't an app, but just on the bus generally. */
+gboolean
+send_to_dash (const gchar * url)
+{
+
+	return TRUE;
+}
+
 /* Handles taking an application and an URL and sending them to Upstart */
 gboolean
 dispatcher_send_to_app (const gchar * app_id, const gchar * url)
 {
 	g_debug("Emitting 'application-start' for APP_ID='%s' and URLS='%s'", app_id, url);
+
+	if (g_strcmp0(app_id, "unity8-dash") == 0) {
+		return send_to_dash(url);
+	}
 
 	const gchar * urls[2] = {
 		url,
