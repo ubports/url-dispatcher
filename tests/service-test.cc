@@ -229,6 +229,23 @@ TEST_F(ServiceTest, Unity8DashTest) {
 	dbus_test_task_set_name(DBUS_TEST_TASK(dashmock), "UnityDash");
 	dbus_test_service_add_task(service, DBUS_TEST_TASK(dashmock));
 
+	dbus_test_task_run(DBUS_TEST_TASK(dashmock));
+
+	GMainLoop * main = g_main_loop_new(NULL, FALSE);
+
+	/* Send an invalid URL */
+	url_dispatch_send("scope://foo-bar", simple_cb, main);
+
+	/* Give it some time to send and reply */
+	g_main_loop_run(main);
+	g_main_loop_unref(main);
+
+	guint callslen = 0;
+	const DbusTestDbusMockCall * calls = dbus_test_dbus_mock_object_get_method_calls(mock, jobobj, "Start", &callslen, NULL);
+
+	EXPECT_EQ(0, callslen);
+
+
 
 	g_object_unref(dashmock);
 }
