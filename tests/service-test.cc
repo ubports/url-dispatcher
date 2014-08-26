@@ -266,4 +266,5 @@ TEST_F(ServiceTest, Unity8DashTest) {
 	calls = dbus_test_dbus_mock_object_get_method_calls(dashmock, fdoobj, "Open", &callslen, NULL);
 
 	EXPECT_EQ(1, callslen);
+	EXPECT_TRUE(g_variant_equal(calls[0].params, g_variant_new_parsed("(['scope://foo-bar'], @a{sv} {})")));
 }
