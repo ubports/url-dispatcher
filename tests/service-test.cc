@@ -21,6 +21,8 @@
 #include <liburl-dispatcher/url-dispatcher.h>
 #include <libdbustest/dbus-test.h>
 
+#include "url-db.h"
+
 class ServiceTest : public ::testing::Test
 {
 	protected:
@@ -34,6 +36,8 @@ class ServiceTest : public ::testing::Test
 		virtual void SetUp() {
 			g_setenv("UBUNTU_APP_LAUNCH_USE_SESSION", "1", TRUE);
 			g_setenv("URL_DISPATCHER_DISABLE_RECOVERABLE_ERROR", "1", TRUE);
+
+			SetUpDb();
 
 			service = dbus_test_service_new(NULL);
 
@@ -88,7 +92,27 @@ class ServiceTest : public ::testing::Test
 					g_main_iteration(TRUE);
 				cleartry++;
 			}
+
+			TearDownDb();
 			return;
+		}
+
+		void SetUpDb () {
+			const gchar * cachedir = CMAKE_BINARY_DIR "/service-test-cache";
+			ASSERT_EQ(0, g_mkdir_with_parents(cachedir, 0700));
+
+			g_setenv("XDG_CACHE_HOME", cachedir, TRUE);
+
+			sqlite3 * db = url_db_create_database();
+			GTimeVal time = {0};
+			time.tv_sec = 5;
+			url_db_set_file_motification_time(db, "/unity8-dash.url-dispatcher", &time);
+			url_db_insert_url(db, "/unity8-dash.url-dispatcher", "scope", NULL);
+			sqlite3_close(db);
+		}
+
+		void TearDownDb () {
+			g_spawn_command_line_sync("rm -rf " CMAKE_BINARY_DIR "/service-test-cache", NULL, NULL, NULL, NULL);
 		}
 };
 
