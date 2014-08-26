@@ -60,6 +60,7 @@ class ServiceTest : public ::testing::Test
 				"ret = dbus.ObjectPath('/instance')", /* python */
 				NULL); /* error */
 
+			dbus_test_task_set_name(DBUS_TEST_TASK(mock), "Upstart");
 			dbus_test_service_add_task(service, DBUS_TEST_TASK(mock));
 			dbus_test_service_start_tasks(service);
 
@@ -190,3 +191,20 @@ TEST_F(ServiceTest, TestURLTest) {
 	g_strfreev(errorappids);
 }
 
+TEST_F(ServiceTest, Unity8DashTest) {
+	DbusTestDbusMock * dashmock = dbus_test_dbus_mock_new("com.canonical.UnityDash");
+	DbusTestDbusMockObject * fdoobj = dbus_test_dbus_mock_get_object(mock, "/unity8_2ddash", "org.freedesktop.Application", NULL);
+
+	dbus_test_dbus_mock_object_add_method(dashmock, fdoobj,
+	                                      "Open",
+	                                      G_VARIANT_TYPE("(asa{sv})"),
+	                                      NULL, /* return */
+	                                      "", /* python */
+	                                      NULL); /* error */
+
+	dbus_test_task_set_name(DBUS_TEST_TASK(dashmock), "UnityDash");
+	dbus_test_service_add_task(service, DBUS_TEST_TASK(dashmock));
+
+
+	g_object_unref(dashmock);
+}
