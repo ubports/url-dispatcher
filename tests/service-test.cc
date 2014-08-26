@@ -28,6 +28,7 @@ class ServiceTest : public ::testing::Test
 	protected:
 		DbusTestService * service = NULL;
 		DbusTestDbusMock * mock = NULL;
+		DbusTestDbusMock * dashmock = NULL;
 		DbusTestDbusMockObject * obj = NULL;
 		DbusTestDbusMockObject * jobobj = NULL;
 		DbusTestProcess * dispatcher = NULL;
@@ -45,6 +46,7 @@ class ServiceTest : public ::testing::Test
 			dbus_test_task_set_name(DBUS_TEST_TASK(dispatcher), "Dispatcher");
 			dbus_test_service_add_task(service, DBUS_TEST_TASK(dispatcher));
 
+			/* Upstart Mock */
 			mock = dbus_test_dbus_mock_new("com.ubuntu.Upstart");
 			obj = dbus_test_dbus_mock_get_object(mock, "/com/ubuntu/Upstart", "com.ubuntu.Upstart0_6", NULL);
 
@@ -66,6 +68,21 @@ class ServiceTest : public ::testing::Test
 
 			dbus_test_task_set_name(DBUS_TEST_TASK(mock), "Upstart");
 			dbus_test_service_add_task(service, DBUS_TEST_TASK(mock));
+
+			/* Dash Mock */
+			dashmock = dbus_test_dbus_mock_new("com.canonical.UnityDash");
+
+			DbusTestDbusMockObject * fdoobj = dbus_test_dbus_mock_get_object(dashmock, "/unity8_2ddash", "org.freedesktop.Application", NULL);
+			dbus_test_dbus_mock_object_add_method(dashmock, fdoobj,
+												  "Open",
+												  G_VARIANT_TYPE("(asa{sv})"),
+												  NULL, /* return */
+												  "", /* python */
+												  NULL); /* error */
+			dbus_test_task_set_name(DBUS_TEST_TASK(dashmock), "UnityDash");
+			dbus_test_service_add_task(service, DBUS_TEST_TASK(dashmock));
+
+			/* Start your engines! */
 			dbus_test_service_start_tasks(service);
 
 			bus = g_bus_get_sync(G_BUS_TYPE_SESSION, NULL, NULL);
@@ -81,6 +98,7 @@ class ServiceTest : public ::testing::Test
 
 			g_clear_object(&dispatcher);
 			g_clear_object(&mock);
+			g_clear_object(&dashmock);
 			g_clear_object(&service);
 
 			g_object_unref(bus);
@@ -104,6 +122,7 @@ class ServiceTest : public ::testing::Test
 			g_setenv("XDG_CACHE_HOME", cachedir, TRUE);
 
 			sqlite3 * db = url_db_create_database();
+
 			GTimeVal time = {0};
 			time.tv_sec = 5;
 			url_db_set_file_motification_time(db, "/unity8-dash.url-dispatcher", &time);
@@ -113,6 +132,18 @@ class ServiceTest : public ::testing::Test
 
 		void TearDownDb () {
 			g_spawn_command_line_sync("rm -rf " CMAKE_BINARY_DIR "/service-test-cache", NULL, NULL, NULL, NULL);
+		}
+		
+		static gboolean quit_loop (gpointer ploop) {
+			g_main_loop_quit((GMainLoop *)ploop);
+			return FALSE;
+		}
+
+		void pause (int time) {
+			GMainLoop * loop = g_main_loop_new(NULL, FALSE);
+			guint timer = g_timeout_add(time, quit_loop, loop);
+			g_main_loop_run(loop);
+			g_main_loop_unref(loop);
 		}
 };
 
@@ -216,21 +247,7 @@ TEST_F(ServiceTest, TestURLTest) {
 }
 
 TEST_F(ServiceTest, Unity8DashTest) {
-	DbusTestDbusMock * dashmock = dbus_test_dbus_mock_new("com.canonical.UnityDash");
-	DbusTestDbusMockObject * fdoobj = dbus_test_dbus_mock_get_object(mock, "/unity8_2ddash", "org.freedesktop.Application", NULL);
-
-	dbus_test_dbus_mock_object_add_method(dashmock, fdoobj,
-	                                      "Open",
-	                                      G_VARIANT_TYPE("(asa{sv})"),
-	                                      NULL, /* return */
-	                                      "", /* python */
-	                                      NULL); /* error */
-
-	dbus_test_task_set_name(DBUS_TEST_TASK(dashmock), "UnityDash");
-	dbus_test_service_add_task(service, DBUS_TEST_TASK(dashmock));
-
-	dbus_test_task_run(DBUS_TEST_TASK(dashmock));
-
+	DbusTestDbusMockObject * fdoobj = dbus_test_dbus_mock_get_object(dashmock, "/unity8_2ddash", "org.freedesktop.Application", NULL);
 	GMainLoop * main = g_main_loop_new(NULL, FALSE);
 
 	/* Send an invalid URL */
@@ -245,7 +262,8 @@ TEST_F(ServiceTest, Unity8DashTest) {
 
 	EXPECT_EQ(0, callslen);
 
+	callslen = 0;
+	calls = dbus_test_dbus_mock_object_get_method_calls(dashmock, fdoobj, "Open", &callslen, NULL);
 
-
-	g_object_unref(dashmock);
+	EXPECT_EQ(1, callslen);
 }
