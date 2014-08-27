@@ -34,8 +34,7 @@ Package: url-dispatcher
 Architecture: any
 Multi-Arch: same
 Pre-Depends: ${misc:Pre-Depends},
-Depends: ubuntu-app-launch,
-         ${misc:Depends},
+Depends: ${misc:Depends},
          ${shlibs:Depends},
 Description: service to allow sending of URLs and get handlers started
  Allows applications to request a URL to be opened and handled by another
