@@ -92,6 +92,7 @@ add_definitions ( -DURL_DISPATCHER_SERVICE="${CMAKE_BINARY_DIR}/service/url-disp
 
 add_executable (service-test service-test.cc)
 target_link_libraries (service-test
+	url-db-lib
 	dispatcher
 	gtest
 	${DBUSTEST_LIBRARIES}

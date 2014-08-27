@@ -138,11 +138,71 @@ bad_url (GDBusMethodInvocation * invocation, const gchar * url)
 	return TRUE;
 }
 
+/* Print an error if we get one */
+static void
+send_open_cb (GObject * object, GAsyncResult * res, gpointer user_data)
+{
+	GError * error = NULL;
+
+	g_dbus_connection_call_finish(G_DBUS_CONNECTION(object), res, &error);
+
+	if (error != NULL) {
+		/* Mostly just to free the error, but printing for debugging */
+		g_warning("Unable to send Open to dash: %s", error->message);
+		g_error_free(error);
+	}
+}
+
+/* Sends the URL to the dash, which isn't an app, but just on the bus generally. */
+gboolean
+send_to_dash (const gchar * url)
+{
+	GDBusConnection * bus = g_bus_get_sync(G_BUS_TYPE_SESSION, NULL, NULL);
+	g_return_val_if_fail(bus != NULL, FALSE);
+
+	/* Kinda sucks that we need to do this, should probably find it's way into
+	   the libUAL API if it's needed outside */
+	g_dbus_connection_emit_signal(bus,
+		NULL, /* destination */
+		"/", /* path */
+		"com.canonical.UbuntuAppLaunch", /* interface */
+		"UnityFocusRequest", /* signal */
+		g_variant_new("(s)", "unity8-dash"),
+		NULL);
+
+	GVariantBuilder opendata;
+	g_variant_builder_init(&opendata, G_VARIANT_TYPE_TUPLE);
+	g_variant_builder_open(&opendata, G_VARIANT_TYPE_ARRAY);
+	g_variant_builder_add_value(&opendata, g_variant_new_string(url));
+	g_variant_builder_close(&opendata);
+	g_variant_builder_add_value(&opendata, g_variant_new_array(G_VARIANT_TYPE("{sv}"), NULL, 0));
+
+	/* Using the FD.o Application interface */
+	g_dbus_connection_call(bus,
+		"com.canonical.UnityDash",
+		"/unity8_2ddash",
+		"org.freedesktop.Application",
+		"Open",
+		g_variant_builder_end(&opendata),
+		NULL,
+		G_DBUS_CALL_FLAGS_NONE,
+		-1,
+		NULL,
+		send_open_cb, NULL);
+
+	g_object_unref(bus);
+	return TRUE;
+}
+
 /* Handles taking an application and an URL and sending them to Upstart */
 gboolean
 dispatcher_send_to_app (const gchar * app_id, const gchar * url)
 {
 	g_debug("Emitting 'application-start' for APP_ID='%s' and URLS='%s'", app_id, url);
+
+	if (g_strcmp0(app_id, "unity8-dash") == 0) {
+		return send_to_dash(url);
+	}
 
 	const gchar * urls[2] = {
 		url,
