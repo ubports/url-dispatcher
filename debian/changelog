@@ -1,3 +1,12 @@
+url-dispatcher (0.1+14.10.20140827-0ubuntu1) utopic; urgency=low
+
+  [ Ted Gould ]
+  * Split update jobs into independent jobs
+  * Support for unity8-dash URLs even though it's not an application
+    (LP: #1361349)
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Wed, 27 Aug 2014 02:10:21 +0000
+
 url-dispatcher (0.1+14.10.20140819.1-0ubuntu1) utopic; urgency=low
 
   [ Ted Gould ]
