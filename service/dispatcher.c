@@ -267,6 +267,12 @@ dispatch_url_cb (GObject * skel, GDBusMethodInvocation * invocation, const gchar
 		return bad_url(invocation, url);
 	}
 
+	/* Check for the 'unconfined' app id which is causing problems */
+	if (g_strcmp0(appid, "unconfined") == 0) {
+		g_free(appid);
+		return bad_url(invocation, url);
+	}
+
 	/* Check to see if we're allowed to use it */
 	if (dispatcher_appid_restrict(appid, package)) {
 		g_free(appid);
