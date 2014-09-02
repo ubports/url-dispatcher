@@ -73,7 +73,6 @@ recoverable_problem_file (GObject * obj, GAsyncResult * res, gpointer user_data)
 	g_variant_get(pid_tuple, "(u)", &pid);
 	g_variant_unref(pid_tuple);
 
-	gchar * signature = g_strdup_printf("url-dispatcher;bad-url;%s", badurl);
 	const gchar * additional[3] = {
 		"BadURL",
 		badurl,
@@ -83,10 +82,9 @@ recoverable_problem_file (GObject * obj, GAsyncResult * res, gpointer user_data)
 	/* Allow disabling for testing, we don't want to report bugs on
 	   our tests ;-) */
 	if (g_getenv("URL_DISPATCHER_DISABLE_RECOVERABLE_ERROR") == NULL) {
-		report_recoverable_problem(signature, pid, FALSE, additional);
+		report_recoverable_problem("url-dispatcher-bad-url", pid, FALSE, additional);
 	}
 
-	g_free(signature);
 	g_free(badurl);
 
 	return;
