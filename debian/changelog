@@ -1,3 +1,10 @@
+url-dispatcher (0.1+14.10.20140905.1-0ubuntu1) utopic; urgency=low
+
+  [ Ted Gould ]
+  * Throw a bad_url on the appid 'unconfined'
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Fri, 05 Sep 2014 03:40:44 +0000
+
 url-dispatcher (0.1+14.10.20140827-0ubuntu1) utopic; urgency=low
 
   [ Ted Gould ]
