@@ -37,7 +37,7 @@ class ServiceTest : public ::testing::Test
 		virtual void SetUp() {
 			g_setenv("UBUNTU_APP_LAUNCH_USE_SESSION", "1", TRUE);
 			g_setenv("URL_DISPATCHER_DISABLE_RECOVERABLE_ERROR", "1", TRUE);
-			g_setenv("XDG_DATA_DIRS", XDG_DIR, TRUE);
+			g_setenv("XDG_DATA_DIRS", XDG_DATA_DIRS, TRUE);
 
 			SetUpDb();
 

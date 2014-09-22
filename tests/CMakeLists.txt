@@ -89,7 +89,7 @@ add_test (lib-test lib-test)
 ###########################
 
 add_definitions ( -DURL_DISPATCHER_SERVICE="${CMAKE_BINARY_DIR}/service/url-dispatcher" )
-add_definitions ( -DXDG_DIR="${CMAKE_CURRENT_SOURCE_DIR}/xdg-data" )
+add_definitions ( -DXDG_DATA_DIRS="${CMAKE_CURRENT_SOURCE_DIR}/xdg-data" )
 
 add_executable (service-test service-test.cc)
 target_link_libraries (service-test
