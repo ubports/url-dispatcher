@@ -37,9 +37,16 @@ class LibTest : public ::testing::Test
 
 			dbus_test_dbus_mock_object_add_method(mock, obj,
 				"DispatchURL",
-				G_VARIANT_TYPE_STRING,
+				G_VARIANT_TYPE("(ss)"),
 				NULL, /* out */
 				"", /* python */
+				NULL); /* error */
+
+			dbus_test_dbus_mock_object_add_method(mock, obj,
+				"TestURL",
+				G_VARIANT_TYPE("as"),
+				G_VARIANT_TYPE("as"),
+				"ret = ['appid']", /* python */
 				NULL); /* error */
 
 			dbus_test_service_add_task(service, DBUS_TEST_TASK(mock));
@@ -88,9 +95,66 @@ TEST_F(LibTest, BaseTest) {
 
 	// ASSERT_NE(calls, nullptr);
 	ASSERT_EQ(callslen, 1);
-	GVariant * check = g_variant_new_parsed("('foo://bar/barish',)");
+	GVariant * check = g_variant_new_parsed("('foo://bar/barish', '')");
 	g_variant_ref_sink(check);
 	ASSERT_TRUE(g_variant_equal(calls->params, check));
 	g_variant_unref(check);
 }
 
+TEST_F(LibTest, NoMain) {
+	/* Spawning a non-main caller */
+	g_spawn_command_line_sync(LIB_TEST_NO_MAIN_HELPER, NULL, NULL, NULL, NULL);
+
+	guint callslen = 0;
+	const DbusTestDbusMockCall * calls = dbus_test_dbus_mock_object_get_method_calls(mock, obj, "DispatchURL", &callslen, NULL);
+
+	// ASSERT_NE(calls, nullptr);
+	ASSERT_EQ(callslen, 1);
+	GVariant * check = g_variant_new_parsed("('foo://bar/barish', '')");
+	g_variant_ref_sink(check);
+	ASSERT_TRUE(g_variant_equal(calls->params, check));
+	g_variant_unref(check);
+}
+
+TEST_F(LibTest, RestrictedTest) {
+	GMainLoop * main = g_main_loop_new(NULL, FALSE);
+
+	url_dispatch_send_restricted("foo://bar/barish", "bar-package", simple_cb, main);
+
+	/* Give it some time to send and reply */
+	g_main_loop_run(main);
+	g_main_loop_unref(main);
+
+	guint callslen = 0;
+	const DbusTestDbusMockCall * calls = dbus_test_dbus_mock_object_get_method_calls(mock, obj, "DispatchURL", &callslen, NULL);
+
+	// ASSERT_NE(calls, nullptr);
+	ASSERT_EQ(callslen, 1);
+	GVariant * check = g_variant_new_parsed("('foo://bar/barish', 'bar-package')");
+	g_variant_ref_sink(check);
+	ASSERT_TRUE(g_variant_equal(calls->params, check));
+	g_variant_unref(check);
+}
+
+TEST_F(LibTest, TestTest) {
+	const gchar * urls[2] = {
+		"foo://bar/barish",
+		NULL
+	};
+
+	gchar ** appids = url_dispatch_url_appid(urls);
+
+	EXPECT_EQ(1, g_strv_length(appids));
+	EXPECT_STREQ("appid", appids[0]);
+	g_strfreev(appids);
+
+	guint callslen = 0;
+	const DbusTestDbusMockCall * calls = dbus_test_dbus_mock_object_get_method_calls(mock, obj, "TestURL", &callslen, NULL);
+
+	// ASSERT_NE(calls, nullptr);
+	ASSERT_EQ(callslen, 1);
+	GVariant * check = g_variant_new_parsed("(['foo://bar/barish'],)");
+	g_variant_ref_sink(check);
+	ASSERT_TRUE(g_variant_equal(calls->params, check));
+	g_variant_unref(check);
+}

@@ -35,7 +35,8 @@ static sqlite3 * urldb = NULL;
 
 /* Errors */
 enum {
-	ERROR_BAD_URL
+	ERROR_BAD_URL,
+	ERROR_RESTRICTED_URL
 };
 
 G_DEFINE_QUARK(url_dispatcher, url_dispatcher_error);
@@ -45,6 +46,7 @@ static void
 register_dbus_errors (void)
 {
 	g_dbus_error_register_error(url_dispatcher_error_quark(), ERROR_BAD_URL, "com.canonical.URLDispatcher.BadURL");
+	g_dbus_error_register_error(url_dispatcher_error_quark(), ERROR_RESTRICTED_URL, "com.canonical.URLDispatcher.RestrictedURL");
 	return;
 }
 
@@ -69,7 +71,6 @@ recoverable_problem_file (GObject * obj, GAsyncResult * res, gpointer user_data)
 	g_variant_get(pid_tuple, "(u)", &pid);
 	g_variant_unref(pid_tuple);
 
-	gchar * signature = g_strdup_printf("url-dispatcher;bad-url;%s", badurl);
 	const gchar * additional[3] = {
 		"BadURL",
 		badurl,
@@ -79,13 +80,28 @@ recoverable_problem_file (GObject * obj, GAsyncResult * res, gpointer user_data)
 	/* Allow disabling for testing, we don't want to report bugs on
 	   our tests ;-) */
 	if (g_getenv("URL_DISPATCHER_DISABLE_RECOVERABLE_ERROR") == NULL) {
-		report_recoverable_problem(signature, pid, FALSE, additional);
+		report_recoverable_problem("url-dispatcher-bad-url", pid, FALSE, additional);
 	}
 
-	g_free(signature);
 	g_free(badurl);
 
 	return;
+}
+
+/* Error based on the fact that we're using a restricted launch but the package
+   doesn't match */
+/* NOTE: Only sending back the data we were given. We don't want people to be
+   able to parse the error as an info leak */
+static gboolean
+restricted_appid (GDBusMethodInvocation * invocation, const gchar * url, const gchar * package)
+{
+	g_dbus_method_invocation_return_error(invocation,
+		url_dispatcher_error_quark(),
+		ERROR_RESTRICTED_URL,
+		"URL '%s' does not have a handler in package '%s'",
+		url, package);
+
+	return TRUE;
 }
 
 /* Say that we have a bad URL and report a recoverable error on the process that
@@ -118,11 +134,71 @@ bad_url (GDBusMethodInvocation * invocation, const gchar * url)
 	return TRUE;
 }
 
-/* Handles taking an application and an URL and sending them to Upstart */
+/* Print an error if we get one */
 static void
-pass_url_to_app (const gchar * app_id, const gchar * url)
+send_open_cb (GObject * object, GAsyncResult * res, gpointer user_data)
+{
+	GError * error = NULL;
+
+	g_dbus_connection_call_finish(G_DBUS_CONNECTION(object), res, &error);
+
+	if (error != NULL) {
+		/* Mostly just to free the error, but printing for debugging */
+		g_warning("Unable to send Open to dash: %s", error->message);
+		g_error_free(error);
+	}
+}
+
+/* Sends the URL to the dash, which isn't an app, but just on the bus generally. */
+gboolean
+send_to_dash (const gchar * url)
+{
+	GDBusConnection * bus = g_bus_get_sync(G_BUS_TYPE_SESSION, NULL, NULL);
+	g_return_val_if_fail(bus != NULL, FALSE);
+
+	/* Kinda sucks that we need to do this, should probably find it's way into
+	   the libUAL API if it's needed outside */
+	g_dbus_connection_emit_signal(bus,
+		NULL, /* destination */
+		"/", /* path */
+		"com.canonical.UbuntuAppLaunch", /* interface */
+		"UnityFocusRequest", /* signal */
+		g_variant_new("(s)", "unity8-dash"),
+		NULL);
+
+	GVariantBuilder opendata;
+	g_variant_builder_init(&opendata, G_VARIANT_TYPE_TUPLE);
+	g_variant_builder_open(&opendata, G_VARIANT_TYPE_ARRAY);
+	g_variant_builder_add_value(&opendata, g_variant_new_string(url));
+	g_variant_builder_close(&opendata);
+	g_variant_builder_add_value(&opendata, g_variant_new_array(G_VARIANT_TYPE("{sv}"), NULL, 0));
+
+	/* Using the FD.o Application interface */
+	g_dbus_connection_call(bus,
+		"com.canonical.UnityDash",
+		"/unity8_2ddash",
+		"org.freedesktop.Application",
+		"Open",
+		g_variant_builder_end(&opendata),
+		NULL,
+		G_DBUS_CALL_FLAGS_NONE,
+		-1,
+		NULL,
+		send_open_cb, NULL);
+
+	g_object_unref(bus);
+	return TRUE;
+}
+
+/* Handles taking an application and an URL and sending them to Upstart */
+gboolean
+dispatcher_send_to_app (const gchar * app_id, const gchar * url)
 {
 	g_debug("Emitting 'application-start' for APP_ID='%s' and URLS='%s'", app_id, url);
+
+	if (g_strcmp0(app_id, "unity8-dash") == 0) {
+		return send_to_dash(url);
+	}
 
 	const gchar * urls[2] = {
 		url,
@@ -133,31 +209,126 @@ pass_url_to_app (const gchar * app_id, const gchar * url)
 		g_warning("Unable to start application '%s' with URL '%s'", app_id, url);
 	}
 
-	return;
+	return TRUE;
+}
+
+/* Whether we should restrict this appid based on the package name */
+gboolean
+dispatcher_appid_restrict (const gchar * appid, const gchar * package)
+{
+	if (package == NULL || package[0] == '\0') {
+		return FALSE;
+	}
+
+	gchar * appackage = NULL;
+	gboolean match = FALSE;
+
+	if (ubuntu_app_launch_app_id_parse(appid, &appackage, NULL, NULL)) {
+		/* Click application */
+		match = (g_strcmp0(package, appackage) == 0);
+	} else {
+		/* Legacy application */
+		match = (g_strcmp0(package, appid) == 0);
+	}
+
+	g_free(appackage);
+
+	return !match;
 }
 
 /* Get a URL off of the bus */
 static gboolean
-dispatch_url_cb (GObject * skel, GDBusMethodInvocation * invocation, const gchar * url, gpointer user_data)
+dispatch_url_cb (GObject * skel, GDBusMethodInvocation * invocation, const gchar * url, const gchar * package, gpointer user_data)
 {
-	g_debug("Dispatching URL: %s", url);
+	/* Nice debugging message depending on whether the @package variable
+	   is valid from DBus */
+	if (package == NULL || package[0] == '\0') {
+		g_debug("Dispatching URL: %s", url);
+	} else {
+		g_debug("Dispatching Restricted URL: %s", url);
+		g_debug("Package restriction: %s", package);
+	}
 
+	/* Check to ensure the URL is valid coming from DBus */
 	if (url == NULL || url[0] == '\0') {
 		return bad_url(invocation, url);
 	}
 
-	if (dispatch_url(url)) {
-		g_dbus_method_invocation_return_value(invocation, NULL);
-	} else {
-		bad_url(invocation, url);
+	/* Actually do it */
+	gchar * appid = NULL;
+	const gchar * outurl = NULL;
+
+	/* Discover the AppID */
+	if (!dispatcher_url_to_appid(url, &appid, &outurl)) {
+		return bad_url(invocation, url);
 	}
+
+	/* Check for the 'unconfined' app id which is causing problems */
+	if (g_strcmp0(appid, "unconfined") == 0) {
+		g_free(appid);
+		return bad_url(invocation, url);
+	}
+
+	/* Check to see if we're allowed to use it */
+	if (dispatcher_appid_restrict(appid, package)) {
+		g_free(appid);
+		return restricted_appid(invocation, url, package);
+	}
+
+	/* We're cleared to continue */
+	dispatcher_send_to_app(appid, outurl);
+	g_free(appid);
+
+	g_dbus_method_invocation_return_value(invocation, NULL);
+
+	return TRUE;
+}
+
+/* Test a URL to find it's AppID */
+static gboolean
+test_url_cb (GObject * skel, GDBusMethodInvocation * invocation, const gchar * const * urls, gpointer user_data)
+{
+	if (urls == NULL || urls[0] == NULL || urls[0][0] == '\0') {
+		/* Right off the bat, let's deal with these */
+		return bad_url(invocation, NULL);
+	}
+
+	GVariantBuilder builder;
+	g_variant_builder_init(&builder, G_VARIANT_TYPE_ARRAY);
+
+	int i;
+	for (i = 0; urls[i] != NULL; i++) {
+		const gchar * url = urls[i];
+
+		g_debug("Testing URL: %s", url);
+
+		if (url == NULL || url[0] == '\0') {
+			g_variant_builder_clear(&builder);
+			return bad_url(invocation, url);
+		}
+
+		gchar * appid = NULL;
+		const gchar * outurl = NULL;
+
+		if (dispatcher_url_to_appid(url, &appid, &outurl)) {
+			GVariant * vappid = g_variant_new_take_string(appid);
+			g_variant_builder_add_value(&builder, vappid);
+		} else {
+			g_variant_builder_clear(&builder);
+			return bad_url(invocation, url);
+		}
+	}
+
+	GVariant * varray = g_variant_builder_end(&builder);
+	GVariant * tuple = g_variant_new_tuple(&varray, 1);
+	g_dbus_method_invocation_return_value(invocation, tuple);
 
 	return TRUE;
 }
 
 /* The core of the URL handling */
 gboolean
-dispatch_url (const gchar * url)
+dispatcher_url_to_appid (const gchar * url, gchar ** out_appid, const gchar ** out_url)
 {
 	/* Special case the app id */
 	GMatchInfo * appidmatch = NULL;
@@ -165,16 +336,13 @@ dispatch_url (const gchar * url)
 		gchar * package = g_match_info_fetch(appidmatch, 1);
 		gchar * app = g_match_info_fetch(appidmatch, 2);
 		gchar * version = g_match_info_fetch(appidmatch, 3);
-		gchar * appid = NULL;
 		gboolean retval = FALSE;
 
-		appid = ubuntu_app_launch_triplet_to_app_id(package, app, version);
-		if (appid != NULL) {
-			pass_url_to_app(appid, NULL);
+		*out_appid = ubuntu_app_launch_triplet_to_app_id(package, app, version);
+		if (*out_appid != NULL) {
 			retval = TRUE;
 		}
 
-		g_free(appid);
 		g_free(package);
 		g_free(app);
 		g_free(version);
@@ -186,10 +354,8 @@ dispatch_url (const gchar * url)
 	/* Special case the application URL */
 	GMatchInfo * appmatch = NULL;
 	if (g_regex_match(applicationre, url, 0, &appmatch)) {
-		gchar * appid = g_match_info_fetch(appmatch, 1);
-		pass_url_to_app(appid, NULL);
+		*out_appid = g_match_info_fetch(appmatch, 1);
 
-		g_free(appid);
 		g_match_info_free(appmatch);
 
 		return TRUE;
@@ -203,12 +369,11 @@ dispatch_url (const gchar * url)
 		gchar * protocol = g_match_info_fetch(genericmatch, 1);
 		gchar * domain = g_match_info_fetch(genericmatch, 2);
 
-		gchar * appid = url_db_find_url(urldb, protocol, domain);
+		*out_appid = url_db_find_url(urldb, protocol, domain);
 
-		if (appid != NULL) {
+		if (*out_appid != NULL) {
 			found = TRUE;
-			pass_url_to_app(appid, url);
-			g_free(appid);
+			*out_url = url;
 		}
 
 		g_free(protocol);
@@ -289,6 +454,7 @@ dispatcher_init (GMainLoop * mainloop)
 
 	skel = service_iface_com_canonical_urldispatcher_skeleton_new();
 	g_signal_connect(skel, "handle-dispatch-url", G_CALLBACK(dispatch_url_cb), NULL);
+	g_signal_connect(skel, "handle-test-url", G_CALLBACK(test_url_cb), NULL);
 
 	return TRUE;
 }

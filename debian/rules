@@ -12,4 +12,3 @@ override_dh_install:
 	mkdir -p debian/url-dispatcher/etc/apport/crashdb.conf.d/
 	install -m 644 debian/url-dispatcher-crashdb.conf debian/url-dispatcher/etc/apport/crashdb.conf.d/
 	dh_install --fail-missing
-

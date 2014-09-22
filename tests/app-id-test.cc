@@ -70,80 +70,157 @@ class AppIdTest : public ::testing::Test
 
 TEST_F(AppIdTest, BaseUrl)
 {
+	gchar * out_appid = NULL;
+	const gchar * out_url = NULL;
+
 	/* Good sanity check */
-	dispatch_url("appid://com.test.good/app1/1.2.3");
-	ASSERT_STREQ("com.test.good_app1_1.2.3", ubuntu_app_launch_mock_get_last_app_id());
+	dispatcher_url_to_appid("appid://com.test.good/app1/1.2.3", &out_appid, &out_url);
+	ASSERT_STREQ("com.test.good_app1_1.2.3", out_appid);
+	EXPECT_EQ(NULL, out_url);
+
+	dispatcher_send_to_app(out_appid, out_url);
+	EXPECT_STREQ("com.test.good_app1_1.2.3", ubuntu_app_launch_mock_get_last_app_id());
+
 	ubuntu_app_launch_mock_clear_last_app_id();
+	g_clear_pointer(&out_appid, g_free);
+	out_url = NULL;
 
 	/* No version at all */
-	dispatch_url("appid://com.test.good/app1");
-	ASSERT_TRUE(NULL == ubuntu_app_launch_mock_get_last_app_id());
+	dispatcher_url_to_appid("appid://com.test.good/app1", &out_appid, &out_url);
+
+	EXPECT_EQ(NULL, out_appid);
+	EXPECT_EQ(NULL, out_url);
+
 	ubuntu_app_launch_mock_clear_last_app_id();
 }
 
 TEST_F(AppIdTest, WildcardUrl)
 {
+	gchar * out_appid = NULL;
+	const gchar * out_url = NULL;
+
 	/* Version wildcard */
-	dispatch_url("appid://com.test.good/app1/current-user-version");
-	ASSERT_STREQ("com.test.good_app1_1.2.3", ubuntu_app_launch_mock_get_last_app_id());
+	dispatcher_url_to_appid("appid://com.test.good/app1/current-user-version", &out_appid, &out_url);
+	ASSERT_STREQ("com.test.good_app1_1.2.3", out_appid);
+	EXPECT_EQ(NULL, out_url);
+
+	dispatcher_send_to_app(out_appid, out_url);
+	EXPECT_STREQ("com.test.good_app1_1.2.3", ubuntu_app_launch_mock_get_last_app_id());
+
 	ubuntu_app_launch_mock_clear_last_app_id();
+	g_clear_pointer(&out_appid, g_free);
+	out_url = NULL;
 
 	/* First app */
-	dispatch_url("appid://com.test.good/first-listed-app/current-user-version");
-	ASSERT_STREQ("com.test.good_app1_1.2.3", ubuntu_app_launch_mock_get_last_app_id());
+	dispatcher_url_to_appid("appid://com.test.good/first-listed-app/current-user-version", &out_appid, &out_url);
+	ASSERT_STREQ("com.test.good_app1_1.2.3", out_appid);
+	EXPECT_EQ(NULL, out_url);
+
+	dispatcher_send_to_app(out_appid, out_url);
+	EXPECT_STREQ("com.test.good_app1_1.2.3", ubuntu_app_launch_mock_get_last_app_id());
+
 	ubuntu_app_launch_mock_clear_last_app_id();
+	g_clear_pointer(&out_appid, g_free);
+	out_url = NULL;
 
 	/* Last app */
-	dispatch_url("appid://com.test.good/last-listed-app/current-user-version");
-	ASSERT_STREQ("com.test.good_app1_1.2.3", ubuntu_app_launch_mock_get_last_app_id());
+	dispatcher_url_to_appid("appid://com.test.good/last-listed-app/current-user-version", &out_appid, &out_url);
+	ASSERT_STREQ("com.test.good_app1_1.2.3", out_appid);
+	EXPECT_EQ(NULL, out_url);
+
+	dispatcher_send_to_app(out_appid, out_url);
+	EXPECT_STREQ("com.test.good_app1_1.2.3", ubuntu_app_launch_mock_get_last_app_id());
+
 	ubuntu_app_launch_mock_clear_last_app_id();
+	g_clear_pointer(&out_appid, g_free);
+	out_url = NULL;
 
 	/* Only app */
-	dispatch_url("appid://com.test.good/only-listed-app/current-user-version");
-	ASSERT_STREQ("com.test.good_app1_1.2.3", ubuntu_app_launch_mock_get_last_app_id());
+	dispatcher_url_to_appid("appid://com.test.good/only-listed-app/current-user-version", &out_appid, &out_url);
+	ASSERT_STREQ("com.test.good_app1_1.2.3", out_appid);
+	EXPECT_EQ(NULL, out_url);
+
+	dispatcher_send_to_app(out_appid, out_url);
+	EXPECT_STREQ("com.test.good_app1_1.2.3", ubuntu_app_launch_mock_get_last_app_id());
+
 	ubuntu_app_launch_mock_clear_last_app_id();
+	g_clear_pointer(&out_appid, g_free);
+	out_url = NULL;
 
 	/* Wild app fixed version */
-	dispatch_url("appid://com.test.good/only-listed-app/1.2.3");
-	ASSERT_STREQ("com.test.good_app1_1.2.3", ubuntu_app_launch_mock_get_last_app_id());
+	dispatcher_url_to_appid("appid://com.test.good/only-listed-app/1.2.3", &out_appid, &out_url);
+	ASSERT_STREQ("com.test.good_app1_1.2.3", out_appid);
+	EXPECT_EQ(NULL, out_url);
+
+	dispatcher_send_to_app(out_appid, out_url);
+	EXPECT_STREQ("com.test.good_app1_1.2.3", ubuntu_app_launch_mock_get_last_app_id());
 	ubuntu_app_launch_mock_clear_last_app_id();
+	g_clear_pointer(&out_appid, g_free);
+	out_url = NULL;
 
 	return;
 }
 
 TEST_F(AppIdTest, OrderingUrl)
 {
-	dispatch_url("appid://com.test.multiple/first-listed-app/current-user-version");
-	ASSERT_STREQ("com.test.multiple_app-first_1.2.3", ubuntu_app_launch_mock_get_last_app_id());
+	gchar * out_appid = NULL;
+	const gchar * out_url = NULL;
+
+	dispatcher_url_to_appid("appid://com.test.multiple/first-listed-app/current-user-version", &out_appid, &out_url);
+	ASSERT_STREQ("com.test.multiple_app-first_1.2.3", out_appid);
+	EXPECT_EQ(NULL, out_url);
+
+	dispatcher_send_to_app(out_appid, out_url);
+	EXPECT_STREQ("com.test.multiple_app-first_1.2.3", ubuntu_app_launch_mock_get_last_app_id());
 	ubuntu_app_launch_mock_clear_last_app_id();
 
-	dispatch_url("appid://com.test.multiple/last-listed-app/current-user-version");
-	ASSERT_STREQ("com.test.multiple_app-last_1.2.3", ubuntu_app_launch_mock_get_last_app_id());
-	ubuntu_app_launch_mock_clear_last_app_id();
+	g_clear_pointer(&out_appid, g_free);
+	out_url = NULL;
 
-	dispatch_url("appid://com.test.multiple/only-listed-app/current-user-version");
-	ASSERT_TRUE(NULL == ubuntu_app_launch_mock_get_last_app_id());
+	dispatcher_url_to_appid("appid://com.test.multiple/last-listed-app/current-user-version", &out_appid, &out_url);
+
+	ASSERT_STREQ("com.test.multiple_app-last_1.2.3", out_appid);
+	EXPECT_EQ(NULL, out_url);
+
+	dispatcher_send_to_app(out_appid, out_url);
+	EXPECT_STREQ("com.test.multiple_app-last_1.2.3", ubuntu_app_launch_mock_get_last_app_id());
+
 	ubuntu_app_launch_mock_clear_last_app_id();
+	g_clear_pointer(&out_appid, g_free);
+	out_url = NULL;
+
+	dispatcher_url_to_appid("appid://com.test.multiple/only-listed-app/current-user-version", &out_appid, &out_url);
+
+	EXPECT_EQ(NULL, out_appid);
+	EXPECT_EQ(NULL, out_url);
 
 	return;
 }
 
 TEST_F(AppIdTest, BadDirectory)
 {
+	gchar * out_appid = NULL;
+	const gchar * out_url = NULL;
+
 	g_setenv("TEST_CLICK_DB", "not-click-db", TRUE);
 
-	dispatch_url("appid://com.test.good/app1/current-user-version");
-	ASSERT_TRUE(NULL == ubuntu_app_launch_mock_get_last_app_id());
-	ubuntu_app_launch_mock_clear_last_app_id();
+	dispatcher_url_to_appid("appid://com.test.good/app1/current-user-version", &out_appid, &out_url);
+
+	EXPECT_EQ(NULL, out_appid);
+	EXPECT_EQ(NULL, out_url);
 
 	return;
 }
 
 TEST_F(AppIdTest, BadUser)
 {
+	gchar * out_appid = NULL;
+	const gchar * out_url = NULL;
+
 	g_setenv("TEST_CLICK_USER", "not-test-user", TRUE);
 
-	dispatch_url("appid://com.test.good/app1/current-user-version");
-	ASSERT_TRUE(NULL == ubuntu_app_launch_mock_get_last_app_id());
-	ubuntu_app_launch_mock_clear_last_app_id();
+	dispatcher_url_to_appid("appid://com.test.good/app1/current-user-version", &out_appid, &out_url);
+
+	EXPECT_EQ(NULL, out_appid);
+	EXPECT_EQ(NULL, out_url);
 }

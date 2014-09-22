@@ -71,6 +71,10 @@ add_test (app-id-test app-id-test)
 # lib test
 ###########################
 
+add_executable (lib-test-no-main lib-test-no-main.c)
+target_link_libraries (lib-test-no-main dispatcher)
+add_definitions ( -DLIB_TEST_NO_MAIN_HELPER="${CMAKE_CURRENT_BINARY_DIR}/lib-test-no-main" )
+
 add_executable (lib-test lib-test.cc)
 target_link_libraries (lib-test
 	dispatcher
@@ -88,6 +92,7 @@ add_definitions ( -DURL_DISPATCHER_SERVICE="${CMAKE_BINARY_DIR}/service/url-disp
 
 add_executable (service-test service-test.cc)
 target_link_libraries (service-test
+	url-db-lib
 	dispatcher
 	gtest
 	${DBUSTEST_LIBRARIES}
@@ -131,4 +136,4 @@ target_link_libraries (url-db-test
 	${GTEST_LIBS})
 
 add_test (url-db-test url-db-test)
-
+add_subdirectory(url_dispatcher_testability)

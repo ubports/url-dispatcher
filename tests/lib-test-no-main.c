@@ -13,23 +13,13 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Author: Ted Gould <ted@canonical.com>
- *
  */
 
-#include <glib.h>
+#include <gio/gio.h>
+#include <liburl-dispatcher/url-dispatcher.h>
 
-#ifndef __DISPATCHER_H__
-#define __DISPATCHER_H__ 1
-
-G_BEGIN_DECLS
-
-gboolean dispatcher_init (GMainLoop * mainloop);
-gboolean dispatcher_shutdown (void);
-gboolean dispatcher_url_to_appid (const gchar * url, gchar ** out_appid, const gchar ** out_url);
-gboolean dispatcher_appid_restrict (const gchar * appid, const gchar * package);
-gboolean dispatcher_send_to_app (const gchar * appid, const gchar * url);
-
-G_END_DECLS
-
-#endif /* __DISPATCHER_H__ */
+int
+main (int argc, char * argv[]) {
+	url_dispatch_send("foo://bar/barish", NULL, NULL);
+	return 0;
+}

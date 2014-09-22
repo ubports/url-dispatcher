@@ -21,11 +21,14 @@
 #include <liburl-dispatcher/url-dispatcher.h>
 #include <libdbustest/dbus-test.h>
 
+#include "url-db.h"
+
 class ServiceTest : public ::testing::Test
 {
 	protected:
 		DbusTestService * service = NULL;
 		DbusTestDbusMock * mock = NULL;
+		DbusTestDbusMock * dashmock = NULL;
 		DbusTestDbusMockObject * obj = NULL;
 		DbusTestDbusMockObject * jobobj = NULL;
 		DbusTestProcess * dispatcher = NULL;
@@ -35,12 +38,15 @@ class ServiceTest : public ::testing::Test
 			g_setenv("UBUNTU_APP_LAUNCH_USE_SESSION", "1", TRUE);
 			g_setenv("URL_DISPATCHER_DISABLE_RECOVERABLE_ERROR", "1", TRUE);
 
+			SetUpDb();
+
 			service = dbus_test_service_new(NULL);
 
 			dispatcher = dbus_test_process_new(URL_DISPATCHER_SERVICE);
 			dbus_test_task_set_name(DBUS_TEST_TASK(dispatcher), "Dispatcher");
 			dbus_test_service_add_task(service, DBUS_TEST_TASK(dispatcher));
 
+			/* Upstart Mock */
 			mock = dbus_test_dbus_mock_new("com.ubuntu.Upstart");
 			obj = dbus_test_dbus_mock_get_object(mock, "/com/ubuntu/Upstart", "com.ubuntu.Upstart0_6", NULL);
 
@@ -60,7 +66,23 @@ class ServiceTest : public ::testing::Test
 				"ret = dbus.ObjectPath('/instance')", /* python */
 				NULL); /* error */
 
+			dbus_test_task_set_name(DBUS_TEST_TASK(mock), "Upstart");
 			dbus_test_service_add_task(service, DBUS_TEST_TASK(mock));
+
+			/* Dash Mock */
+			dashmock = dbus_test_dbus_mock_new("com.canonical.UnityDash");
+
+			DbusTestDbusMockObject * fdoobj = dbus_test_dbus_mock_get_object(dashmock, "/unity8_2ddash", "org.freedesktop.Application", NULL);
+			dbus_test_dbus_mock_object_add_method(dashmock, fdoobj,
+												  "Open",
+												  G_VARIANT_TYPE("(asa{sv})"),
+												  NULL, /* return */
+												  "", /* python */
+												  NULL); /* error */
+			dbus_test_task_set_name(DBUS_TEST_TASK(dashmock), "UnityDash");
+			dbus_test_service_add_task(service, DBUS_TEST_TASK(dashmock));
+
+			/* Start your engines! */
 			dbus_test_service_start_tasks(service);
 
 			bus = g_bus_get_sync(G_BUS_TYPE_SESSION, NULL, NULL);
@@ -76,6 +98,7 @@ class ServiceTest : public ::testing::Test
 
 			g_clear_object(&dispatcher);
 			g_clear_object(&mock);
+			g_clear_object(&dashmock);
 			g_clear_object(&service);
 
 			g_object_unref(bus);
@@ -87,7 +110,40 @@ class ServiceTest : public ::testing::Test
 					g_main_iteration(TRUE);
 				cleartry++;
 			}
+
+			TearDownDb();
 			return;
+		}
+
+		void SetUpDb () {
+			const gchar * cachedir = CMAKE_BINARY_DIR "/service-test-cache";
+			ASSERT_EQ(0, g_mkdir_with_parents(cachedir, 0700));
+
+			g_setenv("XDG_CACHE_HOME", cachedir, TRUE);
+
+			sqlite3 * db = url_db_create_database();
+
+			GTimeVal time = {0};
+			time.tv_sec = 5;
+			url_db_set_file_motification_time(db, "/unity8-dash.url-dispatcher", &time);
+			url_db_insert_url(db, "/unity8-dash.url-dispatcher", "scope", NULL);
+			sqlite3_close(db);
+		}
+
+		void TearDownDb () {
+			g_spawn_command_line_sync("rm -rf " CMAKE_BINARY_DIR "/service-test-cache", NULL, NULL, NULL, NULL);
+		}
+		
+		static gboolean quit_loop (gpointer ploop) {
+			g_main_loop_quit((GMainLoop *)ploop);
+			return FALSE;
+		}
+
+		void pause (int time) {
+			GMainLoop * loop = g_main_loop_new(NULL, FALSE);
+			guint timer = g_timeout_add(time, quit_loop, loop);
+			g_main_loop_run(loop);
+			g_main_loop_unref(loop);
 		}
 };
 
@@ -149,3 +205,94 @@ TEST_F(ServiceTest, ApplicationTest) {
 	ASSERT_TRUE(found_appid);
 }
 
+TEST_F(ServiceTest, TestURLTest) {
+	/* Simple */
+	const char * testurls[] = {
+		"application:///foo-bar.desktop",
+		NULL
+	};
+
+	gchar ** appids = url_dispatch_url_appid(testurls);
+	ASSERT_EQ(1, g_strv_length(appids));
+
+	EXPECT_STREQ("foo-bar", appids[0]);
+
+	g_strfreev(appids);
+
+	/* Multiple */
+	const char * multiurls[] = {
+		"application:///bar-foo.desktop",
+		"application:///foo-bar.desktop",
+		NULL
+	};
+
+	gchar ** multiappids = url_dispatch_url_appid(multiurls);
+	ASSERT_EQ(2, g_strv_length(multiappids));
+
+	EXPECT_STREQ("bar-foo", multiappids[0]);
+	EXPECT_STREQ("foo-bar", multiappids[1]);
+
+	g_strfreev(multiappids);
+
+	/* Error URL */
+	const char * errorurls[] = {
+		"foo://bar/no/url",
+		NULL
+	};
+
+	gchar ** errorappids = url_dispatch_url_appid(errorurls);
+	ASSERT_EQ(0, g_strv_length(errorappids));
+
+	g_strfreev(errorappids);
+}
+
+void
+focus_signal_cb (GDBusConnection *connection, const gchar *sender_name, const gchar *object_path, const gchar *interface_name, const gchar *signal_name, GVariant *parameters, gpointer user_data)
+{
+	guint * focus_count = (guint *)user_data;
+	*focus_count = *focus_count + 1;
+	g_debug("Focus signaled: %d", *focus_count);
+}
+
+TEST_F(ServiceTest, Unity8DashTest) {
+	guint focus_count = 0;
+	GDBusConnection * bus = g_bus_get_sync(G_BUS_TYPE_SESSION, NULL, NULL);
+
+	guint focus_signal = g_dbus_connection_signal_subscribe(bus,
+	                                                        NULL, /* sender */
+	                                                        "com.canonical.UbuntuAppLaunch",
+	                                                        "UnityFocusRequest",
+	                                                        "/",
+	                                                        "unity8-dash", /* arg0 */
+	                                                        G_DBUS_SIGNAL_FLAGS_NONE,
+	                                                        focus_signal_cb,
+	                                                        &focus_count,
+	                                                        NULL); /* destroy func */
+
+
+	DbusTestDbusMockObject * fdoobj = dbus_test_dbus_mock_get_object(dashmock, "/unity8_2ddash", "org.freedesktop.Application", NULL);
+	GMainLoop * main = g_main_loop_new(NULL, FALSE);
+
+	/* Send an invalid URL */
+	url_dispatch_send("scope://foo-bar", simple_cb, main);
+
+	/* Give it some time to send and reply */
+	g_main_loop_run(main);
+	g_main_loop_unref(main);
+
+	guint callslen = 0;
+	const DbusTestDbusMockCall * calls = dbus_test_dbus_mock_object_get_method_calls(mock, jobobj, "Start", &callslen, NULL);
+
+	EXPECT_EQ(0, callslen);
+
+	callslen = 0;
+	calls = dbus_test_dbus_mock_object_get_method_calls(dashmock, fdoobj, "Open", &callslen, NULL);
+
+	EXPECT_EQ(1, callslen);
+	EXPECT_TRUE(g_variant_equal(calls[0].params, g_variant_new_parsed("(['scope://foo-bar'], @a{sv} {})")));
+
+	EXPECT_EQ(1, focus_count);
+
+	g_dbus_connection_signal_unsubscribe(bus, focus_signal);
+	g_clear_object(&bus);
+}

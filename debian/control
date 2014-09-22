@@ -16,8 +16,11 @@ Build-Depends: click-dev,
                libgtest-dev,
                libsqlite3-dev,
                libubuntu-app-launch2-dev (>= 0.3),
-               python,
+               python3,
                python3-dbusmock,
+               python3-fixtures,
+               python3-nose,
+               python3-testtools,
                sqlite3,
 Standards-Version: 3.9.4
 Homepage: http://launchpad.net/url-dispatcher
@@ -31,8 +34,7 @@ Package: url-dispatcher
 Architecture: any
 Multi-Arch: same
 Pre-Depends: ${misc:Pre-Depends},
-Depends: ubuntu-app-launch,
-         ${misc:Depends},
+Depends: ${misc:Depends},
          ${shlibs:Depends},
 Description: service to allow sending of URLs and get handlers started
  Allows applications to request a URL to be opened and handled by another
@@ -83,3 +85,11 @@ Description: developer files for sending requests to the url dispatcher
  starting them inside its own Application Confinement.
  .
  This package contains files that are needed to build applications.
+
+Package: url-dispatcher-testability
+Architecture: all
+Depends: ${misc:Depends},
+         ${python3:Depends},
+         python3-dbusmock,
+         python3-dbus,
+Description: A fake URL dispatcher for use in testing.
