@@ -152,25 +152,3 @@ TEST_F(DispatcherTest, CalendarTest)
 
 	return;
 }
-
-/* FIXME: These should go away */
-TEST_F(DispatcherTest, FixmeTest)
-{
-	gchar * out_appid = NULL;
-	const gchar * out_url = NULL;
-
-	/* File Video */
-	dispatcher_url_to_appid("file:///home/bar/Videos/foo.mp4", &out_appid, &out_url);
-	dispatcher_send_to_app(out_appid, out_url);
-	ASSERT_STREQ("mediaplayer-app", ubuntu_app_launch_mock_get_last_app_id());
-	ubuntu_app_launch_mock_clear_last_app_id();
-
-	/* File Video */
-	dispatcher_url_to_appid("file:///home/bar/Music/The_Bars_Live.mp3", &out_appid, &out_url);
-	dispatcher_send_to_app(out_appid, out_url);
-	ASSERT_STREQ("com.ubuntu.music_music_1.5.4", ubuntu_app_launch_mock_get_last_app_id());
-	ubuntu_app_launch_mock_clear_last_app_id();
-
-	return;
-}
-

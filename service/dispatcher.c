@@ -31,8 +31,6 @@ static ServiceIfaceComCanonicalURLDispatcher * skel = NULL;
 static GRegex * applicationre = NULL;
 static GRegex * appidre = NULL;
 static GRegex * genericre = NULL;
-static GRegex * musicfilere = NULL; /* FIXME */
-static GRegex * videofilere = NULL; /* FIXME */
 static sqlite3 * urldb = NULL;
 
 /* Errors */
@@ -364,34 +362,6 @@ dispatcher_url_to_appid (const gchar * url, gchar ** out_appid, const gchar ** o
 	}
 	g_match_info_free(appmatch);
 
-	/* start FIXME: These are needed work arounds until everything migrates away
-	   from them.  Ewww */
-	GMatchInfo * musicmatch = NULL;
-	if (g_regex_match(musicfilere, url, 0, &musicmatch)) {
-		gboolean retval = FALSE;
-
-		*out_appid = ubuntu_app_launch_triplet_to_app_id("com.ubuntu.music", "music", NULL);
-		if (*out_appid != NULL) {
-			*out_url = url;
-			retval = TRUE;
-		}
-
-		g_match_info_free(musicmatch);
-		return retval;
-	}
-	g_match_info_free(musicmatch);
-
-	GMatchInfo * videomatch = NULL;
-	if (g_regex_match(videofilere, url, 0, &videomatch)) {
-		*out_appid = g_strdup("mediaplayer-app");
-		*out_url = url;
-
-		g_match_info_free(videomatch);
-		return TRUE;
-	}
-	g_match_info_free(videomatch);
-	/* end FIXME: Making the ugly stop */
-
 	/* Check the URL db */
 	GMatchInfo * genericmatch = NULL;
 	if (g_regex_match(genericre, url, 0, &genericmatch)) {
@@ -468,8 +438,6 @@ bus_got (GObject * obj, GAsyncResult * res, gpointer user_data)
 	return;
 }
 
-#define USERNAME_REGEX  "[a-zA-Z0-9_\\-]*"
-
 /* Initialize all the globals */
 gboolean
 dispatcher_init (GMainLoop * mainloop)
@@ -481,10 +449,6 @@ dispatcher_init (GMainLoop * mainloop)
 	applicationre = g_regex_new("^application:///([a-zA-Z0-9_\\.-]*)\\.desktop$", 0, 0, NULL);
 	appidre = g_regex_new("^appid://([a-z0-9\\.-]*)/([a-zA-Z0-9-]*)/([a-zA-Z0-9\\.-]*)$", 0, 0, NULL);
 	genericre = g_regex_new("^(.*)://([a-z0-9\\.-]*)?/?(.*)?$", 0, 0, NULL);
-
-	/* FIXME: Legacy */
-	musicfilere = g_regex_new("^file:///home/" USERNAME_REGEX "/Music/", 0, 0, NULL);
-	videofilere = g_regex_new("^file:///home/" USERNAME_REGEX "/Videos/", 0, 0, NULL);
 
 	g_bus_get(G_BUS_TYPE_SESSION, cancellable, bus_got, mainloop);
 
@@ -506,8 +470,6 @@ dispatcher_shutdown (void)
 	g_regex_unref(applicationre);
 	g_regex_unref(appidre);
 	g_regex_unref(genericre);
-	g_regex_unref(musicfilere); /* FIXME */
-	g_regex_unref(videofilere); /* FIXME */
 	sqlite3_close(urldb);
 
 	return TRUE;
