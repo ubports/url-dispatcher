@@ -1,3 +1,11 @@
+url-dispatcher (0.1+14.10.20140925-0ubuntu1) utopic; urgency=low
+
+  [ Ted Gould ]
+  * Drop file based URLs for Music and Video (LP: #1340952)
+  * Update tests to work with new UAL requirements (LP: #1370735)
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Thu, 25 Sep 2014 13:29:40 +0000
+
 url-dispatcher (0.1+14.10.20140905.1-0ubuntu1) utopic; urgency=low
 
   [ Ted Gould ]
