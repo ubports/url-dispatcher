@@ -161,12 +161,12 @@ TEST_F(DispatcherTest, DialerTest)
 	const gchar * out_url = NULL;
 
 	/* Base Calendar */
-	dispatcher_url_to_appid("tel:+442031485000", &out_appid, &out_url);
+	EXPECT_TRUE(dispatcher_url_to_appid("tel:+442031485000", &out_appid, &out_url));
 	EXPECT_STREQ("com.ubuntu.dialer_dialer_1234", ubuntu_app_launch_mock_get_last_app_id());
 	ubuntu_app_launch_mock_clear_last_app_id();
 
 	/* Two Slash, nothing else */
-	dispatcher_url_to_appid("tel:911,,,1,,1,,2", &out_appid, &out_url);
+	EXPECT_TRUE(dispatcher_url_to_appid("tel:911,,,1,,1,,2", &out_appid, &out_url));
 	EXPECT_STREQ("com.ubuntu.dialer_dialer_1234", ubuntu_app_launch_mock_get_last_app_id());
 	ubuntu_app_launch_mock_clear_last_app_id();
 
