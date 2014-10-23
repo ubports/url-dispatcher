@@ -42,6 +42,8 @@ class DispatcherTest : public ::testing::Test
 
 			url_db_set_file_motification_time(db, "/testdir/com.ubuntu.calendar_calendar_9.8.2343.url-dispatcher", &timestamp);
 			url_db_insert_url(db, "/testdir/com.ubuntu.calendar_calendar_9.8.2343.url-dispatcher", "calendar", NULL);
+			url_db_set_file_motification_time(db, "/testdir/com.ubuntu.dialer_dialer_1234.url-dispatcher", &timestamp);
+			url_db_insert_url(db, "/testdir/com.ubuntu.dialer_dialer_dialer_1234.url-dispatcher", "tel", NULL);
 
 			sqlite3_close(db);
 
@@ -148,6 +150,24 @@ TEST_F(DispatcherTest, CalendarTest)
 	dispatcher_url_to_appid("calendar://", &out_appid, &out_url);
 	dispatcher_send_to_app(out_appid, out_url);
 	ASSERT_STREQ("com.ubuntu.calendar_calendar_9.8.2343", ubuntu_app_launch_mock_get_last_app_id());
+	ubuntu_app_launch_mock_clear_last_app_id();
+
+	return;
+}
+
+TEST_F(DispatcherTest, DialerTest)
+{
+	gchar * out_appid = NULL;
+	const gchar * out_url = NULL;
+
+	/* Base Calendar */
+	dispatcher_url_to_appid("tel:+442031485000", &out_appid, &out_url);
+	EXPECT_STREQ("com.ubuntu.dialer_dialer_1234", ubuntu_app_launch_mock_get_last_app_id());
+	ubuntu_app_launch_mock_clear_last_app_id();
+
+	/* Two Slash, nothing else */
+	dispatcher_url_to_appid("tel:911,,,1,,1,,2", &out_appid, &out_url);
+	EXPECT_STREQ("com.ubuntu.dialer_dialer_1234", ubuntu_app_launch_mock_get_last_app_id());
 	ubuntu_app_launch_mock_clear_last_app_id();
 
 	return;
