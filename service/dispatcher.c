@@ -370,6 +370,7 @@ dispatcher_url_to_appid (const gchar * url, gchar ** out_appid, const gchar ** o
 		gchar * domain = g_match_info_fetch(genericmatch, 2);
 
 		*out_appid = url_db_find_url(urldb, protocol, domain);
+		g_debug("Protocol '%s' for domain '%s' resulting in app id '%s'", protocol, domain, *out_appid);
 
 		if (*out_appid != NULL) {
 			found = TRUE;
