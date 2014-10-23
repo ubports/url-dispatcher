@@ -42,8 +42,12 @@ class DispatcherTest : public ::testing::Test
 
 			url_db_set_file_motification_time(db, "/testdir/com.ubuntu.calendar_calendar_9.8.2343.url-dispatcher", &timestamp);
 			url_db_insert_url(db, "/testdir/com.ubuntu.calendar_calendar_9.8.2343.url-dispatcher", "calendar", NULL);
+
 			url_db_set_file_motification_time(db, "/testdir/com.ubuntu.dialer_dialer_1234.url-dispatcher", &timestamp);
 			url_db_insert_url(db, "/testdir/com.ubuntu.dialer_dialer_1234.url-dispatcher", "tel", NULL);
+
+			url_db_set_file_motification_time(db, "/testdir/magnet-test.url-dispatcher", &timestamp);
+			url_db_insert_url(db, "/testdir/magnet-test.url-dispatcher", "magnet", NULL);
 
 			sqlite3_close(db);
 
@@ -160,14 +164,26 @@ TEST_F(DispatcherTest, DialerTest)
 	gchar * out_appid = NULL;
 	const gchar * out_url = NULL;
 
-	/* Base Calendar */
+	/* Base Telephone */
 	EXPECT_TRUE(dispatcher_url_to_appid("tel:+442031485000", &out_appid, &out_url));
 	EXPECT_STREQ("com.ubuntu.dialer_dialer_1234", out_appid);
 	g_free(out_appid);
 
-	/* Two Slash, nothing else */
+	/* Tel with bunch of commas */
 	EXPECT_TRUE(dispatcher_url_to_appid("tel:911,,,1,,1,,2", &out_appid, &out_url));
 	EXPECT_STREQ("com.ubuntu.dialer_dialer_1234", out_appid);
+	g_free(out_appid);
+
+	return;
+}
+
+TEST_F(DispatcherTest, MagnetTest)
+{
+	gchar * out_appid = NULL;
+	const gchar * out_url = NULL;
+
+	EXPECT_TRUE(dispatcher_url_to_appid("magnet:?xt=urn:ed2k:31D6CFE0D16AE931B73C59D7E0C089C0&xl=0&dn=zero_len.fil&xt=urn:bitprint:3I42H3S6NNFQ2MSVX7XZKYAYSCX5QBYJ.LWPNACQDBZRYXW3VHJVCJ64QBZNGHOHHHZWCLNQ&xt=urn:md5:D41D8CD98F00B204E9800998ECF8427E", &out_appid, &out_url));
+	EXPECT_STREQ("magnet-test", out_appid);
 	g_free(out_appid);
 
 	return;
