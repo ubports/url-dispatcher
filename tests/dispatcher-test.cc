@@ -38,7 +38,9 @@ class DispatcherTest : public ::testing::Test
 			g_setenv("URL_DISPATCHER_CACHE_DIR", cachedir, TRUE);
 
 			sqlite3 * db = url_db_create_database();
-			GTimeVal timestamp = { .tv_sec = 12345 };
+			GTimeVal timestamp;
+			timestamp.tv_sec = 12345;
+			timestamp.tv_usec = 0;
 
 			url_db_set_file_motification_time(db, "/testdir/com.ubuntu.calendar_calendar_9.8.2343.url-dispatcher", &timestamp);
 			url_db_insert_url(db, "/testdir/com.ubuntu.calendar_calendar_9.8.2343.url-dispatcher", "calendar", NULL);
@@ -121,16 +123,16 @@ TEST_F(DispatcherTest, ApplicationTest)
 TEST_F(DispatcherTest, RestrictionTest)
 {
 	/* NULL cases */
-	EXPECT_EQ(false, dispatcher_appid_restrict("foo-bar", NULL));
-	EXPECT_EQ(false, dispatcher_appid_restrict("foo-bar", ""));
+	EXPECT_FALSE(dispatcher_appid_restrict("foo-bar", NULL));
+	EXPECT_FALSE(dispatcher_appid_restrict("foo-bar", ""));
 	/* Legacy case, full match */
-	EXPECT_EQ(false, dispatcher_appid_restrict("foo-bar", "foo-bar"));
-	EXPECT_EQ(false, dispatcher_appid_restrict("foo_bar", "foo_bar"));
-	EXPECT_EQ(true,  dispatcher_appid_restrict("foo_bar", "foo-bar"));
+	EXPECT_FALSE(dispatcher_appid_restrict("foo-bar", "foo-bar"));
+	EXPECT_FALSE(dispatcher_appid_restrict("foo_bar", "foo_bar"));
+	EXPECT_TRUE(dispatcher_appid_restrict("foo_bar", "foo-bar"));
 	/* Click case, match package */
-	EXPECT_EQ(false, dispatcher_appid_restrict("com.test.foo_bar-app_0.3.4", "com.test.foo"));
-	EXPECT_EQ(true,  dispatcher_appid_restrict("com.test.foo_bar-app_0.3.4", "com.test.bar"));
-	EXPECT_EQ(true,  dispatcher_appid_restrict("com.test.foo_bar-app", "com.test.bar"));
+	EXPECT_FALSE(dispatcher_appid_restrict("com.test.foo_bar-app_0.3.4", "com.test.foo"));
+	EXPECT_TRUE(dispatcher_appid_restrict("com.test.foo_bar-app_0.3.4", "com.test.bar"));
+	EXPECT_TRUE(dispatcher_appid_restrict("com.test.foo_bar-app", "com.test.bar"));
 }
 
 TEST_F(DispatcherTest, CalendarTest)

@@ -39,7 +39,7 @@ enum {
 	ERROR_RESTRICTED_URL
 };
 
-G_DEFINE_QUARK(url_dispatcher, url_dispatcher_error);
+G_DEFINE_QUARK(url_dispatcher, url_dispatcher_error)
 
 /* Register our errors */
 static void

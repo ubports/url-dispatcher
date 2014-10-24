@@ -171,7 +171,7 @@ TEST_F(DirectoryUpdateTest, DirDoesntExist)
 	EXPECT_EQ(0, get_url_count(db));
 
 	sqlite3_close(db);
-};
+}
 
 TEST_F(DirectoryUpdateTest, SingleGoodItem)
 {
@@ -188,7 +188,7 @@ TEST_F(DirectoryUpdateTest, SingleGoodItem)
 	EXPECT_TRUE(has_url(db, "http", "ubuntu.com"));
 
 	sqlite3_close(db);
-};
+}
 
 TEST_F(DirectoryUpdateTest, RerunAgain)
 {
@@ -217,7 +217,7 @@ TEST_F(DirectoryUpdateTest, RerunAgain)
 	EXPECT_EQ(1, get_url_count(db));
 
 	sqlite3_close(db);
-};
+}
 
 TEST_F(DirectoryUpdateTest, VariedItems)
 {
@@ -266,7 +266,7 @@ TEST_F(DirectoryUpdateTest, VariedItems)
 	EXPECT_FALSE(has_url(db, "dupfile", "this.is.in.two.file.org"));
 
 	sqlite3_close(db);
-};
+}
 
 TEST_F(DirectoryUpdateTest, RemoveFile)
 {

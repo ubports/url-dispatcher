@@ -142,7 +142,7 @@ class ServiceTest : public ::testing::Test
 
 		void pause (int time) {
 			GMainLoop * loop = g_main_loop_new(NULL, FALSE);
-			guint timer = g_timeout_add(time, quit_loop, loop);
+			g_timeout_add(time, quit_loop, loop);
 			g_main_loop_run(loop);
 			g_main_loop_unref(loop);
 		}
@@ -165,7 +165,7 @@ TEST_F(ServiceTest, InvalidTest) {
 	g_main_loop_unref(main);
 
 	guint callslen = 0;
-	const DbusTestDbusMockCall * calls = dbus_test_dbus_mock_object_get_method_calls(mock, jobobj, "Start", &callslen, NULL);
+	dbus_test_dbus_mock_object_get_method_calls(mock, jobobj, "Start", &callslen, NULL);
 
 	ASSERT_EQ(callslen, 0);
 }

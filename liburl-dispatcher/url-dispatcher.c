@@ -60,7 +60,7 @@ url_dispatched (GObject * obj, GAsyncResult * res, gpointer user_data)
 void
 url_dispatch_send (const gchar * url, URLDispatchCallback cb, gpointer user_data)
 {
-	return url_dispatch_send_restricted(url, NULL, cb, user_data);
+	url_dispatch_send_restricted(url, NULL, cb, user_data);
 }
 
 void
