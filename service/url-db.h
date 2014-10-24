@@ -17,11 +17,11 @@
  *
  */
 
+#ifndef URL_DB_H
+#define URL_DB_H 1
+
 #include <glib.h>
 #include <sqlite3.h>
-
-#ifndef __URL_DB_H__
-#define __URL_DB_H__ 1
 
 G_BEGIN_DECLS
 
@@ -46,4 +46,4 @@ gboolean      url_db_remove_file                    (sqlite3 *      db,
 
 G_END_DECLS
 
-#endif /* __URL_DB_H__ */
+#endif /* URL_DB_H */
