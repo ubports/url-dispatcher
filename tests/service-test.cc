@@ -26,13 +26,13 @@
 class ServiceTest : public ::testing::Test
 {
 	protected:
-		DbusTestService * service = NULL;
-		DbusTestDbusMock * mock = NULL;
-		DbusTestDbusMock * dashmock = NULL;
-		DbusTestDbusMockObject * obj = NULL;
-		DbusTestDbusMockObject * jobobj = NULL;
-		DbusTestProcess * dispatcher = NULL;
-		GDBusConnection * bus = NULL;
+		DbusTestService * service = nullptr;
+		DbusTestDbusMock * mock = nullptr;
+		DbusTestDbusMock * dashmock = nullptr;
+		DbusTestDbusMockObject * obj = nullptr;
+		DbusTestDbusMockObject * jobobj = nullptr;
+		DbusTestProcess * dispatcher = nullptr;
+		GDBusConnection * bus = nullptr;
 
 		virtual void SetUp() {
 			g_setenv("UBUNTU_APP_LAUNCH_USE_SESSION", "1", TRUE);
@@ -41,7 +41,7 @@ class ServiceTest : public ::testing::Test
 
 			SetUpDb();
 
-			service = dbus_test_service_new(NULL);
+			service = dbus_test_service_new(nullptr);
 
 			dispatcher = dbus_test_process_new(URL_DISPATCHER_SERVICE);
 			dbus_test_task_set_name(DBUS_TEST_TASK(dispatcher), "Dispatcher");
@@ -49,23 +49,23 @@ class ServiceTest : public ::testing::Test
 
 			/* Upstart Mock */
 			mock = dbus_test_dbus_mock_new("com.ubuntu.Upstart");
-			obj = dbus_test_dbus_mock_get_object(mock, "/com/ubuntu/Upstart", "com.ubuntu.Upstart0_6", NULL);
+			obj = dbus_test_dbus_mock_get_object(mock, "/com/ubuntu/Upstart", "com.ubuntu.Upstart0_6", nullptr);
 
 			dbus_test_dbus_mock_object_add_method(mock, obj,
 				"GetJobByName",
 				G_VARIANT_TYPE_STRING,
 				G_VARIANT_TYPE_OBJECT_PATH, /* out */
 				"ret = dbus.ObjectPath('/job')", /* python */
-				NULL); /* error */
+				nullptr); /* error */
 
-			jobobj = dbus_test_dbus_mock_get_object(mock, "/job", "com.ubuntu.Upstart0_6.Job", NULL);
+			jobobj = dbus_test_dbus_mock_get_object(mock, "/job", "com.ubuntu.Upstart0_6.Job", nullptr);
 
 			dbus_test_dbus_mock_object_add_method(mock, jobobj,
 				"Start",
 				G_VARIANT_TYPE("(asb)"),
 				G_VARIANT_TYPE_OBJECT_PATH, /* out */
 				"ret = dbus.ObjectPath('/instance')", /* python */
-				NULL); /* error */
+				nullptr); /* error */
 
 			dbus_test_task_set_name(DBUS_TEST_TASK(mock), "Upstart");
 			dbus_test_service_add_task(service, DBUS_TEST_TASK(mock));
@@ -73,20 +73,20 @@ class ServiceTest : public ::testing::Test
 			/* Dash Mock */
 			dashmock = dbus_test_dbus_mock_new("com.canonical.UnityDash");
 
-			DbusTestDbusMockObject * fdoobj = dbus_test_dbus_mock_get_object(dashmock, "/unity8_2ddash", "org.freedesktop.Application", NULL);
+			DbusTestDbusMockObject * fdoobj = dbus_test_dbus_mock_get_object(dashmock, "/unity8_2ddash", "org.freedesktop.Application", nullptr);
 			dbus_test_dbus_mock_object_add_method(dashmock, fdoobj,
 												  "Open",
 												  G_VARIANT_TYPE("(asa{sv})"),
-												  NULL, /* return */
+												  nullptr, /* return */
 												  "", /* python */
-												  NULL); /* error */
+												  nullptr); /* error */
 			dbus_test_task_set_name(DBUS_TEST_TASK(dashmock), "UnityDash");
 			dbus_test_service_add_task(service, DBUS_TEST_TASK(dashmock));
 
 			/* Start your engines! */
 			dbus_test_service_start_tasks(service);
 
-			bus = g_bus_get_sync(G_BUS_TYPE_SESSION, NULL, NULL);
+			bus = g_bus_get_sync(G_BUS_TYPE_SESSION, nullptr, nullptr);
 			g_dbus_connection_set_exit_on_close(bus, FALSE);
 			g_object_add_weak_pointer(G_OBJECT(bus), (gpointer *)&bus);
 			return;
@@ -105,7 +105,7 @@ class ServiceTest : public ::testing::Test
 			g_object_unref(bus);
 
 			unsigned int cleartry = 0;
-			while (bus != NULL && cleartry < 100) {
+			while (bus != nullptr && cleartry < 100) {
 				g_usleep(100000);
 				while (g_main_pending())
 					g_main_iteration(TRUE);
@@ -127,12 +127,12 @@ class ServiceTest : public ::testing::Test
 			GTimeVal time = {0};
 			time.tv_sec = 5;
 			url_db_set_file_motification_time(db, "/unity8-dash.url-dispatcher", &time);
-			url_db_insert_url(db, "/unity8-dash.url-dispatcher", "scope", NULL);
+			url_db_insert_url(db, "/unity8-dash.url-dispatcher", "scope", nullptr);
 			sqlite3_close(db);
 		}
 
 		void TearDownDb () {
-			g_spawn_command_line_sync("rm -rf " CMAKE_BINARY_DIR "/service-test-cache", NULL, NULL, NULL, NULL);
+			g_spawn_command_line_sync("rm -rf " CMAKE_BINARY_DIR "/service-test-cache", nullptr, nullptr, nullptr, nullptr);
 		}
 		
 		static gboolean quit_loop (gpointer ploop) {
@@ -141,7 +141,7 @@ class ServiceTest : public ::testing::Test
 		}
 
 		void pause (int time) {
-			GMainLoop * loop = g_main_loop_new(NULL, FALSE);
+			GMainLoop * loop = g_main_loop_new(nullptr, FALSE);
 			g_timeout_add(time, quit_loop, loop);
 			g_main_loop_run(loop);
 			g_main_loop_unref(loop);
@@ -155,7 +155,7 @@ simple_cb (const gchar * url, gboolean success, gpointer user_data)
 }
 
 TEST_F(ServiceTest, InvalidTest) {
-	GMainLoop * main = g_main_loop_new(NULL, FALSE);
+	GMainLoop * main = g_main_loop_new(nullptr, FALSE);
 
 	/* Send an invalid URL */
 	url_dispatch_send("foo://bar/barish", simple_cb, main);
@@ -165,13 +165,13 @@ TEST_F(ServiceTest, InvalidTest) {
 	g_main_loop_unref(main);
 
 	guint callslen = 0;
-	dbus_test_dbus_mock_object_get_method_calls(mock, jobobj, "Start", &callslen, NULL);
+	dbus_test_dbus_mock_object_get_method_calls(mock, jobobj, "Start", &callslen, nullptr);
 
 	ASSERT_EQ(callslen, 0);
 }
 
 TEST_F(ServiceTest, ApplicationTest) {
-	GMainLoop * main = g_main_loop_new(NULL, FALSE);
+	GMainLoop * main = g_main_loop_new(nullptr, FALSE);
 
 	/* Send an invalid URL */
 	url_dispatch_send("application:///foo-bar.desktop", simple_cb, main);
@@ -181,7 +181,7 @@ TEST_F(ServiceTest, ApplicationTest) {
 	g_main_loop_unref(main);
 
 	guint callslen = 0;
-	const DbusTestDbusMockCall * calls = dbus_test_dbus_mock_object_get_method_calls(mock, jobobj, "Start", &callslen, NULL);
+	const DbusTestDbusMockCall * calls = dbus_test_dbus_mock_object_get_method_calls(mock, jobobj, "Start", &callslen, nullptr);
 
 	ASSERT_EQ(callslen, 1);
 
@@ -192,7 +192,7 @@ TEST_F(ServiceTest, ApplicationTest) {
 	GVariantIter iter;
 	bool found_appid = false;
 	g_variant_iter_init(&iter, env);
-	gchar * var = NULL;
+	gchar * var = nullptr;
 
 	while (g_variant_iter_loop(&iter, "s", &var)) {
 		if (g_strcmp0(var, "APP_ID=foo-bar") == 0) {
@@ -210,7 +210,7 @@ TEST_F(ServiceTest, TestURLTest) {
 	/* Simple */
 	const char * testurls[] = {
 		"application:///foo-bar.desktop",
-		NULL
+		nullptr
 	};
 
 	gchar ** appids = url_dispatch_url_appid(testurls);
@@ -224,7 +224,7 @@ TEST_F(ServiceTest, TestURLTest) {
 	const char * multiurls[] = {
 		"application:///bar-foo.desktop",
 		"application:///foo-bar.desktop",
-		NULL
+		nullptr
 	};
 
 	gchar ** multiappids = url_dispatch_url_appid(multiurls);
@@ -238,7 +238,7 @@ TEST_F(ServiceTest, TestURLTest) {
 	/* Error URL */
 	const char * errorurls[] = {
 		"foo://bar/no/url",
-		NULL
+		nullptr
 	};
 
 	gchar ** errorappids = url_dispatch_url_appid(errorurls);
@@ -257,10 +257,10 @@ focus_signal_cb (GDBusConnection *connection, const gchar *sender_name, const gc
 
 TEST_F(ServiceTest, Unity8DashTest) {
 	guint focus_count = 0;
-	GDBusConnection * bus = g_bus_get_sync(G_BUS_TYPE_SESSION, NULL, NULL);
+	GDBusConnection * bus = g_bus_get_sync(G_BUS_TYPE_SESSION, nullptr, nullptr);
 
 	guint focus_signal = g_dbus_connection_signal_subscribe(bus,
-	                                                        NULL, /* sender */
+	                                                        nullptr, /* sender */
 	                                                        "com.canonical.UbuntuAppLaunch",
 	                                                        "UnityFocusRequest",
 	                                                        "/",
@@ -268,11 +268,11 @@ TEST_F(ServiceTest, Unity8DashTest) {
 	                                                        G_DBUS_SIGNAL_FLAGS_NONE,
 	                                                        focus_signal_cb,
 	                                                        &focus_count,
-	                                                        NULL); /* destroy func */
+	                                                        nullptr); /* destroy func */
 
 
-	DbusTestDbusMockObject * fdoobj = dbus_test_dbus_mock_get_object(dashmock, "/unity8_2ddash", "org.freedesktop.Application", NULL);
-	GMainLoop * main = g_main_loop_new(NULL, FALSE);
+	DbusTestDbusMockObject * fdoobj = dbus_test_dbus_mock_get_object(dashmock, "/unity8_2ddash", "org.freedesktop.Application", nullptr);
+	GMainLoop * main = g_main_loop_new(nullptr, FALSE);
 
 	/* Send an invalid URL */
 	url_dispatch_send("scope://foo-bar", simple_cb, main);
@@ -282,12 +282,12 @@ TEST_F(ServiceTest, Unity8DashTest) {
 	g_main_loop_unref(main);
 
 	guint callslen = 0;
-	const DbusTestDbusMockCall * calls = dbus_test_dbus_mock_object_get_method_calls(mock, jobobj, "Start", &callslen, NULL);
+	const DbusTestDbusMockCall * calls = dbus_test_dbus_mock_object_get_method_calls(mock, jobobj, "Start", &callslen, nullptr);
 
 	EXPECT_EQ(0, callslen);
 
 	callslen = 0;
-	calls = dbus_test_dbus_mock_object_get_method_calls(dashmock, fdoobj, "Open", &callslen, NULL);
+	calls = dbus_test_dbus_mock_object_get_method_calls(dashmock, fdoobj, "Open", &callslen, nullptr);
 
 	EXPECT_EQ(1, callslen);
 	EXPECT_TRUE(g_variant_equal(calls[0].params, g_variant_new_parsed("(['scope://foo-bar'], @a{sv} {})")));

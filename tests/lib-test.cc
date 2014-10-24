@@ -24,35 +24,35 @@
 class LibTest : public ::testing::Test
 {
 	protected:
-		DbusTestService * service = NULL;
-		DbusTestDbusMock * mock = NULL;
-		DbusTestDbusMockObject * obj = NULL;
-		GDBusConnection * bus = NULL;
+		DbusTestService * service = nullptr;
+		DbusTestDbusMock * mock = nullptr;
+		DbusTestDbusMockObject * obj = nullptr;
+		GDBusConnection * bus = nullptr;
 
 		virtual void SetUp() {
-			service = dbus_test_service_new(NULL);
+			service = dbus_test_service_new(nullptr);
 
 			mock = dbus_test_dbus_mock_new("com.canonical.URLDispatcher");
-			obj = dbus_test_dbus_mock_get_object(mock, "/com/canonical/URLDispatcher", "com.canonical.URLDispatcher", NULL);
+			obj = dbus_test_dbus_mock_get_object(mock, "/com/canonical/URLDispatcher", "com.canonical.URLDispatcher", nullptr);
 
 			dbus_test_dbus_mock_object_add_method(mock, obj,
 				"DispatchURL",
 				G_VARIANT_TYPE("(ss)"),
-				NULL, /* out */
+				nullptr, /* out */
 				"", /* python */
-				NULL); /* error */
+				nullptr); /* error */
 
 			dbus_test_dbus_mock_object_add_method(mock, obj,
 				"TestURL",
 				G_VARIANT_TYPE("as"),
 				G_VARIANT_TYPE("as"),
 				"ret = ['appid']", /* python */
-				NULL); /* error */
+				nullptr); /* error */
 
 			dbus_test_service_add_task(service, DBUS_TEST_TASK(mock));
 			dbus_test_service_start_tasks(service);
 
-			bus = g_bus_get_sync(G_BUS_TYPE_SESSION, NULL, NULL);
+			bus = g_bus_get_sync(G_BUS_TYPE_SESSION, nullptr, nullptr);
 			g_dbus_connection_set_exit_on_close(bus, FALSE);
 			g_object_add_weak_pointer(G_OBJECT(bus), (gpointer *)&bus);
 			return;
@@ -65,7 +65,7 @@ class LibTest : public ::testing::Test
 			g_object_unref(bus);
 
 			unsigned int cleartry = 0;
-			while (bus != NULL && cleartry < 100) {
+			while (bus != nullptr && cleartry < 100) {
 				g_usleep(100000);
 				while (g_main_pending())
 					g_main_iteration(TRUE);
@@ -82,7 +82,7 @@ simple_cb (const gchar * url, gboolean success, gpointer user_data)
 }
 
 TEST_F(LibTest, BaseTest) {
-	GMainLoop * main = g_main_loop_new(NULL, FALSE);
+	GMainLoop * main = g_main_loop_new(nullptr, FALSE);
 
 	url_dispatch_send("foo://bar/barish", simple_cb, main);
 
@@ -91,7 +91,7 @@ TEST_F(LibTest, BaseTest) {
 	g_main_loop_unref(main);
 
 	guint callslen = 0;
-	const DbusTestDbusMockCall * calls = dbus_test_dbus_mock_object_get_method_calls(mock, obj, "DispatchURL", &callslen, NULL);
+	const DbusTestDbusMockCall * calls = dbus_test_dbus_mock_object_get_method_calls(mock, obj, "DispatchURL", &callslen, nullptr);
 
 	// ASSERT_NE(calls, nullptr);
 	ASSERT_EQ(callslen, 1);
@@ -103,10 +103,10 @@ TEST_F(LibTest, BaseTest) {
 
 TEST_F(LibTest, NoMain) {
 	/* Spawning a non-main caller */
-	g_spawn_command_line_sync(LIB_TEST_NO_MAIN_HELPER, NULL, NULL, NULL, NULL);
+	g_spawn_command_line_sync(LIB_TEST_NO_MAIN_HELPER, nullptr, nullptr, nullptr, nullptr);
 
 	guint callslen = 0;
-	const DbusTestDbusMockCall * calls = dbus_test_dbus_mock_object_get_method_calls(mock, obj, "DispatchURL", &callslen, NULL);
+	const DbusTestDbusMockCall * calls = dbus_test_dbus_mock_object_get_method_calls(mock, obj, "DispatchURL", &callslen, nullptr);
 
 	// ASSERT_NE(calls, nullptr);
 	ASSERT_EQ(callslen, 1);
@@ -117,7 +117,7 @@ TEST_F(LibTest, NoMain) {
 }
 
 TEST_F(LibTest, RestrictedTest) {
-	GMainLoop * main = g_main_loop_new(NULL, FALSE);
+	GMainLoop * main = g_main_loop_new(nullptr, FALSE);
 
 	url_dispatch_send_restricted("foo://bar/barish", "bar-package", simple_cb, main);
 
@@ -126,7 +126,7 @@ TEST_F(LibTest, RestrictedTest) {
 	g_main_loop_unref(main);
 
 	guint callslen = 0;
-	const DbusTestDbusMockCall * calls = dbus_test_dbus_mock_object_get_method_calls(mock, obj, "DispatchURL", &callslen, NULL);
+	const DbusTestDbusMockCall * calls = dbus_test_dbus_mock_object_get_method_calls(mock, obj, "DispatchURL", &callslen, nullptr);
 
 	// ASSERT_NE(calls, nullptr);
 	ASSERT_EQ(callslen, 1);
@@ -139,7 +139,7 @@ TEST_F(LibTest, RestrictedTest) {
 TEST_F(LibTest, TestTest) {
 	const gchar * urls[2] = {
 		"foo://bar/barish",
-		NULL
+		nullptr
 	};
 
 	gchar ** appids = url_dispatch_url_appid(urls);
@@ -149,7 +149,7 @@ TEST_F(LibTest, TestTest) {
 	g_strfreev(appids);
 
 	guint callslen = 0;
-	const DbusTestDbusMockCall * calls = dbus_test_dbus_mock_object_get_method_calls(mock, obj, "TestURL", &callslen, NULL);
+	const DbusTestDbusMockCall * calls = dbus_test_dbus_mock_object_get_method_calls(mock, obj, "TestURL", &callslen, nullptr);
 
 	// ASSERT_NE(calls, nullptr);
 	ASSERT_EQ(callslen, 1);

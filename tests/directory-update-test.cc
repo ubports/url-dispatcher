@@ -21,16 +21,16 @@
 class DirectoryUpdateTest : public ::testing::Test
 {
 	protected:
-		gchar * cachedir = NULL;
+		gchar * cachedir = nullptr;
 
 		virtual void SetUp() {
-			cachedir = g_build_filename(CMAKE_BINARY_DIR, "url-db-test-cache", NULL);
+			cachedir = g_build_filename(CMAKE_BINARY_DIR, "url-db-test-cache", nullptr);
 			g_setenv("URL_DISPATCHER_CACHE_DIR", cachedir, TRUE);
 		}
 
 		virtual void TearDown() {
 			gchar * cmdline = g_strdup_printf("rm -rf \"%s\"", cachedir);
-			g_spawn_command_line_sync(cmdline, NULL, NULL, NULL, NULL);
+			g_spawn_command_line_sync(cmdline, nullptr, nullptr, nullptr, nullptr);
 			g_free(cmdline);
 			g_free(cachedir);
 		}
@@ -41,7 +41,7 @@ class DirectoryUpdateTest : public ::testing::Test
 					"select count(*) from configfiles",
 					-1, /* length */
 					&stmt,
-					NULL) != SQLITE_OK) {
+					nullptr) != SQLITE_OK) {
 				g_warning("Unable to parse SQL to get file times");
 				return 0;
 			}
@@ -68,7 +68,7 @@ class DirectoryUpdateTest : public ::testing::Test
 					"select count(*) from urls",
 					-1, /* length */
 					&stmt,
-					NULL) != SQLITE_OK) {
+					nullptr) != SQLITE_OK) {
 				g_warning("Unable to parse SQL to get file times");
 				return 0;
 			}
@@ -95,7 +95,7 @@ class DirectoryUpdateTest : public ::testing::Test
 					"select count(*) from configfiles where name = ?1",
 					-1, /* length */
 					&stmt,
-					NULL) != SQLITE_OK) {
+					nullptr) != SQLITE_OK) {
 				g_warning("Unable to parse SQL to get file times");
 				return false;
 			}
@@ -129,7 +129,7 @@ class DirectoryUpdateTest : public ::testing::Test
 					"select count(*) from urls where protocol = ?1 and domainsuffix = ?2",
 					-1, /* length */
 					&stmt,
-					NULL) != SQLITE_OK) {
+					nullptr) != SQLITE_OK) {
 				g_warning("Unable to parse SQL to get file times");
 				return false;
 			}
@@ -164,7 +164,7 @@ TEST_F(DirectoryUpdateTest, DirDoesntExist)
 	sqlite3 * db = url_db_create_database();
 
 	gchar * cmdline = g_strdup_printf("%s \"%s\"", UPDATE_DIRECTORY_TOOL, CMAKE_SOURCE_DIR "/this-does-not-exist");
-	g_spawn_command_line_sync(cmdline, NULL, NULL, NULL, NULL);
+	g_spawn_command_line_sync(cmdline, nullptr, nullptr, nullptr, nullptr);
 	g_free(cmdline);
 
 	EXPECT_EQ(0, get_file_count(db));
@@ -178,7 +178,7 @@ TEST_F(DirectoryUpdateTest, SingleGoodItem)
 	sqlite3 * db = url_db_create_database();
 
 	gchar * cmdline = g_strdup_printf("%s \"%s\"", UPDATE_DIRECTORY_TOOL, UPDATE_DIRECTORY_URLS);
-	g_spawn_command_line_sync(cmdline, NULL, NULL, NULL, NULL);
+	g_spawn_command_line_sync(cmdline, nullptr, nullptr, nullptr, nullptr);
 	g_free(cmdline);
 
 	EXPECT_EQ(1, get_file_count(db));
@@ -192,25 +192,25 @@ TEST_F(DirectoryUpdateTest, SingleGoodItem)
 
 TEST_F(DirectoryUpdateTest, RerunAgain)
 {
-	gchar * cmdline = NULL;
+	gchar * cmdline = nullptr;
 	sqlite3 * db = url_db_create_database();
 
 	cmdline = g_strdup_printf("%s \"%s\"", UPDATE_DIRECTORY_TOOL, UPDATE_DIRECTORY_URLS);
-	g_spawn_command_line_sync(cmdline, NULL, NULL, NULL, NULL);
+	g_spawn_command_line_sync(cmdline, nullptr, nullptr, nullptr, nullptr);
 	g_free(cmdline);
 
 	EXPECT_EQ(1, get_file_count(db));
 	EXPECT_EQ(1, get_url_count(db));
 
 	cmdline = g_strdup_printf("%s \"%s\"", UPDATE_DIRECTORY_TOOL, UPDATE_DIRECTORY_URLS);
-	g_spawn_command_line_sync(cmdline, NULL, NULL, NULL, NULL);
+	g_spawn_command_line_sync(cmdline, nullptr, nullptr, nullptr, nullptr);
 	g_free(cmdline);
 
 	EXPECT_EQ(1, get_file_count(db));
 	EXPECT_EQ(1, get_url_count(db));
 
 	cmdline = g_strdup_printf("%s \"%s\"", UPDATE_DIRECTORY_TOOL, UPDATE_DIRECTORY_URLS);
-	g_spawn_command_line_sync(cmdline, NULL, NULL, NULL, NULL);
+	g_spawn_command_line_sync(cmdline, nullptr, nullptr, nullptr, nullptr);
 	g_free(cmdline);
 
 	EXPECT_EQ(1, get_file_count(db));
@@ -224,7 +224,7 @@ TEST_F(DirectoryUpdateTest, VariedItems)
 	sqlite3 * db = url_db_create_database();
 
 	gchar * cmdline = g_strdup_printf("%s \"%s\"", UPDATE_DIRECTORY_TOOL, UPDATE_DIRECTORY_VARIED);
-	g_spawn_command_line_sync(cmdline, NULL, NULL, NULL, NULL);
+	g_spawn_command_line_sync(cmdline, nullptr, nullptr, nullptr, nullptr);
 	g_free(cmdline);
 
 	EXPECT_EQ(6, get_file_count(db));
@@ -274,18 +274,18 @@ TEST_F(DirectoryUpdateTest, RemoveFile)
 	sqlite3 * db = url_db_create_database();
 
 	/* A temporary directory to put files in */
-	gchar * datadir = g_build_filename(CMAKE_BINARY_DIR, "remove-file-data", NULL);
+	gchar * datadir = g_build_filename(CMAKE_BINARY_DIR, "remove-file-data", nullptr);
 	g_mkdir_with_parents(datadir,  1 << 6 | 1 << 7 | 1 << 8); // 700
 	ASSERT_TRUE(g_file_test(datadir, (GFileTest)(G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR)));
 
 	/* Copy the files */
 	cmdline = g_strdup_printf("cp \"%s/%s\" \"%s\"", UPDATE_DIRECTORY_URLS, "single-good.url-dispatcher", datadir);
-	g_spawn_command_line_sync(cmdline, NULL, NULL, NULL, NULL);
+	g_spawn_command_line_sync(cmdline, nullptr, nullptr, nullptr, nullptr);
 	g_free(cmdline);
 
 	/* Run the tool */
 	cmdline = g_strdup_printf("%s \"%s\"", UPDATE_DIRECTORY_TOOL, datadir);
-	g_spawn_command_line_sync(cmdline, NULL, NULL, NULL, NULL);
+	g_spawn_command_line_sync(cmdline, nullptr, nullptr, nullptr, nullptr);
 	g_free(cmdline);
 
 	EXPECT_EQ(1, get_file_count(db));
@@ -293,12 +293,12 @@ TEST_F(DirectoryUpdateTest, RemoveFile)
 
 	/* Kill the files */
 	cmdline = g_strdup_printf("rm \"%s/%s\"", datadir, "single-good.url-dispatcher");
-	g_spawn_command_line_sync(cmdline, NULL, NULL, NULL, NULL);
+	g_spawn_command_line_sync(cmdline, nullptr, nullptr, nullptr, nullptr);
 	g_free(cmdline);
 
 	/* Run the tool */
 	cmdline = g_strdup_printf("%s \"%s\"", UPDATE_DIRECTORY_TOOL, datadir);
-	g_spawn_command_line_sync(cmdline, NULL, NULL, NULL, NULL);
+	g_spawn_command_line_sync(cmdline, nullptr, nullptr, nullptr, nullptr);
 	g_free(cmdline);
 
 	EXPECT_EQ(0, get_file_count(db));
@@ -306,7 +306,7 @@ TEST_F(DirectoryUpdateTest, RemoveFile)
 
 	/* Cleanup */
 	cmdline = g_strdup_printf("rm -rf \"%s\"", datadir);
-	g_spawn_command_line_sync(cmdline, NULL, NULL, NULL, NULL);
+	g_spawn_command_line_sync(cmdline, nullptr, nullptr, nullptr, nullptr);
 	g_free(cmdline);
 
 	sqlite3_close(db);
@@ -318,18 +318,18 @@ TEST_F(DirectoryUpdateTest, RemoveDirectory)
 	sqlite3 * db = url_db_create_database();
 
 	/* A temporary directory to put files in */
-	gchar * datadir = g_build_filename(CMAKE_BINARY_DIR, "remove-directory-data", NULL);
+	gchar * datadir = g_build_filename(CMAKE_BINARY_DIR, "remove-directory-data", nullptr);
 	g_mkdir_with_parents(datadir,  1 << 6 | 1 << 7 | 1 << 8); // 700
 	ASSERT_TRUE(g_file_test(datadir, (GFileTest)(G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR)));
 
 	/* Copy the files */
 	cmdline = g_strdup_printf("cp \"%s/%s\" \"%s\"", UPDATE_DIRECTORY_URLS, "single-good.url-dispatcher", datadir);
-	g_spawn_command_line_sync(cmdline, NULL, NULL, NULL, NULL);
+	g_spawn_command_line_sync(cmdline, nullptr, nullptr, nullptr, nullptr);
 	g_free(cmdline);
 
 	/* Run the tool */
 	cmdline = g_strdup_printf("%s \"%s/\"", UPDATE_DIRECTORY_TOOL, datadir);
-	g_spawn_command_line_sync(cmdline, NULL, NULL, NULL, NULL);
+	g_spawn_command_line_sync(cmdline, nullptr, nullptr, nullptr, nullptr);
 	g_free(cmdline);
 
 	EXPECT_EQ(1, get_file_count(db));
@@ -337,12 +337,12 @@ TEST_F(DirectoryUpdateTest, RemoveDirectory)
 
 	/* Kill the dir */
 	cmdline = g_strdup_printf("rm -rf \"%s\"", datadir);
-	g_spawn_command_line_sync(cmdline, NULL, NULL, NULL, NULL);
+	g_spawn_command_line_sync(cmdline, nullptr, nullptr, nullptr, nullptr);
 	g_free(cmdline);
 
 	/* Run the tool */
 	cmdline = g_strdup_printf("%s \"%s/\"", UPDATE_DIRECTORY_TOOL, datadir);
-	g_spawn_command_line_sync(cmdline, NULL, NULL, NULL, NULL);
+	g_spawn_command_line_sync(cmdline, nullptr, nullptr, nullptr, nullptr);
 	g_free(cmdline);
 
 	EXPECT_EQ(0, get_file_count(db));

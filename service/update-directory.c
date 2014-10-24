@@ -115,9 +115,7 @@ check_file_outofdate (const gchar * filename, sqlite3 * db)
 	GTimeVal filetime = {0};
 
 	GFile * file = g_file_new_for_path(filename);
-	if(!file) {
-		return FALSE;
-	}
+	g_return_val_if_fail(file != NULL, FALSE);
 
 	GFileInfo * info = g_file_query_info(file, G_FILE_ATTRIBUTE_TIME_MODIFIED, G_FILE_QUERY_INFO_NONE, NULL, NULL);
 	g_file_info_get_modification_time(info, &filetime);
