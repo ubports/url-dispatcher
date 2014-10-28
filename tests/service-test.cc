@@ -283,8 +283,10 @@ TEST_F(ServiceTest, Unity8DashTest) {
 	g_main_loop_unref(main);
 
 	guint callslen = 0;
-	const DbusTestDbusMockCall * calls = dbus_test_dbus_mock_object_get_method_calls(mock, jobobj, "Start", &callslen, nullptr);
+	const DbusTestDbusMockCall * calls = nullptr;
+	calls = dbus_test_dbus_mock_object_get_method_calls(mock, jobobj, "Start", &callslen, nullptr);
 
+	EXPECT_NE(calls, nullptr);
 	EXPECT_EQ(0, callslen);
 
 	callslen = 0;

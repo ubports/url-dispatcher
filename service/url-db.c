@@ -340,7 +340,6 @@ url_db_remove_file (sqlite3 * db, const gchar * path)
 
 	sqlite3_bind_text(stmt, 1, path, -1, SQLITE_TRANSIENT);
 
-	exec_status = SQLITE_ROW;
 	while ((exec_status = sqlite3_step(stmt)) == SQLITE_ROW) {
 	}
 
