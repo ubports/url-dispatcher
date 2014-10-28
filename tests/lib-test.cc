@@ -77,7 +77,7 @@ class LibTest : public ::testing::Test
 };
 
 static void
-simple_cb (const gchar * url, gboolean success, gpointer user_data)
+simple_cb (const gchar * /*url*/, gboolean /*success*/, gpointer user_data)
 {
 	g_main_loop_quit(static_cast<GMainLoop *>(user_data));
 }

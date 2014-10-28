@@ -125,7 +125,7 @@ class ServiceTest : public ::testing::Test
 
 			sqlite3 * db = url_db_create_database();
 
-			GTimeVal time = {0};
+			GTimeVal time = {0, 0};
 			time.tv_sec = 5;
 			url_db_set_file_motification_time(db, "/unity8-dash.url-dispatcher", &time);
 			url_db_insert_url(db, "/unity8-dash.url-dispatcher", "scope", nullptr);
@@ -150,7 +150,7 @@ class ServiceTest : public ::testing::Test
 };
 
 static void
-simple_cb (const gchar * url, gboolean success, gpointer user_data)
+simple_cb (const gchar * /*url*/, gboolean /*success*/, gpointer user_data)
 {
 	g_main_loop_quit(static_cast<GMainLoop *>(user_data));
 }
@@ -249,7 +249,7 @@ TEST_F(ServiceTest, TestURLTest) {
 }
 
 void
-focus_signal_cb (GDBusConnection *connection, const gchar *sender_name, const gchar *object_path, const gchar *interface_name, const gchar *signal_name, GVariant *parameters, gpointer user_data)
+focus_signal_cb (GDBusConnection */*connection*/, const gchar */*sender_name*/, const gchar */*object_path*/, const gchar */*interface_name*/, const gchar */*signal_name*/, GVariant */*parameters*/, gpointer user_data)
 {
 	guint * focus_count = (guint *)user_data;
 	*focus_count = *focus_count + 1;

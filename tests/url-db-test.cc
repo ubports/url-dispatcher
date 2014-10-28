@@ -86,7 +86,7 @@ TEST_F(UrlDBTest, TimestampTest) {
 
 	ASSERT_TRUE(db != nullptr);
 
-	GTimeVal timeval = {0};
+	GTimeVal timeval = {0, 0};
 	EXPECT_FALSE(url_db_get_file_motification_time(db, "/foo", &timeval));
 
 	timeval.tv_sec = 12345;
@@ -104,7 +104,7 @@ TEST_F(UrlDBTest, UrlTest) {
 
 	ASSERT_TRUE(db != nullptr);
 
-	GTimeVal timeval = {0};
+	GTimeVal timeval = {0, 0};
 	timeval.tv_sec = 12345;
 	EXPECT_TRUE(url_db_set_file_motification_time(db, "/foo.url-dispatcher", &timeval));
 
@@ -129,7 +129,7 @@ TEST_F(UrlDBTest, FileListTest) {
 
 	ASSERT_TRUE(db != nullptr);
 
-	GTimeVal timeval = {0};
+	GTimeVal timeval = {0, 0};
 	timeval.tv_sec = 12345;
 
 	/* One Dir */
@@ -169,7 +169,7 @@ TEST_F(UrlDBTest, RemoveFile) {
 
 	ASSERT_TRUE(db != nullptr);
 
-	GTimeVal timeval = {0};
+	GTimeVal timeval = {0, 0};
 	timeval.tv_sec = 12345;
 	EXPECT_TRUE(url_db_set_file_motification_time(db, "/foo.url-dispatcher", &timeval));
 
@@ -190,8 +190,8 @@ TEST_F(UrlDBTest, ReplaceTest) {
 
 	ASSERT_TRUE(db != nullptr);
 
-	GTimeVal timeval = {0};
-	GTimeVal timevaltest = {0};
+	GTimeVal timeval = {0, 0};
+	GTimeVal timevaltest = {0, 0};
 
 	timeval.tv_sec = 12345;
 	EXPECT_TRUE(url_db_set_file_motification_time(db, "/foo.url-dispatcher", &timeval));

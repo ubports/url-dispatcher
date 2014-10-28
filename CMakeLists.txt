@@ -35,8 +35,17 @@ if (EXISTS "/etc/debian_version")
   set(CMAKE_INSTALL_FULL_LIBEXECDIR "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBEXECDIR}")
 endif()
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wpedantic")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wpedantic")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
+
+# https://bugzilla.gnome.org/show_bug.cgi?id=669355
+# Since gdbus-codegen does not produce warning-free code
+# and we use -Werror, only enable these warnings for debug
+# builds. Drop this once the issue has been fixed and landed.
+if (${cmake_build_type_lower} STREQUAL debug)
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wpedantic")# -Wextra")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wpedantic -Wextra")
+endif()
 
 if (${werror})
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Werror")
