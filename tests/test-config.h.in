@@ -1,0 +1,11 @@
+#pragma once
+
+#define CMAKE_SOURCE_DIR "@CMAKE_SOURCE_DIR@"
+#define CMAKE_BINARY_DIR "@CMAKE_BINARY_DIR@"
+#define APP_ID_TEST_URI @APP_ID_TEST_URI@
+#define LIB_TEST_NO_MAIN_HELPER "@CMAKE_CURRENT_BINARY_DIR@/lib-test-no-main"
+#define URL_DISPATCHER_SERVICE "@CMAKE_BINARY_DIR@/service/url-dispatcher"
+#define XDG_DATA_DIRS "@CMAKE_CURRENT_SOURCE_DIR@/xdg-data"
+#define UPDATE_DIRECTORY_TOOL "@CMAKE_BINARY_DIR@/service/update-directory"
+#define UPDATE_DIRECTORY_URLS "@CMAKE_CURRENT_SOURCE_DIR@/test-urls-simple"
+#define UPDATE_DIRECTORY_VARIED "@CMAKE_CURRENT_SOURCE_DIR@/test-urls-varied"

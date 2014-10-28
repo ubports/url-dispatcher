@@ -14,6 +14,8 @@
  *
  */
 
+#include "test-config.h"
+
 #include <gtest/gtest.h>
 #include "url-db.h"
 #include <glib.h>

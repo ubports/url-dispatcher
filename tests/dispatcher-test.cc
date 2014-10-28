@@ -15,6 +15,7 @@
  *
  */
 
+#include "test-config.h"
 
 #include <gio/gio.h>
 #include <gtest/gtest.h>
