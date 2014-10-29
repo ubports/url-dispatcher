@@ -174,6 +174,11 @@ TEST_F(DispatcherTest, DialerTest)
 	EXPECT_STREQ("com.ubuntu.dialer_dialer_1234", out_appid);
 	g_free(out_appid);
 
+	/* Telephone with slashes */
+	EXPECT_TRUE(dispatcher_url_to_appid("tel:///+442031485000", &out_appid, &out_url));
+	EXPECT_STREQ("com.ubuntu.dialer_dialer_1234", out_appid);
+	g_free(out_appid);
+
 	return;
 }
 
