@@ -46,7 +46,6 @@ url_db_create_database (void)
 	gchar * dbfilename = g_build_filename(urldispatchercachedir, "urls-" DB_SCHEMA_VERSION ".db", NULL);
 	g_free(urldispatchercachedir);
 
-	gboolean dbexists = g_file_test(dbfilename, G_FILE_TEST_EXISTS);
 	int open_status = SQLITE_ERROR;
 	sqlite3 * db = NULL;
 
@@ -62,19 +61,21 @@ url_db_create_database (void)
 
 	g_free(dbfilename);
 
-	if (!dbexists) { /* First usage */
-		int exec_status = SQLITE_ERROR;
-		char * failstring = NULL;
+	int exec_status = SQLITE_ERROR;
+	char * failstring = NULL;
 
-		exec_status = sqlite3_exec(db, create_db_sql, NULL, NULL, &failstring);
+	/* If the tables already exist, this command does nothing, because
+	 * the SQL says to create "if not exists". We run it always to
+	 * make this robust against the case where we are killed between
+	 * creating the db file and creating the tables.
+	 */
+	exec_status = sqlite3_exec(db, create_db_sql, NULL, NULL, &failstring);
 
-		if (exec_status != SQLITE_OK) {
-			g_warning("Unable to create tables: %s", failstring);
-			sqlite3_free(failstring);
-			sqlite3_close(db);
-			return NULL;
-		}
-
+	if (exec_status != SQLITE_OK) {
+		g_warning("Unable to create tables: %s", failstring);
+		sqlite3_free(failstring);
+		sqlite3_close(db);
+		return NULL;
 	}
 
 	return db;
