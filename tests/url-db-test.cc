@@ -53,7 +53,7 @@ class UrlDBTest : public ::testing::Test
 		}
 };
 
-TEST_F(UrlDBTest, CreateTest) {
+static void verify_tables() {
 	sqlite3 * db = url_db_create_database();
 
 	ASSERT_TRUE(db != NULL);
@@ -77,6 +77,13 @@ TEST_F(UrlDBTest, CreateTest) {
 	EXPECT_STREQ("text", type);
 
 	sqlite3_close(db);
+}
+
+TEST_F(UrlDBTest, CreateTest) {
+	// Do it twice to ensure that url_db_create_database works
+	// when invoked on a db that already has the tables.
+	verify_tables();
+	verify_tables();
 }
 
 TEST_F(UrlDBTest, TimestampTest) {
