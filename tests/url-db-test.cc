@@ -53,7 +53,7 @@ class UrlDBTest : public ::testing::Test
 		}
 };
 
-static void verify_tables() {
+static void verify_tables(const gchar *cachedir) {
 	sqlite3 * db = url_db_create_database();
 
 	ASSERT_TRUE(db != NULL);
@@ -82,8 +82,8 @@ static void verify_tables() {
 TEST_F(UrlDBTest, CreateTest) {
 	// Do it twice to ensure that url_db_create_database works
 	// when invoked on a db that already has the tables.
-	verify_tables();
-	verify_tables();
+	verify_tables(cachedir);
+	verify_tables(cachedir);
 }
 
 TEST_F(UrlDBTest, TimestampTest) {
