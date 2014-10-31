@@ -310,7 +310,7 @@ url_db_remove_file (sqlite3 * db, const gchar * path)
 			&stmt,
 			NULL) != SQLITE_OK) {
 		g_warning("Unable to parse SQL to remove urls: %s", sqlite3_errmsg(db));
-		return FALSE;
+		goto rollback;
 	}
 
 	sqlite3_bind_text(stmt, 1, path, -1, SQLITE_TRANSIENT);
@@ -323,7 +323,7 @@ url_db_remove_file (sqlite3 * db, const gchar * path)
 
 	if (exec_status != SQLITE_DONE) {
 		g_warning("Unable to execute removal of URLs: %s", sqlite3_errmsg(db));
-		return FALSE;
+		goto rollback;
 	}
 
 	/* Remove references to the file */
@@ -335,7 +335,7 @@ url_db_remove_file (sqlite3 * db, const gchar * path)
 			&stmt,
 			NULL) != SQLITE_OK) {
 		g_warning("Unable to parse SQL to remove urls: %s", sqlite3_errmsg(db));
-		return FALSE;
+		goto rollback;
 	}
 
 	sqlite3_bind_text(stmt, 1, path, -1, SQLITE_TRANSIENT);
@@ -347,14 +347,21 @@ url_db_remove_file (sqlite3 * db, const gchar * path)
 
 	if (exec_status != SQLITE_DONE) {
 		g_warning("Unable to execute removal of file: %s", sqlite3_errmsg(db));
-		return FALSE;
+		goto rollback;
 	}
 
 	/* Commit the full transaction */
 	if (sqlite3_exec(db, "commit", NULL, NULL, NULL) != SQLITE_OK) {
 		g_warning("Unable to commit transaction to delete: %s", sqlite3_errmsg(db));
-		return FALSE;
+		goto rollback;
 	}
 
 	return TRUE;
+
+rollback:
+
+	if (sqlite3_exec(db, "rollback", NULL, NULL, NULL) != SQLITE_OK) {
+		g_warning("Unable to rollback transaction: %s", sqlite3_errmsg(db));
+	}
+	return FALSE;
 }
