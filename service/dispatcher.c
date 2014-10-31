@@ -370,6 +370,7 @@ dispatcher_url_to_appid (const gchar * url, gchar ** out_appid, const gchar ** o
 		gchar * domain = g_match_info_fetch(genericmatch, 2);
 
 		*out_appid = url_db_find_url(urldb, protocol, domain);
+		g_debug("Protocol '%s' for domain '%s' resulting in app id '%s'", protocol, domain, *out_appid);
 
 		if (*out_appid != NULL) {
 			found = TRUE;
@@ -448,7 +449,7 @@ dispatcher_init (GMainLoop * mainloop)
 
 	applicationre = g_regex_new("^application:///([a-zA-Z0-9_\\.-]*)\\.desktop$", 0, 0, NULL);
 	appidre = g_regex_new("^appid://([a-z0-9\\.-]*)/([a-zA-Z0-9-]*)/([a-zA-Z0-9\\.-]*)$", 0, 0, NULL);
-	genericre = g_regex_new("^(.*)://([a-z0-9\\.-]*)?/?(.*)?$", 0, 0, NULL);
+	genericre = g_regex_new("^([a-z][a-z0-9]*):(?://(?:.*@)(a-z0-9\\.-]*)(?::[0-9])/)?(.*)?$", 0, 0, NULL);
 
 	g_bus_get(G_BUS_TYPE_SESSION, cancellable, bus_got, mainloop);
 
