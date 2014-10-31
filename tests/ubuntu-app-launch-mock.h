@@ -15,10 +15,10 @@
  *
  */
 
-#include <glib.h>
+#ifndef UPSTART_APP_LAUNCH_MOCK
+#define UPSTART_APP_LAUNCH_MOCK 1
 
-#ifndef __UPSTART_APP_LAUNCH_MOCK__
-#define __UPSTART_APP_LAUNCH_MOCK__ 1
+#include <glib.h>
 
 G_BEGIN_DECLS
 
@@ -27,4 +27,4 @@ gchar * ubuntu_app_launch_mock_get_last_app_id (void);
 
 G_END_DECLS
 
-#endif /* __UPSTART_APP_LAUNCH_MOCK__ */
+#endif /* UPSTART_APP_LAUNCH_MOCK */

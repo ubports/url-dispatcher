@@ -15,6 +15,7 @@
  *
  */
 
+#include "test-config.h"
 
 #include <gio/gio.h>
 #include <gtest/gtest.h>
@@ -25,30 +26,32 @@
 class DispatcherTest : public ::testing::Test
 {
 	private:
-		GTestDBus * testbus = NULL;
-		GMainLoop * mainloop = NULL;
-		gchar * cachedir = NULL;
+		GTestDBus * testbus = nullptr;
+		GMainLoop * mainloop = nullptr;
+		gchar * cachedir = nullptr;
 
 	protected:
 		virtual void SetUp() {
 			g_setenv("TEST_CLICK_DB", "click-db", TRUE);
 			g_setenv("TEST_CLICK_USER", "test-user", TRUE);
 
-			cachedir = g_build_filename(CMAKE_BINARY_DIR, "dispatcher-test-cache", NULL);
+			cachedir = g_build_filename(CMAKE_BINARY_DIR, "dispatcher-test-cache", nullptr);
 			g_setenv("URL_DISPATCHER_CACHE_DIR", cachedir, TRUE);
 
 			sqlite3 * db = url_db_create_database();
-			GTimeVal timestamp = { .tv_sec = 12345 };
+			GTimeVal timestamp;
+			timestamp.tv_sec = 12345;
+			timestamp.tv_usec = 0;
 
 			url_db_set_file_motification_time(db, "/testdir/com.ubuntu.calendar_calendar_9.8.2343.url-dispatcher", &timestamp);
-			url_db_insert_url(db, "/testdir/com.ubuntu.calendar_calendar_9.8.2343.url-dispatcher", "calendar", NULL);
+			url_db_insert_url(db, "/testdir/com.ubuntu.calendar_calendar_9.8.2343.url-dispatcher", "calendar", nullptr);
 
 			sqlite3_close(db);
 
 			testbus = g_test_dbus_new(G_TEST_DBUS_NONE);
 			g_test_dbus_up(testbus);
 
-			mainloop = g_main_loop_new(NULL, FALSE);
+			mainloop = g_main_loop_new(nullptr, FALSE);
 			dispatcher_init(mainloop);
 
 			return;
@@ -73,7 +76,7 @@ class DispatcherTest : public ::testing::Test
 			g_object_unref(testbus);
 
 			gchar * cmdline = g_strdup_printf("rm -rf \"%s\"", cachedir);
-			g_spawn_command_line_sync(cmdline, NULL, NULL, NULL, NULL);
+			g_spawn_command_line_sync(cmdline, nullptr, nullptr, nullptr, nullptr);
 			g_free(cmdline);
 			g_free(cachedir);
 			return;
@@ -82,8 +85,8 @@ class DispatcherTest : public ::testing::Test
 
 TEST_F(DispatcherTest, ApplicationTest)
 {
-	gchar * out_appid = NULL;
-	const gchar * out_url = NULL;
+	gchar * out_appid = nullptr;
+	const gchar * out_url = nullptr;
 
 	/* Good sanity check */
 	dispatcher_url_to_appid("application:///foo.desktop", &out_appid, &out_url);
@@ -94,13 +97,13 @@ TEST_F(DispatcherTest, ApplicationTest)
 	/* No .desktop */
 	dispatcher_url_to_appid("application:///foo", &out_appid, &out_url);
 	dispatcher_send_to_app(out_appid, out_url);
-	ASSERT_TRUE(NULL == ubuntu_app_launch_mock_get_last_app_id());
+	ASSERT_TRUE(nullptr == ubuntu_app_launch_mock_get_last_app_id());
 	ubuntu_app_launch_mock_clear_last_app_id();
 
 	/* Missing a / */
 	dispatcher_url_to_appid("application://foo.desktop", &out_appid, &out_url);
 	dispatcher_send_to_app(out_appid, out_url);
-	ASSERT_TRUE(NULL == ubuntu_app_launch_mock_get_last_app_id());
+	ASSERT_TRUE(nullptr == ubuntu_app_launch_mock_get_last_app_id());
 	ubuntu_app_launch_mock_clear_last_app_id();
 
 	/* Good with hyphens */
@@ -120,23 +123,23 @@ TEST_F(DispatcherTest, ApplicationTest)
 
 TEST_F(DispatcherTest, RestrictionTest)
 {
-	/* NULL cases */
-	EXPECT_EQ(false, dispatcher_appid_restrict("foo-bar", NULL));
-	EXPECT_EQ(false, dispatcher_appid_restrict("foo-bar", ""));
+	/* nullptr cases */
+	EXPECT_FALSE(dispatcher_appid_restrict("foo-bar", nullptr));
+	EXPECT_FALSE(dispatcher_appid_restrict("foo-bar", ""));
 	/* Legacy case, full match */
-	EXPECT_EQ(false, dispatcher_appid_restrict("foo-bar", "foo-bar"));
-	EXPECT_EQ(false, dispatcher_appid_restrict("foo_bar", "foo_bar"));
-	EXPECT_EQ(true,  dispatcher_appid_restrict("foo_bar", "foo-bar"));
+	EXPECT_FALSE(dispatcher_appid_restrict("foo-bar", "foo-bar"));
+	EXPECT_FALSE(dispatcher_appid_restrict("foo_bar", "foo_bar"));
+	EXPECT_TRUE(dispatcher_appid_restrict("foo_bar", "foo-bar"));
 	/* Click case, match package */
-	EXPECT_EQ(false, dispatcher_appid_restrict("com.test.foo_bar-app_0.3.4", "com.test.foo"));
-	EXPECT_EQ(true,  dispatcher_appid_restrict("com.test.foo_bar-app_0.3.4", "com.test.bar"));
-	EXPECT_EQ(true,  dispatcher_appid_restrict("com.test.foo_bar-app", "com.test.bar"));
+	EXPECT_FALSE(dispatcher_appid_restrict("com.test.foo_bar-app_0.3.4", "com.test.foo"));
+	EXPECT_TRUE(dispatcher_appid_restrict("com.test.foo_bar-app_0.3.4", "com.test.bar"));
+	EXPECT_TRUE(dispatcher_appid_restrict("com.test.foo_bar-app", "com.test.bar"));
 }
 
 TEST_F(DispatcherTest, CalendarTest)
 {
-	gchar * out_appid = NULL;
-	const gchar * out_url = NULL;
+	gchar * out_appid = nullptr;
+	const gchar * out_url = nullptr;
 
 	/* Base Calendar */
 	dispatcher_url_to_appid("calendar:///?starttime=196311221830Z", &out_appid, &out_url);

@@ -17,10 +17,10 @@
  *
  */
 
-#include <glib.h>
+#ifndef DISPATCHER_H
+#define DISPATCHER_H 1
 
-#ifndef __DISPATCHER_H__
-#define __DISPATCHER_H__ 1
+#include <glib.h>
 
 G_BEGIN_DECLS
 
@@ -32,4 +32,4 @@ gboolean dispatcher_send_to_app (const gchar * appid, const gchar * url);
 
 G_END_DECLS
 
-#endif /* __DISPATCHER_H__ */
+#endif /* DISPATCHER_H */

@@ -1,5 +1,6 @@
-
-add_definitions ( -DCMAKE_BINARY_DIR="${CMAKE_CURRENT_BINARY_DIR}" )
+set(APP_ID_TEST_URI 1)
+configure_file(test-config.h.in test-config.h)
+include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 ###########################
 # Click Database
@@ -54,9 +55,6 @@ add_test (dispatcher-test dispatcher-test)
 
 include_directories("${CMAKE_BINARY_DIR}/service")
 
-add_definitions ( -DCMAKE_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}" )
-add_definitions ( -DAPP_ID_TEST_URI=1 )
-
 add_executable (app-id-test app-id-test.cc "${CMAKE_SOURCE_DIR}/service/dispatcher.c")
 target_link_libraries (app-id-test
 	dispatcher-lib
@@ -73,7 +71,6 @@ add_test (app-id-test app-id-test)
 
 add_executable (lib-test-no-main lib-test-no-main.c)
 target_link_libraries (lib-test-no-main dispatcher)
-add_definitions ( -DLIB_TEST_NO_MAIN_HELPER="${CMAKE_CURRENT_BINARY_DIR}/lib-test-no-main" )
 
 add_executable (lib-test lib-test.cc)
 target_link_libraries (lib-test
@@ -87,9 +84,6 @@ add_test (lib-test lib-test)
 ###########################
 # service test
 ###########################
-
-add_definitions ( -DURL_DISPATCHER_SERVICE="${CMAKE_BINARY_DIR}/service/url-dispatcher" )
-add_definitions ( -DXDG_DATA_DIRS="${CMAKE_CURRENT_SOURCE_DIR}/xdg-data" )
 
 add_executable (service-test service-test.cc)
 target_link_libraries (service-test
@@ -113,10 +107,6 @@ add_test (NAME create-db-test
 ###########################
 # update directory test
 ###########################
-
-add_definitions ( -DUPDATE_DIRECTORY_TOOL="${CMAKE_BINARY_DIR}/service/update-directory" )
-add_definitions ( -DUPDATE_DIRECTORY_URLS="${CMAKE_CURRENT_SOURCE_DIR}/test-urls-simple" )
-add_definitions ( -DUPDATE_DIRECTORY_VARIED="${CMAKE_CURRENT_SOURCE_DIR}/test-urls-varied" )
 
 add_executable (directory-update-test directory-update-test.cc)
 target_link_libraries (directory-update-test
