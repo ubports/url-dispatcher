@@ -49,6 +49,12 @@ class DispatcherTest : public ::testing::Test
 			url_db_set_file_motification_time(db, "/testdir/magnet-test.url-dispatcher", &timestamp);
 			url_db_insert_url(db, "/testdir/magnet-test.url-dispatcher", "magnet", NULL);
 
+			url_db_set_file_motification_time(db, "/testdir/browser.url-dispatcher", &timestamp);
+			url_db_insert_url(db, "/testdir/browser.url-dispatcher", "http", NULL);
+
+			url_db_set_file_motification_time(db, "/testdir/webapp.url-dispatcher", &timestamp);
+			url_db_insert_url(db, "/testdir/webapp.url-dispatcher", "http", "foo.com");
+
 			sqlite3_close(db);
 
 			testbus = g_test_dbus_new(G_TEST_DBUS_NONE);
@@ -193,3 +199,26 @@ TEST_F(DispatcherTest, MagnetTest)
 
 	return;
 }
+
+TEST_F(DispatcherTest, WebappTest)
+{
+	gchar * out_appid = NULL;
+	const gchar * out_url = NULL;
+
+	/* Browser test */
+	EXPECT_TRUE(dispatcher_url_to_appid("http://ubuntu.com", &out_appid, &out_url));
+	EXPECT_STREQ("browser", out_appid);
+	g_free(out_appid);
+
+	/* Webapp test */
+	EXPECT_TRUE(dispatcher_url_to_appid("http://foo.com", &out_appid, &out_url));
+	EXPECT_STREQ("webapp", out_appid);
+	g_free(out_appid);
+
+	EXPECT_TRUE(dispatcher_url_to_appid("http://m.foo.com", &out_appid, &out_url));
+	EXPECT_STREQ("webapp", out_appid);
+	g_free(out_appid);
+
+	return;
+}
+
