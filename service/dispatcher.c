@@ -31,6 +31,7 @@ static ServiceIfaceComCanonicalURLDispatcher * skel = NULL;
 static GRegex * applicationre = NULL;
 static GRegex * appidre = NULL;
 static GRegex * genericre = NULL;
+static GRegex * intentre = NULL;
 static sqlite3 * urldb = NULL;
 
 /* Errors */
@@ -326,6 +327,22 @@ test_url_cb (GObject * skel, GDBusMethodInvocation * invocation, const gchar * c
 	return TRUE;
 }
 
+/* Determine the domain for an intent using the package variable */
+gchar *
+intent_domain (const gchar * url)
+{
+	gchar * domain = NULL;
+	GMatchInfo * intentmatch = NULL;
+
+	if (g_regex_match(intentre, url, 0, &intentmatch)) {
+		domain = g_match_info_fetch(intentmatch, 1);
+
+		g_match_info_free(intentmatch);
+	}
+
+	return domain;
+}
+
 /* The core of the URL handling */
 gboolean
 dispatcher_url_to_appid (const gchar * url, gchar ** out_appid, const gchar ** out_url)
@@ -368,6 +385,11 @@ dispatcher_url_to_appid (const gchar * url, gchar ** out_appid, const gchar ** o
 		gboolean found = FALSE;
 		gchar * protocol = g_match_info_fetch(genericmatch, 1);
 		gchar * domain = g_match_info_fetch(genericmatch, 2);
+
+		if (g_strcmp0(protocol, "intent") == 0) {
+			g_free(domain);
+			domain = intent_domain(url);
+		}
 
 		*out_appid = url_db_find_url(urldb, protocol, domain);
 		g_debug("Protocol '%s' for domain '%s' resulting in app id '%s'", protocol, domain, *out_appid);
@@ -450,6 +472,7 @@ dispatcher_init (GMainLoop * mainloop)
 	applicationre = g_regex_new("^application:///([a-zA-Z0-9_\\.-]*)\\.desktop$", 0, 0, NULL);
 	appidre = g_regex_new("^appid://([a-z0-9\\.-]*)/([a-zA-Z0-9-]*)/([a-zA-Z0-9\\.-]*)$", 0, 0, NULL);
 	genericre = g_regex_new("^([a-z][a-z0-9]*):(?://(?:.*@)?([a-zA-Z0-9\\.-]*)(?::[0-9]*)?/?)?(.*)?$", 0, 0, NULL);
+	intentre = g_regex_new("^intent://.*package=([a-zA-Z0-9\\.]*);.*$", 0, 0, NULL);
 
 	g_bus_get(G_BUS_TYPE_SESSION, cancellable, bus_got, mainloop);
 
@@ -471,6 +494,7 @@ dispatcher_shutdown (void)
 	g_regex_unref(applicationre);
 	g_regex_unref(appidre);
 	g_regex_unref(genericre);
+	g_regex_unref(intentre);
 	sqlite3_close(urldb);
 
 	return TRUE;
