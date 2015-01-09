@@ -351,3 +351,25 @@ TEST_F(DirectoryUpdateTest, RemoveDirectory)
 	/* Cleanup */
 	sqlite3_close(db);
 }
+
+TEST_F(DirectoryUpdateTest, IntentTest)
+{
+	sqlite3 * db = url_db_create_database();
+
+	gchar * cmdline = g_strdup_printf("%s \"%s\"", UPDATE_DIRECTORY_TOOL, UPDATE_DIRECTORY_INTENT);
+	g_spawn_command_line_sync(cmdline, NULL, NULL, NULL, NULL);
+	g_free(cmdline);
+
+	EXPECT_EQ(3, get_file_count(db));
+	EXPECT_EQ(3, get_url_count(db));
+
+	EXPECT_TRUE(has_file(db, UPDATE_DIRECTORY_INTENT "/intent-single.url-dispatcher"));
+	EXPECT_TRUE(has_file(db, UPDATE_DIRECTORY_INTENT "/intent-mixed.url-dispatcher"));
+	EXPECT_TRUE(has_file(db, UPDATE_DIRECTORY_INTENT "/intent-no-good.url-dispatcher"));
+
+	EXPECT_TRUE(has_url(db, "intent", "intent.single"));
+	EXPECT_TRUE(has_url(db, "intent", "intent.mixed"));
+	EXPECT_TRUE(has_url(db, "intent", "intent.mixed.again"));
+
+	sqlite3_close(db);
+}

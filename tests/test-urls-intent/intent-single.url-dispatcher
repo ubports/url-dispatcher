@@ -1,0 +1,6 @@
+[
+	{
+		"protocol": "intent",
+		"domain-suffix": "intent.single"
+	}
+]

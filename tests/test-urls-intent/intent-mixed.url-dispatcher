@@ -1,0 +1,13 @@
+[
+	{
+		"protocol": "intent",
+		"domain-suffix": "intent.mixed"
+	},
+	{
+		"protocol": "intent"
+	},
+	{
+		"protocol": "intent",
+		"domain-suffix": "intent.mixed.again"
+	}
+]
