@@ -55,6 +55,16 @@ each_url (JsonArray * array, guint index, JsonNode * value, gpointer user_data)
 		return;
 	}
 
+	if (g_strcmp0(protocol, "intent") == 0) {
+		/* Special handling for intent, we have to have a domain suffix
+		   there because otherwise things will get crazy as we're handling
+		   it by package lookup in the service. */
+		if (suffix == NULL) {
+			g_warning("File %s: Array entry %d is an 'intent' protocol but doesn't have a package name", urldata->filename, index);
+			return;
+		}
+	}
+
 	if (!url_db_insert_url(urldata->db, urldata->filename, protocol, suffix)) {
 		const gchar * additional[7] = {
 			"Filename",
