@@ -15,22 +15,24 @@
  *
  */
 
+#include "test-config.h"
+
 #include <gtest/gtest.h>
 #include "url-db.h"
 
 class UrlDBTest : public ::testing::Test
 {
 	protected:
-		gchar * cachedir = NULL;
+		gchar * cachedir = nullptr;
 
 		virtual void SetUp() {
-			cachedir = g_build_filename(CMAKE_BINARY_DIR, "url-db-test-cache", NULL);
+			cachedir = g_build_filename(CMAKE_BINARY_DIR, "url-db-test-cache", nullptr);
 			g_setenv("URL_DISPATCHER_CACHE_DIR", cachedir, TRUE);
 		}
 
 		virtual void TearDown() {
 			gchar * cmdline = g_strdup_printf("rm -rf \"%s\"", cachedir);
-			g_spawn_command_line_sync(cmdline, NULL, NULL, NULL, NULL);
+			g_spawn_command_line_sync(cmdline, nullptr, nullptr, nullptr, nullptr);
 			g_free(cmdline);
 			g_free(cachedir);
 		}
@@ -38,7 +40,7 @@ class UrlDBTest : public ::testing::Test
 		bool file_list_has (GList * list, const gchar * filename) {
 			GList * cur;
 
-			for (cur = list; cur != NULL; cur = g_list_next(cur)) {
+			for (cur = list; cur != nullptr; cur = g_list_next(cur)) {
 				const gchar * path = (const gchar *)cur->data;
 				gchar * basename = g_path_get_basename(path);
 				gint same = g_strcmp0(basename, filename);
@@ -53,38 +55,45 @@ class UrlDBTest : public ::testing::Test
 		}
 };
 
-TEST_F(UrlDBTest, CreateTest) {
+static void verify_tables(const gchar *cachedir) {
 	sqlite3 * db = url_db_create_database();
 
-	ASSERT_TRUE(db != NULL);
+	ASSERT_TRUE(db != nullptr);
 
-	gchar * dbfile = g_build_filename(cachedir, "url-dispatcher", "urls-1.db", NULL);
+	gchar * dbfile = g_build_filename(cachedir, "url-dispatcher", "urls-1.db", nullptr);
 	EXPECT_TRUE(g_file_test(dbfile, G_FILE_TEST_EXISTS));
 	g_free(dbfile);
 
-	const char * type = NULL;
+	const char * type = nullptr;
 
-	EXPECT_EQ(SQLITE_OK, sqlite3_table_column_metadata(db, NULL, "configfiles", "name", &type, NULL, NULL, NULL, NULL));
+	EXPECT_EQ(SQLITE_OK, sqlite3_table_column_metadata(db, nullptr, "configfiles", "name", &type, nullptr, nullptr, nullptr, nullptr));
 	EXPECT_STREQ("text", type);
-	EXPECT_EQ(SQLITE_OK, sqlite3_table_column_metadata(db, NULL, "configfiles", "timestamp", &type, NULL, NULL, NULL, NULL));
+	EXPECT_EQ(SQLITE_OK, sqlite3_table_column_metadata(db, nullptr, "configfiles", "timestamp", &type, nullptr, nullptr, nullptr, nullptr));
 	EXPECT_STREQ("bigint", type);
 
-	EXPECT_EQ(SQLITE_OK, sqlite3_table_column_metadata(db, NULL, "urls", "sourcefile", &type, NULL, NULL, NULL, NULL));
+	EXPECT_EQ(SQLITE_OK, sqlite3_table_column_metadata(db, nullptr, "urls", "sourcefile", &type, nullptr, nullptr, nullptr, nullptr));
 	EXPECT_STREQ("integer", type);
-	EXPECT_EQ(SQLITE_OK, sqlite3_table_column_metadata(db, NULL, "urls", "protocol", &type, NULL, NULL, NULL, NULL));
+	EXPECT_EQ(SQLITE_OK, sqlite3_table_column_metadata(db, nullptr, "urls", "protocol", &type, nullptr, nullptr, nullptr, nullptr));
 	EXPECT_STREQ("text", type);
-	EXPECT_EQ(SQLITE_OK, sqlite3_table_column_metadata(db, NULL, "urls", "domainsuffix", &type, NULL, NULL, NULL, NULL));
+	EXPECT_EQ(SQLITE_OK, sqlite3_table_column_metadata(db, nullptr, "urls", "domainsuffix", &type, nullptr, nullptr, nullptr, nullptr));
 	EXPECT_STREQ("text", type);
 
 	sqlite3_close(db);
 }
 
+TEST_F(UrlDBTest, CreateTest) {
+	// Do it twice to ensure that url_db_create_database works
+	// when invoked on a db that already has the tables.
+	verify_tables(cachedir);
+	verify_tables(cachedir);
+}
+
 TEST_F(UrlDBTest, TimestampTest) {
 	sqlite3 * db = url_db_create_database();
 
-	ASSERT_TRUE(db != NULL);
+	ASSERT_TRUE(db != nullptr);
 
-	GTimeVal timeval = {0};
+	GTimeVal timeval = {0, 0};
 	EXPECT_FALSE(url_db_get_file_motification_time(db, "/foo", &timeval));
 
 	timeval.tv_sec = 12345;
@@ -100,9 +109,9 @@ TEST_F(UrlDBTest, TimestampTest) {
 TEST_F(UrlDBTest, UrlTest) {
 	sqlite3 * db = url_db_create_database();
 
-	ASSERT_TRUE(db != NULL);
+	ASSERT_TRUE(db != nullptr);
 
-	GTimeVal timeval = {0};
+	GTimeVal timeval = {0, 0};
 	timeval.tv_sec = 12345;
 	EXPECT_TRUE(url_db_set_file_motification_time(db, "/foo.url-dispatcher", &timeval));
 
@@ -125,9 +134,9 @@ TEST_F(UrlDBTest, UrlTest) {
 TEST_F(UrlDBTest, FileListTest) {
 	sqlite3 * db = url_db_create_database();
 
-	ASSERT_TRUE(db != NULL);
+	ASSERT_TRUE(db != nullptr);
 
-	GTimeVal timeval = {0};
+	GTimeVal timeval = {0, 0};
 	timeval.tv_sec = 12345;
 
 	/* One Dir */
@@ -165,9 +174,9 @@ TEST_F(UrlDBTest, FileListTest) {
 TEST_F(UrlDBTest, RemoveFile) {
 	sqlite3 * db = url_db_create_database();
 
-	ASSERT_TRUE(db != NULL);
+	ASSERT_TRUE(db != nullptr);
 
-	GTimeVal timeval = {0};
+	GTimeVal timeval = {0, 0};
 	timeval.tv_sec = 12345;
 	EXPECT_TRUE(url_db_set_file_motification_time(db, "/foo.url-dispatcher", &timeval));
 
@@ -178,7 +187,7 @@ TEST_F(UrlDBTest, RemoveFile) {
 	/* Remove and not find */
 	EXPECT_TRUE(url_db_remove_file(db, "/foo.url-dispatcher"));
 	EXPECT_FALSE(url_db_get_file_motification_time(db, "/foo.url-dispatcher", &timeval));
-	EXPECT_STREQ(NULL, url_db_find_url(db, "bar", "foo.com"));
+	EXPECT_STREQ(nullptr, url_db_find_url(db, "bar", "foo.com"));
 
 	sqlite3_close(db);
 }
@@ -186,10 +195,10 @@ TEST_F(UrlDBTest, RemoveFile) {
 TEST_F(UrlDBTest, ReplaceTest) {
 	sqlite3 * db = url_db_create_database();
 
-	ASSERT_TRUE(db != NULL);
+	ASSERT_TRUE(db != nullptr);
 
-	GTimeVal timeval = {0};
-	GTimeVal timevaltest = {0};
+	GTimeVal timeval = {0, 0};
+	GTimeVal timevaltest = {0, 0};
 
 	timeval.tv_sec = 12345;
 	EXPECT_TRUE(url_db_set_file_motification_time(db, "/foo.url-dispatcher", &timeval));

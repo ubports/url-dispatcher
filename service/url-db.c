@@ -46,7 +46,6 @@ url_db_create_database (void)
 	gchar * dbfilename = g_build_filename(urldispatchercachedir, "urls-" DB_SCHEMA_VERSION ".db", NULL);
 	g_free(urldispatchercachedir);
 
-	gboolean dbexists = g_file_test(dbfilename, G_FILE_TEST_EXISTS);
 	int open_status = SQLITE_ERROR;
 	sqlite3 * db = NULL;
 
@@ -62,19 +61,21 @@ url_db_create_database (void)
 
 	g_free(dbfilename);
 
-	if (!dbexists) { /* First usage */
-		int exec_status = SQLITE_ERROR;
-		char * failstring = NULL;
+	int exec_status = SQLITE_ERROR;
+	char * failstring = NULL;
 
-		exec_status = sqlite3_exec(db, create_db_sql, NULL, NULL, &failstring);
+	/* If the tables already exist, this command does nothing, because
+	 * the SQL says to create "if not exists". We run it always to
+	 * make this robust against the case where we are killed between
+	 * creating the db file and creating the tables.
+	 */
+	exec_status = sqlite3_exec(db, create_db_sql, NULL, NULL, &failstring);
 
-		if (exec_status != SQLITE_OK) {
-			g_warning("Unable to create tables: %s", failstring);
-			sqlite3_free(failstring);
-			sqlite3_close(db);
-			return NULL;
-		}
-
+	if (exec_status != SQLITE_OK) {
+		g_warning("Unable to create tables: %s", failstring);
+		sqlite3_free(failstring);
+		sqlite3_close(db);
+		return NULL;
 	}
 
 	return db;
@@ -310,7 +311,7 @@ url_db_remove_file (sqlite3 * db, const gchar * path)
 			&stmt,
 			NULL) != SQLITE_OK) {
 		g_warning("Unable to parse SQL to remove urls: %s", sqlite3_errmsg(db));
-		return FALSE;
+		goto rollback;
 	}
 
 	sqlite3_bind_text(stmt, 1, path, -1, SQLITE_TRANSIENT);
@@ -323,7 +324,7 @@ url_db_remove_file (sqlite3 * db, const gchar * path)
 
 	if (exec_status != SQLITE_DONE) {
 		g_warning("Unable to execute removal of URLs: %s", sqlite3_errmsg(db));
-		return FALSE;
+		goto rollback;
 	}
 
 	/* Remove references to the file */
@@ -335,12 +336,11 @@ url_db_remove_file (sqlite3 * db, const gchar * path)
 			&stmt,
 			NULL) != SQLITE_OK) {
 		g_warning("Unable to parse SQL to remove urls: %s", sqlite3_errmsg(db));
-		return FALSE;
+		goto rollback;
 	}
 
 	sqlite3_bind_text(stmt, 1, path, -1, SQLITE_TRANSIENT);
 
-	exec_status = SQLITE_ROW;
 	while ((exec_status = sqlite3_step(stmt)) == SQLITE_ROW) {
 	}
 
@@ -348,14 +348,21 @@ url_db_remove_file (sqlite3 * db, const gchar * path)
 
 	if (exec_status != SQLITE_DONE) {
 		g_warning("Unable to execute removal of file: %s", sqlite3_errmsg(db));
-		return FALSE;
+		goto rollback;
 	}
 
 	/* Commit the full transaction */
 	if (sqlite3_exec(db, "commit", NULL, NULL, NULL) != SQLITE_OK) {
 		g_warning("Unable to commit transaction to delete: %s", sqlite3_errmsg(db));
-		return FALSE;
+		goto rollback;
 	}
 
 	return TRUE;
+
+rollback:
+
+	if (sqlite3_exec(db, "rollback", NULL, NULL, NULL) != SQLITE_OK) {
+		g_warning("Unable to rollback transaction: %s", sqlite3_errmsg(db));
+	}
+	return FALSE;
 }

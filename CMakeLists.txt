@@ -1,6 +1,14 @@
 project(url-dispatcher C CXX)
 cmake_minimum_required(VERSION 2.8.9)
 
+string(TOLOWER "${CMAKE_BUILD_TYPE}" cmake_build_type_lower) # Build types should always be lowercase but sometimes they are not.
+
+if (${cmake_build_type_lower} STREQUAL debug)
+  option (werror "Treat warnings as errors." FALSE)
+else()
+  option (werror "Treat warnings as errors." TRUE)
+endif()
+
 option (enable_tests "Build tests" ON)
 option (enable_lcov "Generate Coverage Reports" ON)
 
@@ -27,7 +35,22 @@ if (EXISTS "/etc/debian_version")
   set(CMAKE_INSTALL_FULL_LIBEXECDIR "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBEXECDIR}")
 endif()
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Werror")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
+
+# https://bugzilla.gnome.org/show_bug.cgi?id=669355
+# Since gdbus-codegen does not produce warning-free code
+# and we use -Werror, only enable these warnings for debug
+# builds. Drop this once the issue has been fixed and landed.
+if (${cmake_build_type_lower} STREQUAL debug)
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wpedantic")# -Wextra")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wpedantic -Wextra")
+endif()
+
+if (${werror})
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Werror")
+  set(CMAKE_C_FLAGS "${CMAKE_CXX_FLAGS} -Werror")
+endif() 
 
 pkg_check_modules(UBUNTU_APP_LAUNCH REQUIRED ubuntu-app-launch-2)
 include_directories(${UBUNTU_APP_LAUNCH_INCLUDE_DIRS})
@@ -71,6 +94,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c11 -fPIC")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -fPIC")
 
 add_subdirectory(data)
 add_subdirectory(service)

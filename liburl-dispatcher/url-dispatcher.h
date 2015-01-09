@@ -17,8 +17,8 @@
 
 #include <glib.h>
 
-#ifndef __URL_DISPATCH_H__
-#define __URL_DISPATCH_H__ 1
+#ifndef URL_DISPATCH_H
+#define URL_DISPATCH_H 1
 
 #pragma GCC visibility push(default)
 
@@ -78,4 +78,4 @@ G_END_DECLS
 
 #pragma GCC visibility pop
 
-#endif /* __URL_DISPATCH_H__ */
+#endif /* URL_DISPATCH_H */
