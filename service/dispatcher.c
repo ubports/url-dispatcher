@@ -328,7 +328,7 @@ test_url_cb (GObject * skel, GDBusMethodInvocation * invocation, const gchar * c
 }
 
 /* Determine the domain for an intent using the package variable */
-gchar *
+static gchar *
 intent_domain (const gchar * url)
 {
 	gchar * domain = NULL;
