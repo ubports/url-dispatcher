@@ -58,6 +58,9 @@ class DispatcherTest : public ::testing::Test
 			url_db_set_file_motification_time(db, "/testdir/webapp.url-dispatcher", &timestamp);
 			url_db_insert_url(db, "/testdir/webapp.url-dispatcher", "http", "foo.com");
 
+			url_db_set_file_motification_time(db, "/testdir/intenter.url-dispatcher", &timestamp);
+			url_db_insert_url(db, "/testdir/intenter.url-dispatcher", "intent", "my.android.package");
+
 			sqlite3_close(db);
 
 			testbus = g_test_dbus_new(G_TEST_DBUS_NONE);
@@ -225,3 +228,25 @@ TEST_F(DispatcherTest, WebappTest)
 	return;
 }
 
+TEST_F(DispatcherTest, IntentTest)
+{
+	gchar * out_appid = nullptr;
+	const gchar * out_url = nullptr;
+
+	/* Intent basic test */
+	EXPECT_TRUE(dispatcher_url_to_appid("intent://foo.google.com/maps#Intent;scheme=http;package=my.android.package;end", &out_appid, &out_url));
+	EXPECT_STREQ("intenter", out_appid);
+	g_free(out_appid);
+
+	/* Not our intent test */
+	out_appid = nullptr;
+	EXPECT_FALSE(dispatcher_url_to_appid("intent://foo.google.com/maps#Intent;scheme=http;package=not.android.package;end", &out_appid, &out_url));
+	EXPECT_EQ(nullptr, out_appid);
+
+	/* Ensure domain is ignored */
+	out_appid = nullptr;
+	EXPECT_FALSE(dispatcher_url_to_appid("intent://my.android.package/maps#Intent;scheme=http;package=not.android.package;end", &out_appid, &out_url));
+	EXPECT_EQ(nullptr, out_appid);
+
+	return;
+}
