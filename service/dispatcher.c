@@ -384,11 +384,13 @@ dispatcher_url_to_appid (const gchar * url, gchar ** out_appid, const gchar ** o
 	if (g_regex_match(genericre, url, 0, &genericmatch)) {
 		gboolean found = FALSE;
 		gchar * protocol = g_match_info_fetch(genericmatch, 1);
-		gchar * domain = g_match_info_fetch(genericmatch, 2);
+		gchar * domain = NULL;
 
+		/* We special case the intent domain (further comment there) */
 		if (g_strcmp0(protocol, "intent") == 0) {
-			g_free(domain);
 			domain = intent_domain(url);
+		} else {
+			domain = g_match_info_fetch(genericmatch, 2);
 		}
 
 		*out_appid = url_db_find_url(urldb, protocol, domain);
