@@ -1,3 +1,10 @@
+url-dispatcher (0.1+15.04.20150123-0ubuntu1) vivid; urgency=low
+
+  [ Ted Gould ]
+  * Special handling for intent URLs (LP: #1407709)
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Fri, 23 Jan 2015 15:19:33 +0000
+
 url-dispatcher (0.1+15.04.20141211-0ubuntu1) vivid; urgency=low
 
   [ Ted Gould ]
