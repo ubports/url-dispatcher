@@ -18,7 +18,6 @@
  */
 
 #include <glib.h>
-#include <click.h>
 #include <ubuntu-app-launch.h>
 
 gchar *
@@ -63,8 +62,6 @@ build_exec (const gchar * appid)
 int
 main (int argc, char * argv[])
 {
-	GError * error = NULL;
-
 	/* Build up our exec */
 	const gchar * appid = g_getenv("APP_ID");
 	if (appid == NULL) {
