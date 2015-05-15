@@ -55,7 +55,7 @@ add_test (dispatcher-test dispatcher-test)
 
 include_directories("${CMAKE_BINARY_DIR}/service")
 
-add_executable (app-id-test app-id-test.cc "${CMAKE_SOURCE_DIR}/service/dispatcher.c")
+add_executable (app-id-test app-id-test.cc)
 target_link_libraries (app-id-test
 	dispatcher-lib
 	mock-lib
