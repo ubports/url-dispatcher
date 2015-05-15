@@ -21,6 +21,7 @@
 #include <gtest/gtest.h>
 #include "dispatcher.h"
 #include "ubuntu-app-launch-mock.h"
+#include "overlay-tracker-mock.h"
 #include "url-db.h"
 
 class DispatcherTest : public ::testing::Test
@@ -29,6 +30,7 @@ class DispatcherTest : public ::testing::Test
 		GTestDBus * testbus = nullptr;
 		GMainLoop * mainloop = nullptr;
 		gchar * cachedir = nullptr;
+		OverlayTrackerMock tracker;
 
 	protected:
 		virtual void SetUp() {
@@ -67,7 +69,7 @@ class DispatcherTest : public ::testing::Test
 			g_test_dbus_up(testbus);
 
 			mainloop = g_main_loop_new(nullptr, FALSE);
-			dispatcher_init(mainloop);
+			dispatcher_init(mainloop, reinterpret_cast<OverlayTracker *>(&tracker));
 
 			return;
 		}
