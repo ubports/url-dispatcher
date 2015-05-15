@@ -21,10 +21,11 @@
 #define DISPATCHER_H 1
 
 #include <glib.h>
+#include "overlay-tracker.h"
 
 G_BEGIN_DECLS
 
-gboolean dispatcher_init (GMainLoop * mainloop);
+gboolean dispatcher_init (GMainLoop * mainloop, OverlayTracker * tracker);
 gboolean dispatcher_shutdown (void);
 gboolean dispatcher_url_to_appid (const gchar * url, gchar ** out_appid, const gchar ** out_url);
 gboolean dispatcher_appid_restrict (const gchar * appid, const gchar * package);

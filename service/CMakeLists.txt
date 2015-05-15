@@ -40,7 +40,9 @@ ${JSONGLIB_LIBRARIES}
 
 add_library(dispatcher-lib STATIC
 	dispatcher.h
-	dispatcher.c)
+	dispatcher.c
+	overlay-tracker.h
+	overlay-tracker.cpp)
 
 target_link_libraries(dispatcher-lib
 	url-db-lib

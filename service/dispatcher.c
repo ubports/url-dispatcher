@@ -503,7 +503,7 @@ bus_got (GObject * obj, GAsyncResult * res, gpointer user_data)
 
 /* Initialize all the globals */
 gboolean
-dispatcher_init (GMainLoop * mainloop)
+dispatcher_init (GMainLoop * mainloop, OverlayTracker * tracker)
 {
 	cancellable = g_cancellable_new();
 
