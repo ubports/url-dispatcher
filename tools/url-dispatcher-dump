@@ -1,0 +1,3 @@
+#!/bin/sh
+
+echo .quit | sqlite3 -batch -csv -cmd "select urls.protocol, urls.domainsuffix, configfiles.name from urls, configfiles where urls.sourcefile = configfiles.rowid;" ~/.cache/url-dispatcher/urls-1.db 
