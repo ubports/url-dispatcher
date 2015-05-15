@@ -16,3 +16,8 @@ install(
   RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
 )
 
+install(
+  SCRIPT url-dispatcher-dump
+  RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
+)
+
