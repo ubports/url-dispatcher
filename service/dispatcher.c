@@ -213,6 +213,22 @@ dispatcher_send_to_app (const gchar * app_id, const gchar * url)
 	return TRUE;
 }
 
+/* Handles setting up the overlay with the URL */
+gboolean
+dispatcher_send_to_overlay (const gchar * app_id, const gchar * url)
+{
+	/* TODO */
+	return FALSE;
+}
+
+/* Check to see if this is an overlay AppID */
+gboolean
+is_overlay (const gchar * appid)
+{
+	/* TODO */
+	return FALSE;
+}
+
 /* Whether we should restrict this appid based on the package name */
 gboolean
 dispatcher_appid_restrict (const gchar * appid, const gchar * package)
@@ -277,7 +293,11 @@ dispatch_url_cb (GObject * skel, GDBusMethodInvocation * invocation, const gchar
 	}
 
 	/* We're cleared to continue */
-	dispatcher_send_to_app(appid, outurl);
+	if (!is_overlay(appid)) {
+		dispatcher_send_to_app(appid, outurl);
+	} else {
+		dispatcher_send_to_overlay(appid, outurl);
+	}
 	g_free(appid);
 
 	g_dbus_method_invocation_return_value(invocation, NULL);
