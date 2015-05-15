@@ -41,6 +41,8 @@ ${JSONGLIB_LIBRARIES}
 add_library(dispatcher-lib STATIC
 	dispatcher.h
 	dispatcher.c
+	glib-thread.h
+	glib-thread.cpp
 	overlay-tracker.h
 	overlay-tracker.cpp)
 

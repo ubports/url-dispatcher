@@ -3,6 +3,7 @@ extern "C" {
 #include "overlay-tracker.h"
 }
 
+#include "glib-thread.h"
 
 OverlayTracker * overlay_tracker_new (void) {
 	return nullptr;
