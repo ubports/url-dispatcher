@@ -44,7 +44,10 @@ add_library(dispatcher-lib STATIC
 	glib-thread.h
 	glib-thread.cpp
 	overlay-tracker.h
-	overlay-tracker.cpp)
+	overlay-tracker.cpp
+	overlay-tracker-iface.h
+	overlay-tracker-mir.h
+	overlay-tracker-mir.cpp)
 
 target_link_libraries(dispatcher-lib
 	url-db-lib
