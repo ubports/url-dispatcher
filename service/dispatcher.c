@@ -225,8 +225,26 @@ dispatcher_send_to_overlay (const gchar * app_id, const gchar * url)
 gboolean
 is_overlay (const gchar * appid)
 {
-	/* TODO */
-	return FALSE;
+	gboolean found = FALSE;
+	gchar * desktopname = g_strdup_printf("%s.desktop", appid);
+
+	/* Check system dir */
+	if (!found) {
+		gchar * sysdir = g_build_filename(OVERLAY_SYSTEM_DIRECTORY, desktopname, NULL);
+		found = g_file_test(sysdir, G_FILE_TEST_EXISTS);
+		g_free(sysdir);
+	}
+
+	/* Check user dir (clicks) */
+	if (!found) {
+		gchar * usrdir = g_build_filename(g_get_user_cache_dir(), "url-dispatcher", "url-overlays", desktopname, NULL);
+		found = g_file_test(usrdir, G_FILE_TEST_EXISTS);
+		g_free(usrdir);
+	}
+
+	g_free(desktopname);
+
+	return found;
 }
 
 /* Whether we should restrict this appid based on the package name */
