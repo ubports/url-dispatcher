@@ -20,6 +20,8 @@
 #include <glib.h>
 #include <ubuntu-app-launch.h>
 
+#include "recoverable-problem.h"
+
 gchar *
 build_exec (const gchar * appid, const gchar * directory)
 {
@@ -64,7 +66,7 @@ main (int argc, char * argv[])
 	/* Build up our exec */
 	const gchar * appid = g_getenv("APP_ID");
 	if (appid == NULL) {
-		g_error("Environment variable 'APP_ID' required");
+		report_recoverable_problem("url-dispatcher-url-overlay-no-appid", 0, TRUE, NULL);
 		return -1;
 	}
 
@@ -79,6 +81,13 @@ main (int argc, char * argv[])
 	}
 
 	if (exec == NULL) {
+		const gchar * props[3] = {
+			"AppID",
+			appid,
+			NULL
+		};
+
+		report_recoverable_problem("url-dispatcher-url-overlay-bad-appid", 0, TRUE, props);
 		return -1;
 	}
 
