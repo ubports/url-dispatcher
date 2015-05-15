@@ -21,14 +21,13 @@
 #include <ubuntu-app-launch.h>
 
 gchar *
-build_exec (const gchar * appid)
+build_exec (const gchar * appid, const gchar * directory)
 {
 	gchar * appid_desktop = g_strdup_printf("%s.desktop", appid);
-	gchar * desktopfilepath = g_build_filename(g_get_user_cache_dir(), "pay-service", "pay-ui", appid_desktop, NULL);
+	gchar * desktopfilepath = g_build_filename(directory, appid_desktop, NULL);
 	g_free(appid_desktop);
 
 	if (!g_file_test(desktopfilepath, G_FILE_TEST_EXISTS)) {
-		g_error("Can not file desktop file for '%s', expecting: '%s'", appid, desktopfilepath);
 		g_free(desktopfilepath);
 		return NULL;
 	}
@@ -38,7 +37,7 @@ build_exec (const gchar * appid)
 	g_key_file_load_from_file(keyfile, desktopfilepath, G_KEY_FILE_NONE, &error);
 
 	if (error != NULL) {
-		g_error("Unable to read pay-ui desktop file '%s': %s", desktopfilepath, error->message);
+		g_error("Unable to read url-overlay desktop file '%s': %s", desktopfilepath, error->message);
 		g_free(desktopfilepath);
 		g_key_file_free(keyfile);
 		g_error_free(error);
@@ -48,7 +47,7 @@ build_exec (const gchar * appid)
 	g_free(desktopfilepath);
 
 	if (!g_key_file_has_key(keyfile, "Desktop Entry", "Exec", NULL)) {
-		g_error("Desktop file does not have 'Exec' key");
+		g_error("Desktop file for '%s' in '%s' does not have 'Exec' key", appid, directory);
 		g_key_file_free(keyfile);
 		return NULL;
 	}
@@ -69,7 +68,16 @@ main (int argc, char * argv[])
 		return -1;
 	}
 
-	gchar * exec = build_exec(appid);
+	/* Try the system directory first */
+	gchar * exec = build_exec(appid, OVERLAY_SYSTEM_DIRECTORY);
+
+	/* If not there look to the user directory (click) */
+	if (exec == NULL) {
+		gchar * userdir = g_build_filename(g_get_user_cache_dir(), "url-dispatcher", "url-overlays", NULL);
+		exec = build_exec(appid, userdir);
+		g_free(userdir);
+	}
+
 	if (exec == NULL) {
 		return -1;
 	}

@@ -2,6 +2,8 @@
 include(UseConstantBuilder)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
+add_definitions( -DOVERLAY_SYSTEM_DIRECTORY="${CMAKE_INSTALL_FULL_DATADIR}/url-dispatcher/url-overlays" )
+
 ###########################
 # Generated Lib
 ###########################
