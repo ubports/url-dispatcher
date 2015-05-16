@@ -54,8 +54,16 @@ OverlayTrackerMir::addOverlay (const char * appid, unsigned long pid)
 		auto session = std::shared_ptr<MirPromptSession>(
 			mir_connection_create_prompt_session_sync(mir.get(), pid, sessionStateChangedStatic, this),
 			[] (MirPromptSession * session) { if (session) mir_prompt_session_release_sync(session); });
+		if (!session) {
+			g_critical("Unable to create trusted prompt session for %d with appid '%s'", pid, sappid.c_str());
+			return;
+		}
 		
 		auto instance = ubuntu_app_launch_start_session_helper(HELPER_TYPE, session.get(), sappid.c_str(), nullptr /* TODO */);
+		if (instance == nullptr) {
+			g_critical("Unable to start helper for %d with appid '%s'", pid, sappid.c_str());
+			return;
+		}
 
 		ongoingSessions.emplace(std::make_tuple(sappid, std::string(instance), session));
 		g_free(instance);
