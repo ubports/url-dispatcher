@@ -6,9 +6,11 @@ static const char * HELPER_TYPE = "url-overlay";
 OverlayTrackerMir::OverlayTrackerMir (void) 
 	: thread([this] {
 		/* Setup Helper Observer */
+		ubuntu_app_launch_observer_add_helper_stop(untrustedHelperStoppedStatic, HELPER_TYPE, this);
 		},
 		[this] {
 		/* Remove Helper Observer */
+		ubuntu_app_launch_observer_delete_helper_stop(untrustedHelperStoppedStatic, HELPER_TYPE, this);
 		})
 {
 	mir = std::shared_ptr<MirConnection>([] {
@@ -85,4 +87,31 @@ OverlayTrackerMir::sessionStateChanged (MirPromptSession * session, MirPromptSes
 			}
 		}
 	});
+}
+
+void
+OverlayTrackerMir::untrustedHelperStoppedStatic (const gchar * appid, const gchar * instanceid, const gchar * helpertype, gpointer user_data)
+{
+	reinterpret_cast<OverlayTrackerMir *>(user_data)->untrustedHelperStopped(appid, instanceid, helpertype);
+}
+
+void 
+OverlayTrackerMir::untrustedHelperStopped(const gchar * appid, const gchar * instanceid, const gchar * helpertype)
+{
+	/* This callback will happen on our thread already, we don't need
+	   to proxy it on */
+	if (g_strcmp0(helpertype, HELPER_TYPE) != 0) {
+		return;
+	}
+
+	/* Making the code in the loop easier to read by using std::string outside */
+	std::string sappid(appid);
+	std::string sinstanceid(instanceid);
+
+	for (auto it = ongoingSessions.begin(); it != ongoingSessions.end(); it++) {
+		if (std::get<0>(*it) == sappid && std::get<1>(*it) == sinstanceid) {
+			ongoingSessions.erase(it);
+			break;
+		}
+	}
 }
