@@ -41,7 +41,8 @@ OverlayTrackerMir::addOverlay (const char * appid, unsigned long pid)
 		
 		auto instance = ubuntu_app_launch_start_session_helper(HELPER_TYPE, session.get(), sappid.c_str(), nullptr /* TODO */);
 
-		ongoingSessions.emplace(std::make_pair(std::string(instance), session));
+		ongoingSessions.emplace(std::make_tuple(sappid, std::string(instance), session));
+		g_free(instance);
 	});
 }
 
@@ -63,8 +64,8 @@ OverlayTrackerMir::sessionStateChanged (MirPromptSession * session, MirPromptSes
 	   want to get back on our thread */
 	thread.executeOnThread([this, session]() {
 		for (auto it = ongoingSessions.begin(); it != ongoingSessions.end(); it++) {
-			if (it->second.get() == session) {
-				ubuntu_app_launch_stop_multiple_helper(HELPER_TYPE, "foo" /* TODO */, it->first.c_str());
+			if (std::get<2>(*it).get() == session) {
+				ubuntu_app_launch_stop_multiple_helper(HELPER_TYPE, std::get<0>(*it).c_str(), std::get<1>(*it).c_str());
 				ongoingSessions.erase(it);
 				break;
 			}

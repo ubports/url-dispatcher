@@ -13,7 +13,7 @@ class OverlayTrackerMir : public OverlayTrackerIface {
 private:
 	GLib::ContextThread thread;
 	std::shared_ptr<MirConnection> mir;
-	std::set<std::pair<std::string, std::shared_ptr<MirPromptSession>>> ongoingSessions;
+	std::set<std::tuple<std::string, std::string, std::shared_ptr<MirPromptSession>>> ongoingSessions;
 
 public:
 	OverlayTrackerMir (void); 
