@@ -17,8 +17,12 @@ private:
 
 public:
 	OverlayTrackerMir (void); 
+	~OverlayTrackerMir (void); 
 	void addOverlay (const char * appid, unsigned long pid) override;
 
 	static void sessionStateChangedStatic (MirPromptSession * session, MirPromptSessionState state, void * user_data);
 	void sessionStateChanged (MirPromptSession * session, MirPromptSessionState state);
+
+	static void untrustedHelperStoppedStatic (const gchar * appid, const gchar * instanceid, const gchar * helpertype, gpointer user_data);
+	void untrustedHelperStopped(const gchar * appid, const gchar * instanceid, const gchar * helpertype, gpointer user_data);
 };

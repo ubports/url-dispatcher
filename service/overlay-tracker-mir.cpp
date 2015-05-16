@@ -27,6 +27,20 @@ OverlayTrackerMir::OverlayTrackerMir (void)
 	}
 }
 
+/* Enforce a shutdown order, sessions before connection */
+OverlayTrackerMir::~OverlayTrackerMir (void) 
+{
+	thread.executeOnThread<bool>([this] {
+		while (!ongoingSessions.empty()) {
+			sessionStateChanged(std::get<2>(*ongoingSessions.begin()).get(), mir_prompt_session_state_stopped);
+		}
+
+		return true;
+	});
+
+	mir.reset();
+}
+
 void
 OverlayTrackerMir::addOverlay (const char * appid, unsigned long pid)
 {
