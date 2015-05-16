@@ -26,6 +26,7 @@
 #include "url-db.h"
 
 /* Globals */
+static OverlayTracker * tracker = NULL;
 static GCancellable * cancellable = NULL;
 static ServiceIfaceComCanonicalURLDispatcher * skel = NULL;
 static GRegex * applicationre = NULL;
@@ -111,7 +112,7 @@ static gboolean
 bad_url (GDBusMethodInvocation * invocation, const gchar * url)
 {
 	const gchar * sender = g_dbus_method_invocation_get_sender(invocation);
-	GDBusConnection * conn = g_dbus_method_invocation_get_connection(invocation);
+	GDBusConnection * conn = g_dbus_method_invocation_get_connection(invocation); /* transfer: none */
 
 	g_dbus_connection_call(conn,
 		"org.freedesktop.DBus",
@@ -215,10 +216,34 @@ dispatcher_send_to_app (const gchar * app_id, const gchar * url)
 
 /* Handles setting up the overlay with the URL */
 gboolean
-dispatcher_send_to_overlay (const gchar * app_id, const gchar * url)
+dispatcher_send_to_overlay (const gchar * app_id, const gchar * url, GDBusMethodInvocation * invocation)
 {
-	/* TODO */
-	return FALSE;
+	GError * error = NULL;
+	const gchar * sender = g_dbus_method_invocation_get_sender(invocation);
+	GDBusConnection * conn = g_dbus_method_invocation_get_connection(invocation); /* transfer: none */
+
+	GVariant * callret = g_dbus_connection_call_sync(conn,
+		"org.freedesktop.DBus",
+		"/",
+		"org.freedesktop.DBus",
+		"GetConnectionUnixProcessID",
+		g_variant_new("(s)", sender),
+		G_VARIANT_TYPE("(u)"),
+		G_DBUS_CALL_FLAGS_NONE,
+		-1, /* timeout */
+		NULL, /* cancellable */
+		&error);
+
+	if (error != NULL) {
+		g_warning("Unable to get PID for '%s' when processing URL '%s': %s", g_dbus_method_invocation_get_sender(invocation), url, error->message);
+		g_error_free(error);
+		return FALSE;
+	}
+
+	unsigned int pid = 0;
+	g_variant_get_child(callret, 0, "u", &pid);
+
+	return overlay_tracker_add(tracker, app_id, pid, url);
 }
 
 /* Check to see if this is an overlay AppID */
@@ -311,16 +336,21 @@ dispatch_url_cb (GObject * skel, GDBusMethodInvocation * invocation, const gchar
 	}
 
 	/* We're cleared to continue */
+	gboolean sent = FALSE;
 	if (!is_overlay(appid)) {
-		dispatcher_send_to_app(appid, outurl);
+		sent = dispatcher_send_to_app(appid, outurl);
 	} else {
-		dispatcher_send_to_overlay(appid, outurl);
+		sent = dispatcher_send_to_overlay(appid, outurl, invocation);
 	}
 	g_free(appid);
 
-	g_dbus_method_invocation_return_value(invocation, NULL);
+	if (sent) {
+		g_dbus_method_invocation_return_value(invocation, NULL);
+	} else {
+		bad_url(invocation, url);
+	}
 
-	return TRUE;
+	return sent;
 }
 
 /* Test a URL to find it's AppID */
@@ -503,8 +533,9 @@ bus_got (GObject * obj, GAsyncResult * res, gpointer user_data)
 
 /* Initialize all the globals */
 gboolean
-dispatcher_init (GMainLoop * mainloop, OverlayTracker * tracker)
+dispatcher_init (GMainLoop * mainloop, OverlayTracker * intracker)
 {
+	tracker = intracker;
 	cancellable = g_cancellable_new();
 
 	urldb = url_db_create_database();
