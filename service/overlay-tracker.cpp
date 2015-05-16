@@ -6,7 +6,8 @@ extern "C" {
 #include "overlay-tracker-iface.h"
 #include "overlay-tracker-mir.h"
 
-OverlayTracker * overlay_tracker_new (void) {
+OverlayTracker *
+overlay_tracker_new (void) {
 	try {
 		OverlayTrackerMir * cpptracker = new OverlayTrackerMir();
 		return reinterpret_cast<OverlayTracker *>(cpptracker);
@@ -15,7 +16,8 @@ OverlayTracker * overlay_tracker_new (void) {
 	}
 }
 
-void overlay_tracker_delete (OverlayTracker * tracker) {
+void
+overlay_tracker_delete (OverlayTracker * tracker) {
 	g_return_if_fail(tracker != nullptr);
 
 	auto cpptracker = reinterpret_cast<OverlayTrackerMir *>(tracker);
@@ -23,11 +25,12 @@ void overlay_tracker_delete (OverlayTracker * tracker) {
 	return;
 }
 
-void overlay_tracker_add (OverlayTracker * tracker, const char * appid, unsigned long pid) {
-	g_return_if_fail(tracker != nullptr);
-	g_return_if_fail(appid != nullptr);
-	g_return_if_fail(pid != 0);
+gboolean
+overlay_tracker_add (OverlayTracker * tracker, const char * appid, unsigned long pid, const gchar * url) {
+	g_return_val_if_fail(tracker != nullptr, FALSE);
+	g_return_val_if_fail(appid != nullptr, FALSE);
+	g_return_val_if_fail(pid != 0, FALSE);
+	g_return_val_if_fail(url != nullptr, FALSE);
 
-	reinterpret_cast<OverlayTrackerIface *>(tracker)->addOverlay(appid, pid);
-	return;
+	return reinterpret_cast<OverlayTrackerIface *>(tracker)->addOverlay(appid, pid, url) ? TRUE : FALSE;
 }
