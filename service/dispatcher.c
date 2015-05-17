@@ -222,6 +222,7 @@ dispatcher_send_to_overlay (const gchar * app_id, const gchar * url, GDBusMethod
 	const gchar * sender = g_dbus_method_invocation_get_sender(invocation);
 	GDBusConnection * conn = g_dbus_method_invocation_get_connection(invocation); /* transfer: none */
 
+	/* TODO: Detect if a scope is what we need to overlay on */
 	GVariant * callret = g_dbus_connection_call_sync(conn,
 		"org.freedesktop.DBus",
 		"/",
@@ -242,6 +243,7 @@ dispatcher_send_to_overlay (const gchar * app_id, const gchar * url, GDBusMethod
 
 	unsigned int pid = 0;
 	g_variant_get_child(callret, 0, "u", &pid);
+	g_variant_unref(callret);
 
 	return overlay_tracker_add(tracker, app_id, pid, url);
 }
