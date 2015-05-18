@@ -106,6 +106,6 @@ TEST_F(ExecToolTest, SetOverlay)
 	ASSERT_EQ(1, len);
 
 	GVariant * appexecenv = g_variant_get_child_value(calls[0].params, 1);
-	EXPECT_STREQ("APP_EXEC=overlay", g_variant_get_string(appexecenv, nullptr));
+	EXPECT_STREQ("APP_EXEC=foobar", g_variant_get_string(appexecenv, nullptr));
 	g_variant_unref(appexecenv);
 }
