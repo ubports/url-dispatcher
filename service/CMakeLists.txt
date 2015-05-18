@@ -57,6 +57,7 @@ target_link_libraries(dispatcher-lib
 	${GOBJECT2_LIBRARIES}
 	${GIO2_LIBRARIES}
 	${SQLITE_LIBRARIES}
+	${UBUNTU_APP_LAUNCH_LIBRARIES}
 )
 
 ###########################
@@ -94,7 +95,7 @@ add_executable(service-exec service.c recoverable-problem.h recoverable-problem.
 
 set_target_properties(service-exec PROPERTIES OUTPUT_NAME "url-dispatcher")
 
-target_link_libraries(service-exec dispatcher-lib ${UBUNTU_APP_LAUNCH_LIBRARIES})
+target_link_libraries(service-exec dispatcher-lib)
 
 ###########################
 # Update Directory

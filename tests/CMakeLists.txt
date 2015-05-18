@@ -141,3 +141,17 @@ target_link_libraries (exec-tool-test
 	${DBUSTEST_LIBRARIES})
 
 add_test (exec-tool-test exec-tool-test)
+
+###########################
+# overlay tracker test
+###########################
+
+add_executable (overlay-tracker-test overlay-tracker-test.cpp mir-mock.cpp)
+target_link_libraries (overlay-tracker-test
+	dispatcher-lib
+	gtest
+	${GTEST_LIBS}
+	${GIO2_LIBRARIES}
+	${DBUSTEST_LIBRARIES})
+
+add_test (overlay-tracker-test overlay-tracker-test)
