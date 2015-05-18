@@ -70,8 +70,18 @@ main (int argc, char * argv[])
 		return -1;
 	}
 
-	/* Try the system directory first */
-	gchar * exec = build_exec(appid, OVERLAY_SYSTEM_DIRECTORY);
+	gchar * exec = NULL;
+
+	/* Allow for environment override */
+	const gchar * envdir = g_getenv("URL_DISPATCHER_OVERLAY_DIR");
+	if (G_UNLIKELY(envdir != NULL)) { /* Mostly for testing */
+		exec = build_exec(appid, envdir);
+	}
+
+	/* Try the system directory */
+	if (exec == NULL) {
+		exec = build_exec(appid, OVERLAY_SYSTEM_DIRECTORY);
+	}
 
 	/* If not there look to the user directory (click) */
 	if (exec == NULL) {
