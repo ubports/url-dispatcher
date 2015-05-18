@@ -30,9 +30,11 @@ class DispatcherTest : public ::testing::Test
 		GTestDBus * testbus = nullptr;
 		GMainLoop * mainloop = nullptr;
 		gchar * cachedir = nullptr;
-		OverlayTrackerMock tracker;
 
 	protected:
+		OverlayTrackerMock tracker;
+		GDBusConnection * session = nullptr;
+
 		virtual void SetUp() {
 			g_setenv("TEST_CLICK_DB", "click-db", TRUE);
 			g_setenv("TEST_CLICK_USER", "test-user", TRUE);
@@ -69,6 +71,8 @@ class DispatcherTest : public ::testing::Test
 			testbus = g_test_dbus_new(G_TEST_DBUS_NONE);
 			g_test_dbus_up(testbus);
 
+			session = g_bus_get_sync(G_BUS_TYPE_SESSION, NULL, NULL);
+
 			mainloop = g_main_loop_new(nullptr, FALSE);
 			dispatcher_init(mainloop, reinterpret_cast<OverlayTracker *>(&tracker));
 
@@ -89,6 +93,8 @@ class DispatcherTest : public ::testing::Test
 
 			/* let other threads settle */
 			g_usleep(500000);
+
+			g_clear_object(&session);
 
 			g_test_dbus_down(testbus);
 			g_object_unref(testbus);
@@ -250,6 +256,20 @@ TEST_F(DispatcherTest, IntentTest)
 	out_appid = nullptr;
 	EXPECT_FALSE(dispatcher_url_to_appid("intent://my.android.package/maps#Intent;scheme=http;package=not.android.package;end", &out_appid, &out_url));
 	EXPECT_EQ(nullptr, out_appid);
+
+	return;
+}
+
+TEST_F(DispatcherTest, OverlayTest)
+{
+	/* TODO: is_overlay */
+
+	EXPECT_TRUE(dispatcher_send_to_overlay ("mock-overlay", "overlay://ubuntu.com", session, g_dbus_connection_get_unique_name(session)));
+
+	ASSERT_EQ(1, tracker.addedOverlays.size());
+	EXPECT_EQ("mock-overlay", std::get<0>(tracker.addedOverlays[0]));
+	EXPECT_EQ(getpid(), std::get<1>(tracker.addedOverlays[0]));
+	EXPECT_EQ("overlay://ubuntu.com", std::get<2>(tracker.addedOverlays[0]));
 
 	return;
 }

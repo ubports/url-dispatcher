@@ -216,11 +216,9 @@ dispatcher_send_to_app (const gchar * app_id, const gchar * url)
 
 /* Handles setting up the overlay with the URL */
 gboolean
-dispatcher_send_to_overlay (const gchar * app_id, const gchar * url, GDBusMethodInvocation * invocation)
+dispatcher_send_to_overlay (const gchar * app_id, const gchar * url, GDBusConnection * conn, const gchar * sender)
 {
 	GError * error = NULL;
-	const gchar * sender = g_dbus_method_invocation_get_sender(invocation);
-	GDBusConnection * conn = g_dbus_method_invocation_get_connection(invocation); /* transfer: none */
 
 	/* TODO: Detect if a scope is what we need to overlay on */
 	GVariant * callret = g_dbus_connection_call_sync(conn,
@@ -236,7 +234,7 @@ dispatcher_send_to_overlay (const gchar * app_id, const gchar * url, GDBusMethod
 		&error);
 
 	if (error != NULL) {
-		g_warning("Unable to get PID for '%s' when processing URL '%s': %s", g_dbus_method_invocation_get_sender(invocation), url, error->message);
+		g_warning("Unable to get PID for '%s' when processing URL '%s': %s", sender, url, error->message);
 		g_error_free(error);
 		return FALSE;
 	}
@@ -351,7 +349,11 @@ dispatch_url_cb (GObject * skel, GDBusMethodInvocation * invocation, const gchar
 	if (!is_overlay(appid)) {
 		sent = dispatcher_send_to_app(appid, outurl);
 	} else {
-		sent = dispatcher_send_to_overlay(appid, outurl, invocation);
+		sent = dispatcher_send_to_overlay(
+			appid,
+			outurl,
+			g_dbus_method_invocation_get_connection(invocation),
+			g_dbus_method_invocation_get_sender(invocation));
 	}
 	g_free(appid);
 
@@ -426,6 +428,9 @@ intent_domain (const gchar * url)
 gboolean
 dispatcher_url_to_appid (const gchar * url, gchar ** out_appid, const gchar ** out_url)
 {
+	g_return_val_if_fail(url != NULL, FALSE);
+	g_return_val_if_fail(out_appid != NULL, FALSE);
+
 	/* Special case the app id */
 	GMatchInfo * appidmatch = NULL;
 	if (g_regex_match(appidre, url, 0, &appidmatch)) {
@@ -477,7 +482,9 @@ dispatcher_url_to_appid (const gchar * url, gchar ** out_appid, const gchar ** o
 
 		if (*out_appid != NULL) {
 			found = TRUE;
-			*out_url = url;
+			if (out_url != NULL) {
+				*out_url = url;
+			}
 		}
 
 		g_free(protocol);

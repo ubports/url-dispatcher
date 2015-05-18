@@ -20,7 +20,7 @@
 #ifndef DISPATCHER_H
 #define DISPATCHER_H 1
 
-#include <glib.h>
+#include <gio/gio.h>
 #include "overlay-tracker.h"
 
 G_BEGIN_DECLS
@@ -30,6 +30,7 @@ gboolean dispatcher_shutdown (void);
 gboolean dispatcher_url_to_appid (const gchar * url, gchar ** out_appid, const gchar ** out_url);
 gboolean dispatcher_appid_restrict (const gchar * appid, const gchar * package);
 gboolean dispatcher_send_to_app (const gchar * appid, const gchar * url);
+gboolean dispatcher_send_to_overlay (const gchar * app_id, const gchar * url, GDBusConnection * conn, const gchar * sender);
 
 G_END_DECLS
 
