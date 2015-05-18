@@ -248,7 +248,7 @@ dispatcher_send_to_overlay (const gchar * app_id, const gchar * url, GDBusConnec
 
 /* Check to see if this is an overlay AppID */
 gboolean
-is_overlay (const gchar * appid)
+dispatcher_is_overlay (const gchar * appid)
 {
 	const gchar * systemdir = NULL;
 	gboolean found = FALSE;
@@ -346,7 +346,7 @@ dispatch_url_cb (GObject * skel, GDBusMethodInvocation * invocation, const gchar
 
 	/* We're cleared to continue */
 	gboolean sent = FALSE;
-	if (!is_overlay(appid)) {
+	if (!dispatcher_is_overlay(appid)) {
 		sent = dispatcher_send_to_app(appid, outurl);
 	} else {
 		sent = dispatcher_send_to_overlay(

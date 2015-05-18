@@ -262,7 +262,8 @@ TEST_F(DispatcherTest, IntentTest)
 
 TEST_F(DispatcherTest, OverlayTest)
 {
-	/* TODO: is_overlay */
+	EXPECT_TRUE(dispatcher_is_overlay("mock-overlay"));
+	EXPECT_FALSE(dispatcher_is_overlay("not-overlay"));
 
 	EXPECT_TRUE(dispatcher_send_to_overlay ("mock-overlay", "overlay://ubuntu.com", session, g_dbus_connection_get_unique_name(session)));
 
