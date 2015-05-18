@@ -252,12 +252,21 @@ dispatcher_send_to_overlay (const gchar * app_id, const gchar * url, GDBusMethod
 gboolean
 is_overlay (const gchar * appid)
 {
+	const gchar * systemdir = NULL;
 	gboolean found = FALSE;
 	gchar * desktopname = g_strdup_printf("%s.desktop", appid);
 
+	/* First time, check the environment */
+	if (G_UNLIKELY(systemdir == NULL)) {
+		systemdir = g_getenv("URL_DISPATCHER_OVERLAY_DIR");
+		if (systemdir == NULL) {
+			systemdir = OVERLAY_SYSTEM_DIRECTORY;
+		}
+	}
+
 	/* Check system dir */
 	if (!found) {
-		gchar * sysdir = g_build_filename(OVERLAY_SYSTEM_DIRECTORY, desktopname, NULL);
+		gchar * sysdir = g_build_filename(systemdir, desktopname, NULL);
 		found = g_file_test(sysdir, G_FILE_TEST_EXISTS);
 		g_free(sysdir);
 	}
