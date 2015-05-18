@@ -101,8 +101,20 @@ main (int argc, char * argv[])
 		return -1;
 	}
 
-	ubuntu_app_launch_helper_set_exec(exec);
+	GDBusConnection * bus = g_bus_get_sync(G_BUS_TYPE_SESSION, NULL, NULL);
+	g_return_val_if_fail(bus != NULL, -1);
+
+	gboolean sended = ubuntu_app_launch_helper_set_exec(exec);
 	g_free(exec);
 
-	return 0;
+	/* Ensuring the messages get on the bus before we quit */
+	g_dbus_connection_flush_sync(bus, NULL, NULL);
+	g_clear_object(&bus);
+
+	if (sended) {
+		return 0;
+	} else {
+		g_critical("Unable to send exec to Upstart");
+		return -1;
+	}
 }
