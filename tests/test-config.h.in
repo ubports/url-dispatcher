@@ -11,3 +11,4 @@
 #define UPDATE_DIRECTORY_VARIED "@CMAKE_CURRENT_SOURCE_DIR@/test-urls-varied"
 #define UPDATE_DIRECTORY_INTENT "@CMAKE_CURRENT_SOURCE_DIR@/test-urls-intent"
 #define OVERLAY_TEST_DIR "@CMAKE_CURRENT_SOURCE_DIR@/overlay-dir"
+#define EXEC_TOOL "@CMAKE_BINARY_DIR@/service/exec-tool"
