@@ -79,11 +79,7 @@ recoverable_problem_file (GObject * obj, GAsyncResult * res, gpointer user_data)
 		NULL
 	};
 
-	/* Allow disabling for testing, we don't want to report bugs on
-	   our tests ;-) */
-	if (g_getenv("URL_DISPATCHER_DISABLE_RECOVERABLE_ERROR") == NULL) {
-		report_recoverable_problem("url-dispatcher-bad-url", pid, FALSE, additional);
-	}
+	report_recoverable_problem("url-dispatcher-bad-url", pid, FALSE, additional);
 
 	g_free(badurl);
 
