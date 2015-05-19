@@ -4,18 +4,22 @@
 #include <iostream>
 #include <thread>
 
-static const char * valid_trust_session = "In the circle of trust";
+MirPromptSession * mir_mock_valid_trust_session = (MirPromptSession *)"In the circle of trust";
 static bool valid_trust_connection = true;
-pid_t mir_mock_last_trust_pid = 0;
 static int trusted_fd = 1234;
 MirPromptSession * mir_mock_last_released_session = NULL;
+pid_t mir_mock_last_trust_pid = 0;
+void (*mir_mock_last_trust_func)(MirPromptSession *, MirPromptSessionState, void*data) = NULL;
+void * mir_mock_last_trust_data = NULL;
 
 MirPromptSession *
-mir_connection_create_prompt_session_sync(MirConnection * connection, pid_t pid, void (*)(MirPromptSession *, MirPromptSessionState, void*data), void * context) {
+mir_connection_create_prompt_session_sync(MirConnection * connection, pid_t pid, void (*func)(MirPromptSession *, MirPromptSessionState, void*data), void * context) {
 	mir_mock_last_trust_pid = pid;
+	mir_mock_last_trust_func = func;
+	mir_mock_last_trust_data = context;
 
 	if (valid_trust_connection) {
-		return (MirPromptSession *)valid_trust_session;
+		return mir_mock_valid_trust_session;
 	} else {
 		return nullptr;
 	}
@@ -25,7 +29,7 @@ void
 mir_prompt_session_release_sync (MirPromptSession * session)
 {
 	mir_mock_last_released_session = session;
-	if (reinterpret_cast<char *>(session) != valid_trust_session) {
+	if (session != mir_mock_valid_trust_session) {
 		std::cerr << "Releasing a Mir Trusted Prompt that isn't valid" << std::endl;
 		exit(1);
 	}
@@ -33,7 +37,7 @@ mir_prompt_session_release_sync (MirPromptSession * session)
 
 MirWaitHandle *
 mir_prompt_session_new_fds_for_prompt_providers (MirPromptSession * session, unsigned int numfds, mir_client_fd_callback cb, void * data) {
-	if (reinterpret_cast<char *>(session) != valid_trust_session) {
+	if (session != mir_mock_valid_trust_session) {
 		std::cerr << "Releasing a Mir Trusted Prompt that isn't valid" << std::endl;
 		exit(1);
 	}
