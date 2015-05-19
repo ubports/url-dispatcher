@@ -34,6 +34,22 @@ target_link_libraries(mock-lib
 )
 
 ###########################
+# Mir Mock Lib
+###########################
+
+add_library(mir-mock-lib SHARED
+	mir-mock.h
+	mir-mock.cpp)
+
+target_link_libraries(mir-mock-lib
+	${GLIB2_LIBRARIES}
+)
+
+set_target_properties(mir-mock-lib PROPERTIES
+	OUTPUT_NAME "mir-mock"
+)
+
+###########################
 # Dispatcher test
 ###########################
 
@@ -146,9 +162,11 @@ add_test (exec-tool-test exec-tool-test)
 # overlay tracker test
 ###########################
 
-add_executable (overlay-tracker-test overlay-tracker-test.cpp mir-mock.cpp ubuntu-app-launch-mock.c)
+add_executable (overlay-tracker-test overlay-tracker-test.cpp)
 target_link_libraries (overlay-tracker-test
 	dispatcher-lib
+	mir-mock-lib
+	mock-lib
 	gtest
 	${GTEST_LIBS}
 	${GIO2_LIBRARIES}
