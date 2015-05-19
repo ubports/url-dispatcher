@@ -249,7 +249,7 @@ TEST_F(ServiceTest, TestURLTest) {
 }
 
 void
-focus_signal_cb (GDBusConnection */*connection*/, const gchar */*sender_name*/, const gchar */*object_path*/, const gchar */*interface_name*/, const gchar */*signal_name*/, GVariant */*parameters*/, gpointer user_data)
+focus_signal_cb (GDBusConnection * /*connection*/, const gchar * /*sender_name*/, const gchar * /*object_path*/, const gchar * /*interface_name*/, const gchar * /*signal_name*/, GVariant * /*parameters*/, gpointer user_data)
 {
 	guint * focus_count = (guint *)user_data;
 	*focus_count = *focus_count + 1;
