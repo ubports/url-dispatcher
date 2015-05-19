@@ -98,6 +98,9 @@ TEST_F(OverlayTrackerTest, MirSignalStop) {
 
 	EXPECT_TRUE(tracker.addOverlay("app-id", 5, "http://no-name-yet.com"));
 
+	/* Try a badie */
+	mir_mock_last_trust_func((MirPromptSession *)1337, mir_prompt_session_state_stopped, mir_mock_last_trust_data);
+
 	EXPECT_NE(nullptr, mir_mock_last_trust_func);
 	mir_mock_last_trust_func(mir_mock_valid_trust_session, mir_prompt_session_state_stopped, mir_mock_last_trust_data);
 
