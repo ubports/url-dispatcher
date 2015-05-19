@@ -1,4 +1,6 @@
 
+#include <random>
+
 #include "test-config.h"
 
 #include <gio/gio.h>
@@ -7,6 +9,7 @@
 
 #include "overlay-tracker-mir.h"
 #include "ubuntu-app-launch-mock.h"
+#include "mir-mock.h"
 
 class OverlayTrackerTest : public ::testing::Test
 {
@@ -42,7 +45,13 @@ TEST_F(OverlayTrackerTest, BasicCreation) {
 TEST_F(OverlayTrackerTest, AddOverlay) {
 	auto tracker = new OverlayTrackerMir();
 
+	auto mirconn = mir_mock_connect_last_connect();
+	EXPECT_EQ("mir_socket_trusted", mirconn.first.substr(mirconn.first.size() - 18));
+	EXPECT_EQ("url-dispatcher", mirconn.second);
+
 	EXPECT_TRUE(tracker->addOverlay("app-id", 5, "http://no-name-yet.com"));
+
+	EXPECT_EQ(5, mir_mock_last_trust_pid);
 
 	EXPECT_STREQ("url-overlay", ubuntu_app_launch_mock_last_start_session_helper);
 	EXPECT_STREQ("app-id", ubuntu_app_launch_mock_last_start_session_appid);
@@ -57,10 +66,16 @@ TEST_F(OverlayTrackerTest, AddOverlay) {
 
 TEST_F(OverlayTrackerTest, OverlayABunch) {
 	OverlayTrackerMir tracker;
+	std::uniform_int_distribution<> randpid(1, 32000);
+	std::mt19937 rand;
 
 	/* Testing adding a bunch of overlays, we're using pretty standard
 	   data structures, but let's make sure we didn't break 'em */
 	for (auto name : std::vector<std::string>{"warty", "hoary", "breezy", "dapper", "edgy", "feisty", "gutsy", "hardy", "intrepid", "jaunty", "karmic", "lucid", "maverick", "natty", "oneiric", "precise", "quantal", "raring", "saucy", "trusty", "utopic", "vivid", "wily"}) {
-		tracker.addOverlay(name.c_str(), 42, "http://ubuntu.com/releases");
+		int pid = randpid(rand);
+		tracker.addOverlay(name.c_str(), pid, "http://ubuntu.com/releases");
+
+		EXPECT_EQ(pid, mir_mock_last_trust_pid);
+		EXPECT_EQ(name, ubuntu_app_launch_mock_last_start_session_appid);
 	}
 }

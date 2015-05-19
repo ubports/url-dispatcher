@@ -9,12 +9,12 @@
 
 static const char * valid_trust_session = "In the circle of trust";
 static bool valid_trust_connection = true;
-static pid_t last_trust_pid = 0;
+pid_t mir_mock_last_trust_pid = 0;
 static int trusted_fd = 1234;
 
 MirPromptSession *
 mir_connection_create_prompt_session_sync(MirConnection * connection, pid_t pid, void (*)(MirPromptSession *, MirPromptSessionState, void*data), void * context) {
-	last_trust_pid = pid;
+	mir_mock_last_trust_pid = pid;
 
 	if (valid_trust_connection) {
 		return (MirPromptSession *)valid_trust_session;
