@@ -50,6 +50,10 @@ gchar ** ubuntu_app_launch_mock_last_start_session_uris = NULL;
 gchar *
 ubuntu_app_launch_start_session_helper (const gchar * type, MirPromptSession * session, const gchar * appid, const gchar * const * uris)
 {
+	g_clear_pointer(&ubuntu_app_launch_mock_last_start_session_helper, g_free);
+	g_clear_pointer(&ubuntu_app_launch_mock_last_start_session_appid, g_free);
+	g_clear_pointer(&ubuntu_app_launch_mock_last_start_session_uris, g_strfreev);
+
 	ubuntu_app_launch_mock_last_start_session_helper = g_strdup(type);
 	ubuntu_app_launch_mock_last_start_session_session = session;
 	ubuntu_app_launch_mock_last_start_session_appid = g_strdup(appid);
@@ -64,6 +68,10 @@ gchar * ubuntu_app_launch_mock_last_stop_instance = NULL;
 
 gboolean
 ubuntu_app_launch_stop_multiple_helper (const gchar * helper_type, const gchar * appid, const gchar * instance) {
+	g_clear_pointer(&ubuntu_app_launch_mock_last_stop_helper, g_free);
+	g_clear_pointer(&ubuntu_app_launch_mock_last_stop_appid, g_free);
+	g_clear_pointer(&ubuntu_app_launch_mock_last_stop_instance, g_free);
+
 	ubuntu_app_launch_mock_last_stop_helper = g_strdup(helper_type);
 	ubuntu_app_launch_mock_last_stop_appid = g_strdup(appid);
 	ubuntu_app_launch_mock_last_stop_instance = g_strdup(instance);

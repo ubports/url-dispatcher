@@ -54,3 +54,13 @@ TEST_F(OverlayTrackerTest, AddOverlay) {
 	EXPECT_STREQ("app-id", ubuntu_app_launch_mock_last_stop_appid);
 	EXPECT_STREQ("instance", ubuntu_app_launch_mock_last_stop_instance);
 }
+
+TEST_F(OverlayTrackerTest, OverlayABunch) {
+	OverlayTrackerMir tracker;
+
+	/* Testing adding a bunch of overlays, we're using pretty standard
+	   data structures, but let's make sure we didn't break 'em */
+	for (auto name : std::vector<std::string>{"warty", "hoary", "breezy", "dapper", "edgy", "feisty", "gutsy", "hardy", "intrepid", "jaunty", "karmic", "lucid", "maverick", "natty", "oneiric", "precise", "quantal", "raring", "saucy", "trusty", "utopic", "vivid", "wily"}) {
+		tracker.addOverlay(name.c_str(), 42, "http://ubuntu.com/releases");
+	}
+}
