@@ -146,7 +146,7 @@ add_test (exec-tool-test exec-tool-test)
 # overlay tracker test
 ###########################
 
-add_executable (overlay-tracker-test overlay-tracker-test.cpp mir-mock.cpp)
+add_executable (overlay-tracker-test overlay-tracker-test.cpp mir-mock.cpp ubuntu-app-launch-mock.c)
 target_link_libraries (overlay-tracker-test
 	dispatcher-lib
 	gtest
