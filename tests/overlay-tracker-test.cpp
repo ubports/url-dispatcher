@@ -88,3 +88,36 @@ TEST_F(OverlayTrackerTest, BasicCreation) {
 	auto tracker = new OverlayTrackerMir();
 	delete tracker;
 }
+
+TEST_F(OverlayTrackerTest, AddOverlay) {
+	auto tracker = new OverlayTrackerMir();
+
+	EXPECT_TRUE(tracker->addOverlay("app-id", 5, "http://no-name-yet.com"));
+
+	guint callslen = 0;
+	const DbusTestDbusMockCall * calls = dbus_test_dbus_mock_object_get_method_calls(mock, jobobj, "Start", &callslen, nullptr);
+
+	ASSERT_EQ(callslen, 1);
+
+	/* Making sure the APP_ID is here.  We're not testing more to
+	   make it so the tests break less, that should be tested in
+	   Upstart App Launch, we don't need to retest */
+	GVariant * env = g_variant_get_child_value(calls->params, 0);
+	GVariantIter iter;
+	bool found_appid = false;
+	g_variant_iter_init(&iter, env);
+	gchar * var = nullptr;
+
+	while (g_variant_iter_loop(&iter, "s", &var)) {
+		if (g_strcmp0(var, "APP_ID=app-id") == 0) {
+			ASSERT_FALSE(found_appid);
+			found_appid = true;
+		}
+	}
+
+	g_variant_unref(env);
+
+	ASSERT_TRUE(found_appid);
+
+	delete tracker;
+}
