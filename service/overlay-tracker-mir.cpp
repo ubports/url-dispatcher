@@ -34,7 +34,7 @@ OverlayTrackerMir::~OverlayTrackerMir (void)
 {
 	thread.executeOnThread<bool>([this] {
 		while (!ongoingSessions.empty()) {
-			sessionStateChanged(std::get<2>(*ongoingSessions.begin()).get(), mir_prompt_session_state_stopped);
+			removeSession(std::get<2>(*ongoingSessions.begin()).get());
 		}
 
 		return true;
@@ -80,6 +80,18 @@ OverlayTrackerMir::sessionStateChangedStatic (MirPromptSession * session, MirPro
 }
 
 void
+OverlayTrackerMir::removeSession (MirPromptSession * session)
+{
+	for (auto it = ongoingSessions.begin(); it != ongoingSessions.end(); it++) {
+		if (std::get<2>(*it).get() == session) {
+			ubuntu_app_launch_stop_multiple_helper(HELPER_TYPE, std::get<0>(*it).c_str(), std::get<1>(*it).c_str());
+			ongoingSessions.erase(it);
+			break;
+		}
+	}
+}
+
+void
 OverlayTrackerMir::sessionStateChanged (MirPromptSession * session, MirPromptSessionState state)
 {
 	if (state != mir_prompt_session_state_stopped) {
@@ -90,13 +102,7 @@ OverlayTrackerMir::sessionStateChanged (MirPromptSession * session, MirPromptSes
 	/* Executing on the Mir thread, which is nice and all, but we
 	   want to get back on our thread */
 	thread.executeOnThread([this, session]() {
-		for (auto it = ongoingSessions.begin(); it != ongoingSessions.end(); it++) {
-			if (std::get<2>(*it).get() == session) {
-				ubuntu_app_launch_stop_multiple_helper(HELPER_TYPE, std::get<0>(*it).c_str(), std::get<1>(*it).c_str());
-				ongoingSessions.erase(it);
-				break;
-			}
-		}
+		removeSession(session);
 	});
 }
 

@@ -20,6 +20,8 @@ public:
 	~OverlayTrackerMir (void); 
 	bool addOverlay (const char * appid, unsigned long pid, const char * url) override;
 
+	void removeSession (MirPromptSession * session);
+
 	static void sessionStateChangedStatic (MirPromptSession * session, MirPromptSessionState state, void * user_data);
 	void sessionStateChanged (MirPromptSession * session, MirPromptSessionState state);
 
