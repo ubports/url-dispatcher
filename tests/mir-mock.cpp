@@ -4,13 +4,11 @@
 #include <iostream>
 #include <thread>
 
-#include <mir_toolkit/mir_connection.h>
-#include <mir_toolkit/mir_prompt_session.h>
-
 static const char * valid_trust_session = "In the circle of trust";
 static bool valid_trust_connection = true;
 pid_t mir_mock_last_trust_pid = 0;
 static int trusted_fd = 1234;
+MirPromptSession * mir_mock_last_released_session = NULL;
 
 MirPromptSession *
 mir_connection_create_prompt_session_sync(MirConnection * connection, pid_t pid, void (*)(MirPromptSession *, MirPromptSessionState, void*data), void * context) {
@@ -26,6 +24,7 @@ mir_connection_create_prompt_session_sync(MirConnection * connection, pid_t pid,
 void
 mir_prompt_session_release_sync (MirPromptSession * session)
 {
+	mir_mock_last_released_session = session;
 	if (reinterpret_cast<char *>(session) != valid_trust_session) {
 		std::cerr << "Releasing a Mir Trusted Prompt that isn't valid" << std::endl;
 		exit(1);
@@ -43,7 +42,7 @@ mir_prompt_session_new_fds_for_prompt_providers (MirPromptSession * session, uns
 	std::thread * thread = new std::thread([session, numfds, cb, data]() {
 		int fdlist[numfds];
 
-		for (int i = 0; i < numfds; i++) 
+		for (unsigned int i = 0; i < numfds; i++) 
 			fdlist[i] = trusted_fd;
 
 		cb(session, numfds, fdlist, data);

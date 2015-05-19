@@ -79,3 +79,16 @@ TEST_F(OverlayTrackerTest, OverlayABunch) {
 		EXPECT_EQ(name, ubuntu_app_launch_mock_last_start_session_appid);
 	}
 }
+
+TEST_F(OverlayTrackerTest, UALSignalStop) {
+	OverlayTrackerMir tracker;
+
+	/* Call with the overlay before it is set */
+	ubuntu_app_launch_mock_observer_helper_stop_func("app-id", "instance", "url-overlay", ubuntu_app_launch_mock_observer_helper_stop_user_data);
+
+	EXPECT_TRUE(tracker.addOverlay("app-id", 5, "http://no-name-yet.com"));
+
+	mir_mock_last_released_session = nullptr;
+	ubuntu_app_launch_mock_observer_helper_stop_func("app-id", "instance", "url-overlay", ubuntu_app_launch_mock_observer_helper_stop_user_data);
+	EXPECT_NE(nullptr, mir_mock_last_released_session);
+}

@@ -26,6 +26,9 @@ G_BEGIN_DECLS
 void ubuntu_app_launch_mock_clear_last_app_id (void);
 gchar * ubuntu_app_launch_mock_get_last_app_id (void);
 
+extern UbuntuAppLaunchHelperObserver ubuntu_app_launch_mock_observer_helper_stop_func;
+extern gchar * ubuntu_app_launch_mock_observer_helper_stop_type;
+extern void * ubuntu_app_launch_mock_observer_helper_stop_user_data;
 extern gchar * ubuntu_app_launch_mock_last_start_session_helper;
 extern MirPromptSession * ubuntu_app_launch_mock_last_start_session_session;
 extern gchar * ubuntu_app_launch_mock_last_start_session_appid;
