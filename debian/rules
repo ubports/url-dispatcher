@@ -2,6 +2,7 @@
 
 export DPKG_GENSYMBOLS_CHECK_LEVEL = 4
 export G_MESSAGES_DEBUG=all
+export URL_DISPATCHER_DISABLE_RECOVERABLE_ERROR=1
 
 %:
 	dh $@ --fail-missing --with click
