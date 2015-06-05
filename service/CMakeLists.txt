@@ -111,7 +111,7 @@ target_link_libraries(update-directory ${GIO2_LIBRARIES} ${JSONGLIB_LIBRARIES} u
 
 add_executable(url-overlay-exec-tool url-overlay.c recoverable-problem.c)
 set_target_properties(url-overlay-exec-tool PROPERTIES OUTPUT_NAME "exec-tool")
-target_link_libraries(url-overlay-exec-tool ${GIO2_LIBRARIES} ${UBUNTU_APP_LAUNCH_LIBRARIES})
+target_link_libraries(url-overlay-exec-tool ${GIO2_LIBRARIES} ${UBUNTU_APP_LAUNCH_LIBRARIES} ${CLICK_LIBRARIES})
 
 ###########################
 # Installation
