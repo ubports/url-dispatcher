@@ -262,13 +262,13 @@ TEST_F(DispatcherTest, IntentTest)
 
 TEST_F(DispatcherTest, OverlayTest)
 {
-	EXPECT_TRUE(dispatcher_is_overlay("mock-overlay"));
-	EXPECT_FALSE(dispatcher_is_overlay("not-overlay"));
+	EXPECT_TRUE(dispatcher_is_overlay("com.test.good_application_1.2.3"));
+	EXPECT_FALSE(dispatcher_is_overlay("com.test.bad_application_1.2.3"));
 
-	EXPECT_TRUE(dispatcher_send_to_overlay ("mock-overlay", "overlay://ubuntu.com", session, g_dbus_connection_get_unique_name(session)));
+	EXPECT_TRUE(dispatcher_send_to_overlay ("com.test.good_application_1.2.3", "overlay://ubuntu.com", session, g_dbus_connection_get_unique_name(session)));
 
 	ASSERT_EQ(1, tracker.addedOverlays.size());
-	EXPECT_EQ("mock-overlay", std::get<0>(tracker.addedOverlays[0]));
+	EXPECT_EQ("com.test.good_application_1.2.3", std::get<0>(tracker.addedOverlays[0]));
 	EXPECT_EQ(getpid(), std::get<1>(tracker.addedOverlays[0]));
 	EXPECT_EQ("overlay://ubuntu.com", std::get<2>(tracker.addedOverlays[0]));
 
