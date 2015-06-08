@@ -152,16 +152,7 @@ main (int argc, char * argv[])
 	}
 
 	gchar * dir = build_dir(appid);
-	if (dir == NULL) {
-		const gchar * props[3] = {
-			"AppID",
-			appid,
-			NULL
-		};
-
-		report_recoverable_problem("url-dispatcher-url-overlay-bad-appid", 0, TRUE, props);
-		return -1;
-	}
+	/* NOTE: Dir will be NULL for system apps */
 
 	GDBusConnection * bus = g_bus_get_sync(G_BUS_TYPE_SESSION, NULL, NULL);
 	g_return_val_if_fail(bus != NULL, -1);
