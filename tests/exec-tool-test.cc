@@ -33,6 +33,9 @@ class ExecToolTest : public ::testing::Test
 			g_setenv("URL_DISPATCHER_DISABLE_RECOVERABLE_ERROR", "1", TRUE);
 			g_setenv("URL_DISPATCHER_OVERLAY_DIR", OVERLAY_TEST_DIR, TRUE);
 
+			g_setenv("TEST_CLICK_DB", "click-db", TRUE);
+			g_setenv("TEST_CLICK_USER", "test-user", TRUE);
+
 			service = dbus_test_service_new(nullptr);
 
 			/* Upstart Mock */
@@ -95,7 +98,7 @@ TEST_F(ExecToolTest, SetOverlay)
 	EXPECT_TRUE(g_spawn_command_line_sync(EXEC_TOOL, nullptr, nullptr, &retval, nullptr));
 	EXPECT_NE(0, retval);
 
-	g_setenv("APP_ID", "mock-overlay", TRUE);
+	g_setenv("APP_ID", "com.test.good_application_1.2.3", TRUE);
 	g_setenv("UPSTART_JOB", "fubar", TRUE);
 	EXPECT_TRUE(g_spawn_command_line_sync(EXEC_TOOL, nullptr, nullptr, &retval, nullptr));
 	EXPECT_EQ(0, retval);
@@ -103,9 +106,13 @@ TEST_F(ExecToolTest, SetOverlay)
 	guint len = 0;
 	const DbusTestDbusMockCall * calls = dbus_test_dbus_mock_object_get_method_calls(mock, obj, "SetEnv", &len, NULL);
 	ASSERT_NE(nullptr, calls);
-	ASSERT_EQ(1, len);
+	ASSERT_EQ(2, len);
 
 	GVariant * appexecenv = g_variant_get_child_value(calls[0].params, 1);
 	EXPECT_STREQ("APP_EXEC=foobar", g_variant_get_string(appexecenv, nullptr));
 	g_variant_unref(appexecenv);
+
+	GVariant * appdirenv = g_variant_get_child_value(calls[1].params, 1);
+	EXPECT_STREQ("APP_DIR=" CLICK_DATA_DIR "/.click/users/test-user/com.test.good", g_variant_get_string(appdirenv, nullptr));
+	g_variant_unref(appdirenv);
 }
