@@ -3,12 +3,12 @@
 # URL Dispatcher
 ###########################
 
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../liburl-dispatcher)
+include_directories(${CMAKE_SOURCE_DIR}/liburl-dispatcher)
 
 add_executable(url-dispatcher url-dispatcher.c)
 
 target_link_libraries(url-dispatcher
-dispatcher
+  dispatcher
 )
 
 install(
@@ -17,7 +17,7 @@ install(
 )
 
 install(
-  SCRIPT url-dispatcher-dump
-  RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
+  PROGRAMS url-dispatcher-dump
+  DESTINATION "${CMAKE_INSTALL_BINDIR}"
 )
 
