@@ -24,7 +24,7 @@
 #define DB_SCHEMA_VERSION "1"
 
 sqlite3 *
-url_db_create_database (void)
+url_db_create_database ()
 {
 	const gchar * cachedir = g_getenv("URL_DISPATCHER_CACHE_DIR"); /* Mostly for testing */
 

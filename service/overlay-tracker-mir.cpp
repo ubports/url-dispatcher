@@ -22,7 +22,7 @@
 
 static const char * HELPER_TYPE = "url-overlay";
 
-OverlayTrackerMir::OverlayTrackerMir (void) 
+OverlayTrackerMir::OverlayTrackerMir () 
 	: thread([this] {
 		/* Setup Helper Observer */
 		ubuntu_app_launch_observer_add_helper_stop(untrustedHelperStoppedStatic, HELPER_TYPE, this);
@@ -49,7 +49,7 @@ OverlayTrackerMir::OverlayTrackerMir (void)
 }
 
 /* Enforce a shutdown order, sessions before connection */
-OverlayTrackerMir::~OverlayTrackerMir (void) 
+OverlayTrackerMir::~OverlayTrackerMir () 
 {
 	thread.executeOnThread<bool>([this] {
 		while (!ongoingSessions.empty()) {

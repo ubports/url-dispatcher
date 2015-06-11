@@ -29,7 +29,7 @@ ubuntu_app_launch_start_application (const gchar * appid, const gchar * const * 
 }
 
 void
-ubuntu_app_launch_mock_clear_last_app_id (void)
+ubuntu_app_launch_mock_clear_last_app_id ()
 {
 	g_free(last_appid);
 	last_appid = NULL;
@@ -37,7 +37,7 @@ ubuntu_app_launch_mock_clear_last_app_id (void)
 }
 
 gchar *
-ubuntu_app_launch_mock_get_last_app_id (void)
+ubuntu_app_launch_mock_get_last_app_id ()
 {
 	return last_appid;
 }

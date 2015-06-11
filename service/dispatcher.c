@@ -45,7 +45,7 @@ G_DEFINE_QUARK(url_dispatcher, url_dispatcher_error)
 
 /* Register our errors */
 static void
-register_dbus_errors (void)
+register_dbus_errors ()
 {
 	g_dbus_error_register_error(url_dispatcher_error_quark(), ERROR_BAD_URL, "com.canonical.URLDispatcher.BadURL");
 	g_dbus_error_register_error(url_dispatcher_error_quark(), ERROR_RESTRICTED_URL, "com.canonical.URLDispatcher.RestrictedURL");
@@ -570,7 +570,7 @@ dispatcher_init (GMainLoop * mainloop, OverlayTracker * intracker)
 
 /* Clean up all the globals */
 gboolean
-dispatcher_shutdown (void)
+dispatcher_shutdown ()
 {
 	g_cancellable_cancel(cancellable);
 

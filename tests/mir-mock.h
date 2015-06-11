@@ -24,7 +24,7 @@
 #include <mir_toolkit/mir_prompt_session.h>
 
 void mir_mock_connect_return_valid (bool valid);
-std::pair<std::string, std::string> mir_mock_connect_last_connect (void);
+std::pair<std::string, std::string> mir_mock_connect_last_connect ();
 void mir_mock_set_trusted_fd (int fd);
 
 extern MirPromptSession * mir_mock_valid_trust_session;

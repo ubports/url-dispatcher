@@ -25,7 +25,7 @@ extern "C" {
 #include "overlay-tracker-mir.h"
 
 OverlayTracker *
-overlay_tracker_new (void) {
+overlay_tracker_new () {
 	try {
 		OverlayTrackerMir * cpptracker = new OverlayTrackerMir();
 		return reinterpret_cast<OverlayTracker *>(cpptracker);

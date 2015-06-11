@@ -34,8 +34,8 @@ private:
 	std::set<std::tuple<std::string, std::string, std::shared_ptr<MirPromptSession>>> ongoingSessions;
 
 public:
-	OverlayTrackerMir (void); 
-	~OverlayTrackerMir (void); 
+	OverlayTrackerMir (); 
+	~OverlayTrackerMir (); 
 	bool addOverlay (const char * appid, unsigned long pid, const char * url) override;
 
 	void removeSession (MirPromptSession * session);

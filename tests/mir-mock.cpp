@@ -92,7 +92,7 @@ mir_mock_connect_return_valid (bool valid)
 }
 
 std::pair<std::string, std::string>
-mir_mock_connect_last_connect (void)
+mir_mock_connect_last_connect ()
 {
 	return last_connection;
 }

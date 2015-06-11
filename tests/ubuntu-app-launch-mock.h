@@ -23,8 +23,8 @@
 
 G_BEGIN_DECLS
 
-void ubuntu_app_launch_mock_clear_last_app_id (void);
-gchar * ubuntu_app_launch_mock_get_last_app_id (void);
+void ubuntu_app_launch_mock_clear_last_app_id ();
+gchar * ubuntu_app_launch_mock_get_last_app_id ();
 
 extern UbuntuAppLaunchHelperObserver ubuntu_app_launch_mock_observer_helper_stop_func;
 extern gchar * ubuntu_app_launch_mock_observer_helper_stop_type;

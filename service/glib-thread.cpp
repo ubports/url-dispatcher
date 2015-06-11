@@ -23,7 +23,7 @@ namespace GLib
 {
 
 
-ContextThread::ContextThread (std::function<void(void)> beforeLoop, std::function<void(void)> afterLoop)
+ContextThread::ContextThread (std::function<void()> beforeLoop, std::function<void()> afterLoop)
     : _context(nullptr)
     , _loop(nullptr)
 {
@@ -40,7 +40,7 @@ ContextThread::ContextThread (std::function<void(void)> beforeLoop, std::functio
     /* NOTE: We copy afterLoop but reference beforeLoop. We're blocking so we
        know that beforeLoop will stay valid long enough, but we can't say the
        same for afterLoop */
-    _thread = std::thread([&context_promise, &beforeLoop, afterLoop, this](void) -> void
+    _thread = std::thread([&context_promise, &beforeLoop, afterLoop, this]() -> void
     {
         /* Build up the context and loop for the async events and a place
            for GDBus to send its events back to */
@@ -85,12 +85,12 @@ ContextThread::ContextThread (std::function<void(void)> beforeLoop, std::functio
     }
 }
 
-ContextThread::~ContextThread (void)
+ContextThread::~ContextThread ()
 {
     quit();
 }
 
-void ContextThread::quit (void)
+void ContextThread::quit ()
 {
     g_cancellable_cancel(_cancel.get()); /* Force the cancellation on ongoing tasks */
     if (_loop != nullptr)
@@ -109,17 +109,17 @@ void ContextThread::quit (void)
     }
 }
 
-bool ContextThread::isCancelled (void)
+bool ContextThread::isCancelled ()
 {
     return g_cancellable_is_cancelled(_cancel.get()) == TRUE;
 }
 
-std::shared_ptr<GCancellable> ContextThread::getCancellable (void)
+std::shared_ptr<GCancellable> ContextThread::getCancellable ()
 {
     return _cancel;
 }
 
-void ContextThread::simpleSource (std::function<GSource * (void)> srcBuilder, std::function<void(void)> work)
+void ContextThread::simpleSource (std::function<GSource * ()> srcBuilder, std::function<void()> work)
 {
     if (isCancelled())
     {
@@ -129,7 +129,7 @@ void ContextThread::simpleSource (std::function<GSource * (void)> srcBuilder, st
     /* Copy the work so that we can reuse it */
     /* Lifecycle is handled with the source pointer when we attach
        it to the context. */
-    auto heapWork = new std::function<void(void)>(work);
+    auto heapWork = new std::function<void()>(work);
 
     auto source = std::shared_ptr<GSource>(srcBuilder(),
                                            [](GSource * src)
@@ -140,26 +140,26 @@ void ContextThread::simpleSource (std::function<GSource * (void)> srcBuilder, st
     g_source_set_callback(source.get(),
                           [](gpointer data) -> gboolean
     {
-        std::function<void(void)>* heapWork = reinterpret_cast<std::function<void(void)> *>(data);
+        std::function<void()>* heapWork = reinterpret_cast<std::function<void()> *>(data);
         (*heapWork)();
         return G_SOURCE_REMOVE;
     }, heapWork,
     [](gpointer data)
     {
-        std::function<void(void)>* heapWork = reinterpret_cast<std::function<void(void)> *>(data);
+        std::function<void()>* heapWork = reinterpret_cast<std::function<void()> *>(data);
         delete heapWork;
     });
 
     g_source_attach(source.get(), _context.get());
 }
 
-void ContextThread::executeOnThread (std::function<void(void)> work)
+void ContextThread::executeOnThread (std::function<void()> work)
 {
     simpleSource(g_idle_source_new, work);
 }
 
 void ContextThread::timeout (const std::chrono::milliseconds& length,
-                             std::function<void(void)> work)
+                             std::function<void()> work)
 {
     simpleSource([length]()
     {
@@ -168,7 +168,7 @@ void ContextThread::timeout (const std::chrono::milliseconds& length,
 }
 
 void ContextThread::timeoutSeconds (const std::chrono::seconds& length,
-                                    std::function<void(void)> work)
+                                    std::function<void()> work)
 {
     simpleSource([length]()
     {
