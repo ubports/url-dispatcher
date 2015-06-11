@@ -52,7 +52,7 @@ add_library(dispatcher-lib STATIC
 target_link_libraries(dispatcher-lib
 	url-db-lib
 	service-generated
-	-lpthread
+	-pthread
 	${GLIB2_LIBRARIES}
 	${GOBJECT2_LIBRARIES}
 	${GIO2_LIBRARIES}

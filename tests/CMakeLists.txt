@@ -42,7 +42,7 @@ add_library(mir-mock-lib SHARED
 	mir-mock.cpp)
 
 target_link_libraries(mir-mock-lib
-	-lpthread
+	-pthread
 	${GLIB2_LIBRARIES}
 )
 
