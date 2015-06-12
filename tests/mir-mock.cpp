@@ -16,6 +16,7 @@
 
 #include "mir-mock.h"
 
+#include <vector>
 #include <iostream>
 #include <thread>
 
@@ -28,7 +29,7 @@ void (*mir_mock_last_trust_func)(MirPromptSession *, MirPromptSessionState, void
 void * mir_mock_last_trust_data = NULL;
 
 MirPromptSession *
-mir_connection_create_prompt_session_sync(MirConnection * connection, pid_t pid, void (*func)(MirPromptSession *, MirPromptSessionState, void*data), void * context) {
+mir_connection_create_prompt_session_sync(MirConnection *, pid_t pid, void (*func)(MirPromptSession *, MirPromptSessionState, void*data), void * context) {
 	mir_mock_last_trust_pid = pid;
 	mir_mock_last_trust_func = func;
 	mir_mock_last_trust_data = context;
@@ -57,14 +58,13 @@ mir_prompt_session_new_fds_for_prompt_providers (MirPromptSession * session, uns
 		exit(1);
 	}
 
-	/* TODO: Put in another thread to be more mir like */
 	std::thread * thread = new std::thread([session, numfds, cb, data]() {
-		int fdlist[numfds];
+		std::vector<int> fdlist(numfds);
 
 		for (unsigned int i = 0; i < numfds; i++) 
 			fdlist[i] = trusted_fd;
 
-		cb(session, numfds, fdlist, data);
+		cb(session, numfds, fdlist.data(), data);
 	});
 
 	return reinterpret_cast<MirWaitHandle *>(thread);
