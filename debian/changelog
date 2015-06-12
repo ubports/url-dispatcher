@@ -1,3 +1,13 @@
+url-dispatcher (0.1+15.10.20150612-0ubuntu1) wily; urgency=medium
+
+  [ Ted Gould ]
+  * Add upstart build dep for tests on Wily
+  * Provide a small tool to dump the URL DB in a readable form
+  * Support URL Overlays of content in a trusted session without a
+    desktop file
+
+ -- CI Train Bot <ci-train-bot@canonical.com>  Fri, 12 Jun 2015 16:00:40 +0000
+
 url-dispatcher (0.1+15.04.20150123-0ubuntu1) vivid; urgency=low
 
   [ Ted Gould ]
