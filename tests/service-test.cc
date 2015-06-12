@@ -39,6 +39,7 @@ class ServiceTest : public ::testing::Test
 			g_setenv("UBUNTU_APP_LAUNCH_USE_SESSION", "1", TRUE);
 			g_setenv("URL_DISPATCHER_DISABLE_RECOVERABLE_ERROR", "1", TRUE);
 			g_setenv("XDG_DATA_DIRS", XDG_DATA_DIRS, TRUE);
+			g_setenv("LD_PRELOAD", MIR_MOCK_PATH, TRUE);
 
 			SetUpDb();
 
@@ -94,10 +95,6 @@ class ServiceTest : public ::testing::Test
 		}
 
 		virtual void TearDown() {
-			/* dbustest should probably do this, not sure */
-			kill(dbus_test_process_get_pid(dispatcher), SIGTERM);
-			g_usleep(50000);
-
 			g_clear_object(&dispatcher);
 			g_clear_object(&mock);
 			g_clear_object(&dashmock);
@@ -107,9 +104,7 @@ class ServiceTest : public ::testing::Test
 
 			unsigned int cleartry = 0;
 			while (bus != nullptr && cleartry < 100) {
-				g_usleep(100000);
-				while (g_main_pending())
-					g_main_iteration(TRUE);
+				pause(100);
 				cleartry++;
 			}
 
@@ -249,7 +244,7 @@ TEST_F(ServiceTest, TestURLTest) {
 }
 
 void
-focus_signal_cb (GDBusConnection */*connection*/, const gchar */*sender_name*/, const gchar */*object_path*/, const gchar */*interface_name*/, const gchar */*signal_name*/, GVariant */*parameters*/, gpointer user_data)
+focus_signal_cb (GDBusConnection * /*connection*/, const gchar * /*sender_name*/, const gchar * /*object_path*/, const gchar * /*interface_name*/, const gchar * /*signal_name*/, GVariant * /*parameters*/, gpointer user_data)
 {
 	guint * focus_count = (guint *)user_data;
 	*focus_count = *focus_count + 1;

@@ -52,7 +52,7 @@ if (${werror})
   set(CMAKE_C_FLAGS "${CMAKE_CXX_FLAGS} -Werror")
 endif() 
 
-pkg_check_modules(UBUNTU_APP_LAUNCH REQUIRED ubuntu-app-launch-2)
+pkg_check_modules(UBUNTU_APP_LAUNCH REQUIRED ubuntu-app-launch-2>=0.5)
 include_directories(${UBUNTU_APP_LAUNCH_INCLUDE_DIRS})
 
 pkg_check_modules(GLIB2 REQUIRED glib-2.0)
@@ -75,6 +75,9 @@ include_directories(${DBUSTEST_INCLUDE_DIRS})
 
 pkg_check_modules(SQLITE REQUIRED sqlite3)
 include_directories(${SQLITE_INCLUDE_DIRS})
+
+pkg_check_modules(CLICK REQUIRED click-0.4)
+include_directories(${CLICK_INCLUDE_DIRS})
 
 if(${LOCAL_INSTALL})
   set(DBUSSERVICEDIR "${CMAKE_INSTALL_DATADIR}/dbus-1/services/")
@@ -105,7 +108,7 @@ add_subdirectory(tools)
 if (${enable_tests})
   set (GTEST_SOURCE_DIR /usr/src/gtest/src)
   set (GTEST_INCLUDE_DIR ${GTEST_SOURCE_DIR}/..)
-  set (GTEST_LIBS -lpthread)
+  set (GTEST_LIBS -pthread)
   enable_testing ()
   if (${enable_lcov})
 #    include(GCov)

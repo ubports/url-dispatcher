@@ -1,4 +1,5 @@
 usr/lib/*/url-dispatcher
+usr/lib/*/ubuntu-app-launch/url-overlay/exec-tool
 usr/share/dbus-1
 usr/share/upstart/sessions
 usr/bin/url-dispatcher-dump

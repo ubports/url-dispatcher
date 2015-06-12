@@ -25,7 +25,7 @@
 
 G_BEGIN_DECLS
 
-sqlite3 *     url_db_create_database                (void);
+sqlite3 *     url_db_create_database                ();
 gboolean      url_db_get_file_motification_time     (sqlite3 *      db,
                                                      const gchar *  filename,
                                                      GTimeVal *     timeval);

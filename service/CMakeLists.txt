@@ -2,6 +2,8 @@
 include(UseConstantBuilder)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
+add_definitions( -DOVERLAY_SYSTEM_DIRECTORY="${CMAKE_INSTALL_FULL_DATADIR}/url-dispatcher/url-overlays" )
+
 ###########################
 # Generated Lib
 ###########################
@@ -38,15 +40,24 @@ ${JSONGLIB_LIBRARIES}
 
 add_library(dispatcher-lib STATIC
 	dispatcher.h
-	dispatcher.c)
+	dispatcher.c
+	glib-thread.h
+	glib-thread.cpp
+	overlay-tracker.h
+	overlay-tracker.cpp
+	overlay-tracker-iface.h
+	overlay-tracker-mir.h
+	overlay-tracker-mir.cpp)
 
 target_link_libraries(dispatcher-lib
 	url-db-lib
 	service-generated
+	-pthread
 	${GLIB2_LIBRARIES}
 	${GOBJECT2_LIBRARIES}
 	${GIO2_LIBRARIES}
 	${SQLITE_LIBRARIES}
+	${UBUNTU_APP_LAUNCH_LIBRARIES}
 )
 
 ###########################
@@ -84,7 +95,7 @@ add_executable(service-exec service.c recoverable-problem.h recoverable-problem.
 
 set_target_properties(service-exec PROPERTIES OUTPUT_NAME "url-dispatcher")
 
-target_link_libraries(service-exec dispatcher-lib ${UBUNTU_APP_LAUNCH_LIBRARIES})
+target_link_libraries(service-exec dispatcher-lib)
 
 ###########################
 # Update Directory
@@ -95,11 +106,24 @@ set_target_properties(update-directory PROPERTIES OUTPUT_NAME "update-directory"
 target_link_libraries(update-directory ${GIO2_LIBRARIES} ${JSONGLIB_LIBRARIES} url-db-lib)
 
 ###########################
+# URL Overlay Exec Tool
+###########################
+
+add_executable(url-overlay-exec-tool url-overlay.c recoverable-problem.c)
+set_target_properties(url-overlay-exec-tool PROPERTIES OUTPUT_NAME "exec-tool")
+target_link_libraries(url-overlay-exec-tool ${GIO2_LIBRARIES} ${UBUNTU_APP_LAUNCH_LIBRARIES} ${CLICK_LIBRARIES})
+
+###########################
 # Installation
 ###########################
 
 install(
   TARGETS service-exec update-directory
   RUNTIME DESTINATION "${CMAKE_INSTALL_FULL_LIBEXECDIR}/url-dispatcher"
+)
+
+install(
+  TARGETS url-overlay-exec-tool
+  RUNTIME DESTINATION "${CMAKE_INSTALL_FULL_LIBEXECDIR}/ubuntu-app-launch/url-overlay"
 )
 

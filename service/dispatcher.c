@@ -26,6 +26,7 @@
 #include "url-db.h"
 
 /* Globals */
+static OverlayTracker * tracker = NULL;
 static GCancellable * cancellable = NULL;
 static ServiceIfaceComCanonicalURLDispatcher * skel = NULL;
 static GRegex * applicationre = NULL;
@@ -44,7 +45,7 @@ G_DEFINE_QUARK(url_dispatcher, url_dispatcher_error)
 
 /* Register our errors */
 static void
-register_dbus_errors (void)
+register_dbus_errors ()
 {
 	g_dbus_error_register_error(url_dispatcher_error_quark(), ERROR_BAD_URL, "com.canonical.URLDispatcher.BadURL");
 	g_dbus_error_register_error(url_dispatcher_error_quark(), ERROR_RESTRICTED_URL, "com.canonical.URLDispatcher.RestrictedURL");
@@ -78,11 +79,7 @@ recoverable_problem_file (GObject * obj, GAsyncResult * res, gpointer user_data)
 		NULL
 	};
 
-	/* Allow disabling for testing, we don't want to report bugs on
-	   our tests ;-) */
-	if (g_getenv("URL_DISPATCHER_DISABLE_RECOVERABLE_ERROR") == NULL) {
-		report_recoverable_problem("url-dispatcher-bad-url", pid, FALSE, additional);
-	}
+	report_recoverable_problem("url-dispatcher-bad-url", pid, FALSE, additional);
 
 	g_free(badurl);
 
@@ -111,7 +108,7 @@ static gboolean
 bad_url (GDBusMethodInvocation * invocation, const gchar * url)
 {
 	const gchar * sender = g_dbus_method_invocation_get_sender(invocation);
-	GDBusConnection * conn = g_dbus_method_invocation_get_connection(invocation);
+	GDBusConnection * conn = g_dbus_method_invocation_get_connection(invocation); /* transfer: none */
 
 	g_dbus_connection_call(conn,
 		"org.freedesktop.DBus",
@@ -213,6 +210,73 @@ dispatcher_send_to_app (const gchar * app_id, const gchar * url)
 	return TRUE;
 }
 
+/* Handles setting up the overlay with the URL */
+gboolean
+dispatcher_send_to_overlay (const gchar * app_id, const gchar * url, GDBusConnection * conn, const gchar * sender)
+{
+	GError * error = NULL;
+
+	/* TODO: Detect if a scope is what we need to overlay on */
+	GVariant * callret = g_dbus_connection_call_sync(conn,
+		"org.freedesktop.DBus",
+		"/",
+		"org.freedesktop.DBus",
+		"GetConnectionUnixProcessID",
+		g_variant_new("(s)", sender),
+		G_VARIANT_TYPE("(u)"),
+		G_DBUS_CALL_FLAGS_NONE,
+		-1, /* timeout */
+		NULL, /* cancellable */
+		&error);
+
+	if (error != NULL) {
+		g_warning("Unable to get PID for '%s' when processing URL '%s': %s", sender, url, error->message);
+		g_error_free(error);
+		return FALSE;
+	}
+
+	unsigned int pid = 0;
+	g_variant_get_child(callret, 0, "u", &pid);
+	g_variant_unref(callret);
+
+	return overlay_tracker_add(tracker, app_id, pid, url);
+}
+
+/* Check to see if this is an overlay AppID */
+gboolean
+dispatcher_is_overlay (const gchar * appid)
+{
+	const gchar * systemdir = NULL;
+	gboolean found = FALSE;
+	gchar * desktopname = g_strdup_printf("%s.desktop", appid);
+
+	/* First time, check the environment */
+	if (G_UNLIKELY(systemdir == NULL)) {
+		systemdir = g_getenv("URL_DISPATCHER_OVERLAY_DIR");
+		if (systemdir == NULL) {
+			systemdir = OVERLAY_SYSTEM_DIRECTORY;
+		}
+	}
+
+	/* Check system dir */
+	if (!found) {
+		gchar * sysdir = g_build_filename(systemdir, desktopname, NULL);
+		found = g_file_test(sysdir, G_FILE_TEST_EXISTS);
+		g_free(sysdir);
+	}
+
+	/* Check user dir (clicks) */
+	if (!found) {
+		gchar * usrdir = g_build_filename(g_get_user_cache_dir(), "url-dispatcher", "url-overlays", desktopname, NULL);
+		found = g_file_test(usrdir, G_FILE_TEST_EXISTS);
+		g_free(usrdir);
+	}
+
+	g_free(desktopname);
+
+	return found;
+}
+
 /* Whether we should restrict this appid based on the package name */
 gboolean
 dispatcher_appid_restrict (const gchar * appid, const gchar * package)
@@ -277,12 +341,25 @@ dispatch_url_cb (GObject * skel, GDBusMethodInvocation * invocation, const gchar
 	}
 
 	/* We're cleared to continue */
-	dispatcher_send_to_app(appid, outurl);
+	gboolean sent = FALSE;
+	if (!dispatcher_is_overlay(appid)) {
+		sent = dispatcher_send_to_app(appid, outurl);
+	} else {
+		sent = dispatcher_send_to_overlay(
+			appid,
+			outurl,
+			g_dbus_method_invocation_get_connection(invocation),
+			g_dbus_method_invocation_get_sender(invocation));
+	}
 	g_free(appid);
 
-	g_dbus_method_invocation_return_value(invocation, NULL);
+	if (sent) {
+		g_dbus_method_invocation_return_value(invocation, NULL);
+	} else {
+		bad_url(invocation, url);
+	}
 
-	return TRUE;
+	return sent;
 }
 
 /* Test a URL to find it's AppID */
@@ -347,6 +424,9 @@ intent_domain (const gchar * url)
 gboolean
 dispatcher_url_to_appid (const gchar * url, gchar ** out_appid, const gchar ** out_url)
 {
+	g_return_val_if_fail(url != NULL, FALSE);
+	g_return_val_if_fail(out_appid != NULL, FALSE);
+
 	/* Special case the app id */
 	GMatchInfo * appidmatch = NULL;
 	if (g_regex_match(appidre, url, 0, &appidmatch)) {
@@ -398,7 +478,9 @@ dispatcher_url_to_appid (const gchar * url, gchar ** out_appid, const gchar ** o
 
 		if (*out_appid != NULL) {
 			found = TRUE;
-			*out_url = url;
+			if (out_url != NULL) {
+				*out_url = url;
+			}
 		}
 
 		g_free(protocol);
@@ -465,8 +547,9 @@ bus_got (GObject * obj, GAsyncResult * res, gpointer user_data)
 
 /* Initialize all the globals */
 gboolean
-dispatcher_init (GMainLoop * mainloop)
+dispatcher_init (GMainLoop * mainloop, OverlayTracker * intracker)
 {
+	tracker = intracker;
 	cancellable = g_cancellable_new();
 
 	urldb = url_db_create_database();
@@ -487,7 +570,7 @@ dispatcher_init (GMainLoop * mainloop)
 
 /* Clean up all the globals */
 gboolean
-dispatcher_shutdown (void)
+dispatcher_shutdown ()
 {
 	g_cancellable_cancel(cancellable);
 

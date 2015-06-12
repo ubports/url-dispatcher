@@ -39,13 +39,15 @@ main (int argc, char * argv[])
 
 	guint term_source = g_unix_signal_add(SIGTERM, sig_term, mainloop);
 
-	dispatcher_init(mainloop);
+	OverlayTracker * tracker = overlay_tracker_new();
+	dispatcher_init(mainloop, tracker);
 
 	/* Run Main */
 	g_main_loop_run(mainloop);
 
 	/* Clean up globals */
 	dispatcher_shutdown();
+	overlay_tracker_delete(tracker);
 	g_source_remove(term_source);
 	g_main_loop_unref(mainloop);
 

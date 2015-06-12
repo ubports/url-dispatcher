@@ -63,6 +63,12 @@ apport_child_timeout (gpointer user_data)
 void
 report_recoverable_problem (const gchar * signature, GPid report_pid, gboolean wait, const gchar * additional_properties[])
 {
+	/* Allow disabling for testing, we don't want to report bugs on
+	   our tests ;-) */
+	if (G_UNLIKELY(g_getenv("URL_DISPATCHER_DISABLE_RECOVERABLE_ERROR") != NULL)) {
+		return;
+	}
+
 	GError * error = NULL;
 	gint error_stdin = 0;
 	GPid pid = 0;

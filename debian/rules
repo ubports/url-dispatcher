@@ -2,6 +2,7 @@
 
 export DPKG_GENSYMBOLS_CHECK_LEVEL = 4
 export G_MESSAGES_DEBUG=all
+export URL_DISPATCHER_DISABLE_RECOVERABLE_ERROR=1
 
 %:
 	dh $@ --fail-missing --with click
@@ -12,3 +13,7 @@ override_dh_install:
 	mkdir -p debian/url-dispatcher/etc/apport/crashdb.conf.d/
 	install -m 644 debian/url-dispatcher-crashdb.conf debian/url-dispatcher/etc/apport/crashdb.conf.d/
 	dh_install --fail-missing
+
+override_dh_click:
+	dh_click --name urls
+	dh_click --name url-overlay

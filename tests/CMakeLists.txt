@@ -34,6 +34,23 @@ target_link_libraries(mock-lib
 )
 
 ###########################
+# Mir Mock Lib
+###########################
+
+add_library(mir-mock-lib SHARED
+	mir-mock.h
+	mir-mock.cpp)
+
+target_link_libraries(mir-mock-lib
+	-pthread
+	${GLIB2_LIBRARIES}
+)
+
+set_target_properties(mir-mock-lib PROPERTIES
+	OUTPUT_NAME "mir-mock"
+)
+
+###########################
 # Dispatcher test
 ###########################
 
@@ -55,7 +72,7 @@ add_test (dispatcher-test dispatcher-test)
 
 include_directories("${CMAKE_BINARY_DIR}/service")
 
-add_executable (app-id-test app-id-test.cc "${CMAKE_SOURCE_DIR}/service/dispatcher.c")
+add_executable (app-id-test app-id-test.cc)
 target_link_libraries (app-id-test
 	dispatcher-lib
 	mock-lib
@@ -128,3 +145,32 @@ target_link_libraries (url-db-test
 
 add_test (url-db-test url-db-test)
 add_subdirectory(url_dispatcher_testability)
+
+###########################
+# exec tool test
+###########################
+
+add_executable (exec-tool-test exec-tool-test.cc)
+target_link_libraries (exec-tool-test
+	gtest
+	${GTEST_LIBS}
+	${GIO2_LIBRARIES}
+	${DBUSTEST_LIBRARIES})
+
+add_test (exec-tool-test exec-tool-test)
+
+###########################
+# overlay tracker test
+###########################
+
+add_executable (overlay-tracker-test overlay-tracker-test.cpp)
+target_link_libraries (overlay-tracker-test
+	dispatcher-lib
+	mir-mock-lib
+	mock-lib
+	gtest
+	${GTEST_LIBS}
+	${GIO2_LIBRARIES}
+	${DBUSTEST_LIBRARIES})
+
+add_test (overlay-tracker-test overlay-tracker-test)
