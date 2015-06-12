@@ -15,6 +15,4 @@ def add_info(report):
 
 	dbpath = os.path.join(xdg_cache_home, 'url-dispatcher', 'urls-1.db')
 	if os.path.exists(dbpath):
-		attach_command_output(report, ['sqlite3', dbpath, '.tables'], 'CacheDBTables')
-		attach_command_output(report, ['sqlite3', dbpath, 'select * from urls'], 'CacheDBURLS')
-		attach_command_output(report, ['sqlite3', dbpath, 'select * from configfiles'], 'CacheDBFiles')
+		attach_command_output(report, ['url-dispatcher-dump'], 'URLDispatcherDB')
