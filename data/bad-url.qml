@@ -7,6 +7,7 @@ MainView {
 	applicationName: "com.canonical.url-dispatcher.bad-url-prompt"
 	automaticOrientation: true
 	backgroundColor: "transparent"
+	anchors.fill: parent
 
 	Component {
 		id: dialog
@@ -17,7 +18,7 @@ MainView {
 			Button {
 				text: "Sucks doesn't it"
 				color: UbuntuColors.orange
-				onClicked: qt.quit()
+				onClicked: Qt.quit()
 			}
 		}
 	}
