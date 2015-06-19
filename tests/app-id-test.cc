@@ -227,3 +227,24 @@ TEST_F(AppIdTest, BadUser)
 	EXPECT_EQ(nullptr, out_appid);
 	EXPECT_EQ(nullptr, out_url);
 }
+
+TEST_F(AppIdTest, BadVersion)
+{
+	gchar * out_appid = nullptr;
+	const gchar * out_url = nullptr;
+
+	/* Good sanity check */
+	dispatcher_url_to_appid("appid://com.test.good/app1/1.2.3", &out_appid, &out_url);
+	ASSERT_STREQ("com.test.good_app1_1.2.3", out_appid);
+	g_free(out_appid);
+
+	/* Variable version */
+	dispatcher_url_to_appid("appid://com.test.good/app1/current-user-version", &out_appid, &out_url);
+	ASSERT_STREQ("com.test.good_app1_1.2.3", out_appid);
+	g_free(out_appid);
+
+	/* Wrong version */
+	dispatcher_url_to_appid("appid://com.test.good/app1/1.2.4", &out_appid, &out_url);
+	EXPECT_EQ(nullptr, out_appid);
+}
+
