@@ -114,6 +114,15 @@ set_target_properties(url-overlay-exec-tool PROPERTIES OUTPUT_NAME "exec-tool")
 target_link_libraries(url-overlay-exec-tool ${GIO2_LIBRARIES} ${UBUNTU_APP_LAUNCH_LIBRARIES} ${CLICK_LIBRARIES})
 
 ###########################
+# Bad URL Exec Tool
+###########################
+
+add_definitions( -DQML_BAD_URL="${CMAKE_INSTALL_FULL_DATADIR}/url-dispatcher/bad-url.qml" )
+add_executable(bad-url-exec-tool bad-url.c)
+set_target_properties(bad-url-exec-tool PROPERTIES OUTPUT_NAME "exec-tool")
+target_link_libraries(bad-url-exec-tool ${GIO2_LIBRARIES} ${UBUNTU_APP_LAUNCH_LIBRARIES})
+
+###########################
 # Installation
 ###########################
 
@@ -125,5 +134,10 @@ install(
 install(
   TARGETS url-overlay-exec-tool
   RUNTIME DESTINATION "${CMAKE_INSTALL_FULL_LIBEXECDIR}/ubuntu-app-launch/url-overlay"
+)
+
+install(
+  TARGETS bad-url-exec-tool
+  RUNTIME DESTINATION "${CMAKE_INSTALL_FULL_LIBEXECDIR}/ubuntu-app-launch/bad-url"
 )
 
