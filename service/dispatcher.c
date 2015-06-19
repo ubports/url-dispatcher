@@ -440,6 +440,18 @@ dispatcher_url_to_appid (const gchar * url, gchar ** out_appid, const gchar ** o
 			retval = TRUE;
 		}
 
+		if (*out_appid != NULL) {
+			/* Look at the current version of the app and ensure
+			   we're not asking for an older version */
+			gchar * testappid = ubuntu_app_launch_triplet_to_app_id(package, app, NULL);
+			if (g_strcmp0(*out_appid, testappid) != 0) {
+				retval = FALSE;
+				g_free(*out_appid);
+			}
+
+			g_free(testappid);
+		}
+
 		g_free(package);
 		g_free(app);
 		g_free(version);
