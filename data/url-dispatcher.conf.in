@@ -7,5 +7,10 @@ stop on stopping dbus
 respawn
 
 emits application-start
+emtis untrusted-helper-type-end
 
 exec @pkglibexecdir@/url-dispatcher
+
+post-stop script
+	initctl emit untrusted-helper-type-end HELPER_TYPE=url-overlay
+end script
