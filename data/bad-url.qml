@@ -12,11 +12,11 @@ MainView {
 	Component {
 		id: dialog
 		Dialog {
-			title: "Bad URL"
-			text: "This won't work"
+			title: "Unrecognized Address"
+			text: "Ubuntu can't open addresses of type \"\"."
 
 			Button {
-				text: "Sucks doesn't it"
+				text: "OK"
 				color: UbuntuColors.orange
 				onClicked: Qt.quit()
 			}
