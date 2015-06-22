@@ -485,6 +485,16 @@ dispatcher_url_to_appid (const gchar * url, gchar ** out_appid, const gchar ** o
 			}
 		}
 
+		if (g_strcmp0(protocol, "scope") == 0) {
+			/* Add a check for the scope if we can do that, since it is
+			   a system URL that we can do more checking on */
+			if (!scope_checker_is_scope(checker, domain)) {
+				found = FALSE;
+				g_clear_pointer(out_appid, g_free);
+				g_clear_pointer(out_url, g_free);
+			}
+		}
+
 		g_free(protocol);
 		g_free(domain);
 
