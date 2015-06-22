@@ -74,7 +74,7 @@ class DispatcherTest : public ::testing::Test
 			session = g_bus_get_sync(G_BUS_TYPE_SESSION, NULL, NULL);
 
 			mainloop = g_main_loop_new(nullptr, FALSE);
-			dispatcher_init(mainloop, reinterpret_cast<OverlayTracker *>(&tracker));
+			dispatcher_init(mainloop, reinterpret_cast<OverlayTracker *>(&tracker), nullptr);
 
 			return;
 		}
