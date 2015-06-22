@@ -40,7 +40,12 @@ main (int argc, char * argv[])
 	guint term_source = g_unix_signal_add(SIGTERM, sig_term, mainloop);
 
 	OverlayTracker * tracker = overlay_tracker_new();
-	ScopeChecker * checker = scope_checker_new();
+
+	ScopeChecker * checker = NULL;
+	if (g_getenv("URL_DISPATCHER_DISABLE_SCOPE_CHECKING") == NULL)
+		checker = scope_checker_new();
+
+	/* Initialize Dispatcher */
 	dispatcher_init(mainloop, tracker, checker);
 
 	/* Run Main */
