@@ -42,6 +42,7 @@ main (int argc, char * argv[])
 	OverlayTracker * tracker = overlay_tracker_new();
 
 	ScopeChecker * checker = NULL;
+	/* Allow disabing for testing */
 	if (g_getenv("URL_DISPATCHER_DISABLE_SCOPE_CHECKING") == NULL)
 		checker = scope_checker_new();
 
