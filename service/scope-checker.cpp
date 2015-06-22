@@ -53,12 +53,12 @@ scope_checker_is_scope_pid (ScopeChecker * checker, pid_t pid)
 	if (aa == nullptr)
 		return 0;
 
-	if (g_strcmp0(aa, "unconfined") == 0) {
+	std::string appid(aa);
+
+	if (appid == "unconfined") {
 		/* We're not going to support unconfined scopes, too hard */
 		return 0;
 	}
-
-	std::string appid(aa);
 
 	gchar * pkg = nullptr;
 	gchar * app = nullptr;
