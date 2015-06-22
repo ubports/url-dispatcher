@@ -47,7 +47,9 @@ add_library(dispatcher-lib STATIC
 	overlay-tracker.cpp
 	overlay-tracker-iface.h
 	overlay-tracker-mir.h
-	overlay-tracker-mir.cpp)
+	overlay-tracker-mir.cpp
+	scope-checker.h
+	scope-checker.cpp)
 
 target_link_libraries(dispatcher-lib
 	url-db-lib
