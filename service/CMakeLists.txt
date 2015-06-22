@@ -55,6 +55,7 @@ target_link_libraries(dispatcher-lib
 	url-db-lib
 	service-generated
 	-pthread
+	${APPARMOR_LIBRARIES}
 	${GLIB2_LIBRARIES}
 	${GOBJECT2_LIBRARIES}
 	${GIO2_LIBRARIES}
