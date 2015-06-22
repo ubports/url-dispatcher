@@ -20,19 +20,19 @@ scope_checker_delete (ScopeChecker * checker)
 	delete runtime;
 }
 
-bool
+int
 scope_checker_is_scope (ScopeChecker * checker, const char * appid)
 {
 	if (checker == nullptr || appid == nullptr)
-		return false;
+		return 0;
 
 	auto runtime = reinterpret_cast<unity::scopes::Runtime *>(checker);
 
 	try {
 		auto registry = runtime->registry();
 		registry->get_metadata(appid);
-		return true;
+		return !0;
 	} catch (...) {
-		return false;
+		return 0;
 	}
 }

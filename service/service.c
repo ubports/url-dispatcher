@@ -40,7 +40,8 @@ main (int argc, char * argv[])
 	guint term_source = g_unix_signal_add(SIGTERM, sig_term, mainloop);
 
 	OverlayTracker * tracker = overlay_tracker_new();
-	dispatcher_init(mainloop, tracker);
+	ScopeChecker * checker = scope_checker_new();
+	dispatcher_init(mainloop, tracker, checker);
 
 	/* Run Main */
 	g_main_loop_run(mainloop);
@@ -48,6 +49,7 @@ main (int argc, char * argv[])
 	/* Clean up globals */
 	dispatcher_shutdown();
 	overlay_tracker_delete(tracker);
+	scope_checker_delete(checker);
 	g_source_remove(term_source);
 	g_main_loop_unref(mainloop);
 

@@ -23,10 +23,12 @@
 #include "dispatcher.h"
 #include "service-iface.h"
 #include "recoverable-problem.h"
+#include "scope-checker.h"
 #include "url-db.h"
 
 /* Globals */
 static OverlayTracker * tracker = NULL;
+static ScopeChecker * checker = NULL;
 static GCancellable * cancellable = NULL;
 static ServiceIfaceComCanonicalURLDispatcher * skel = NULL;
 static GRegex * applicationre = NULL;
@@ -547,9 +549,10 @@ bus_got (GObject * obj, GAsyncResult * res, gpointer user_data)
 
 /* Initialize all the globals */
 gboolean
-dispatcher_init (GMainLoop * mainloop, OverlayTracker * intracker)
+dispatcher_init (GMainLoop * mainloop, OverlayTracker * intracker, ScopeChecker * inchecker)
 {
 	tracker = intracker;
+	checker = inchecker;
 	cancellable = g_cancellable_new();
 
 	urldb = url_db_create_database();
