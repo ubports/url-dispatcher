@@ -37,7 +37,10 @@ scope_checker_is_scope (ScopeChecker * checker, const char * appid)
 		auto registry = runtime->registry();
 		registry->get_metadata(appid);
 		return !0;
+	} catch (unity::scopes::NotFoundException e) {
+		return 0;
 	} catch (...) {
+		g_warning("Unable to read the Unity Scopes Registry");
 		return 0;
 	}
 }
