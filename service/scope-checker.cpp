@@ -25,8 +25,14 @@ scope_checker_delete (ScopeChecker * checker)
 int
 scope_checker_is_scope (ScopeChecker * checker, const char * appid)
 {
-	if (checker == nullptr || appid == nullptr)
+	if (checker == nullptr) {
+		g_warning("%s:%d: Checker is '(null)'", __FILE__, __LINE__);
 		return 0;
+	}
+	if (appid == nullptr) {
+		g_warning("%s:%d: appid is '(null)'", __FILE__, __LINE__);
+		return 0;
+	}
 
 	auto runtime = reinterpret_cast<unity::scopes::Runtime *>(checker);
 
