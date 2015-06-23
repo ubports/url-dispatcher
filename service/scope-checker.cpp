@@ -18,9 +18,6 @@ scope_checker_new ()
 void
 scope_checker_delete (ScopeChecker * checker)
 {
-	if (checker == nullptr)
-		return;
-
 	auto runtime = reinterpret_cast<unity::scopes::Runtime *>(checker);
 	delete runtime;
 }
