@@ -23,6 +23,7 @@
 #include "ubuntu-app-launch-mock.h"
 #include "overlay-tracker-mock.h"
 #include "url-db.h"
+#include "scope-mock.h"
 
 class DispatcherTest : public ::testing::Test
 {
