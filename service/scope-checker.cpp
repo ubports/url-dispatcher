@@ -52,7 +52,7 @@ scope_checker_is_scope_pid (ScopeChecker * checker, pid_t pid)
 	if (aa_gettaskcon(pid, &aa, nullptr) != 0) {
 		return 0;
 	}
-	
+
 	if (aa == nullptr)
 		return 0;
 
@@ -73,6 +73,6 @@ scope_checker_is_scope_pid (ScopeChecker * checker, pid_t pid)
 		g_free(pkg);
 		g_free(app);
 	}
-	
+
 	return scope_checker_is_scope(checker, appid.c_str());
 }
