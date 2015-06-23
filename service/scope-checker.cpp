@@ -63,6 +63,7 @@ scope_checker_is_scope_pid (ScopeChecker * checker, pid_t pid)
 		return 0;
 
 	std::string appid(aa);
+	free(aa);
 
 	if (appid == "unconfined") {
 		/* We're not going to support unconfined scopes, too hard */
