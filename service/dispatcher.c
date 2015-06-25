@@ -594,7 +594,8 @@ dispatcher_url_to_appid (const gchar * url, gchar ** out_appid, const gchar ** o
 			if (!scope_checker_is_scope(checker, domain)) {
 				found = FALSE;
 				g_clear_pointer(out_appid, g_free);
-				g_clear_pointer(out_url, g_free);
+				if (out_url != NULL)
+					g_clear_pointer(out_url, g_free);
 			}
 		}
 
