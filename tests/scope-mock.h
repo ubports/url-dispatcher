@@ -13,7 +13,6 @@ public:
 
 class RegistryMock : public virtual unity::scopes::Registry
 {
-	unity::scopes::testing::ScopeMetadataBuilder builder;
 	std::shared_ptr<std::map<std::string, std::exception>> scopeExceptions;
 
 public:
@@ -25,9 +24,16 @@ public:
 	unity::scopes::ScopeMetadata get_metadata(std::string const& scope_id) override {
 		std::cout << "Getting Metadata" << std::endl;
 		try {
-			auto exp = (*scopeExceptions)[scope_id];
+			auto exp = scopeExceptions->at(scope_id);
 			throw exp;
 		} catch (std::out_of_range e) {
+			unity::scopes::testing::ScopeMetadataBuilder builder;
+			builder.scope_id(scope_id);
+			std::shared_ptr<unity::scopes::Scope> foo((unity::scopes::Scope *)5, [](unity::scopes::Scope *) { return; });
+			builder.proxy(foo);
+			builder.display_name("foo");
+			builder.description("foo");
+			builder.author("foo");
 			return builder();
 		}
 	}
