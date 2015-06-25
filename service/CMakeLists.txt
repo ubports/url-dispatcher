@@ -48,6 +48,7 @@ add_library(dispatcher-lib STATIC
 	overlay-tracker-iface.h
 	overlay-tracker-mir.h
 	overlay-tracker-mir.cpp
+	scope-checker-facade.h
 	scope-checker.h
 	scope-checker.cpp)
 

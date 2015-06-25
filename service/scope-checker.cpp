@@ -6,19 +6,37 @@ extern "C" {
 }
 
 #include <unity-scopes.h>
+#include "scope-checker-facade.h"
+
+RuntimeFacade::RuntimeFacade () {
+}
+
+RuntimeFacade::~RuntimeFacade () {
+}
+
+class RuntimeReal : public RuntimeFacade {
+public:
+	unity::scopes::Runtime::UPtr runtime;
+	RuntimeReal () {
+		runtime = unity::scopes::Runtime::create();
+	}
+
+	unity::scopes::RegistryProxy registry () {
+		return runtime->registry();
+	}
+};
 
 ScopeChecker *
 scope_checker_new ()
 {
-	auto uruntime = unity::scopes::Runtime::create();
-	auto runtime = uruntime.release();
-	return reinterpret_cast<ScopeChecker *>(runtime);
+	auto fu_runtime = new RuntimeReal();
+	return reinterpret_cast<ScopeChecker *>(fu_runtime);
 }
 
 void
 scope_checker_delete (ScopeChecker * checker)
 {
-	auto runtime = reinterpret_cast<unity::scopes::Runtime *>(checker);
+	auto runtime = reinterpret_cast<RuntimeFacade *>(checker);
 	delete runtime;
 }
 
@@ -34,7 +52,7 @@ scope_checker_is_scope (ScopeChecker * checker, const char * appid)
 		return 0;
 	}
 
-	auto runtime = reinterpret_cast<unity::scopes::Runtime *>(checker);
+	auto runtime = reinterpret_cast<RuntimeFacade *>(checker);
 
 	try {
 		auto registry = runtime->registry();
