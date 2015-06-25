@@ -34,6 +34,7 @@ class DispatcherTest : public ::testing::Test
 
 	protected:
 		OverlayTrackerMock tracker;
+		RuntimeMock scope_runtime;
 		GDBusConnection * session = nullptr;
 
 		virtual void SetUp() {
@@ -75,7 +76,7 @@ class DispatcherTest : public ::testing::Test
 			session = g_bus_get_sync(G_BUS_TYPE_SESSION, NULL, NULL);
 
 			mainloop = g_main_loop_new(nullptr, FALSE);
-			dispatcher_init(mainloop, reinterpret_cast<OverlayTracker *>(&tracker), nullptr);
+			dispatcher_init(mainloop, reinterpret_cast<OverlayTracker *>(&tracker), reinterpret_cast<ScopeChecker *>(&scope_runtime));
 
 			return;
 		}

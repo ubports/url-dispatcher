@@ -2,6 +2,8 @@
 #include <unity-scopes.h>
 #include <unity/scopes/testing/ScopeMetadataBuilder.h>
 
+#include "scope-checker-facade.h"
+
 class unity::scopes::internal::ScopeMetadataImpl {
 public:
 	ScopeMetadataImpl () { }
@@ -26,10 +28,9 @@ public:
 
 };
 
-class RuntimeMock : public unity::scopes::Runtime
+class RuntimeMock : public RuntimeFacade
 {
 public:
-
 	unity::scopes::RegistryProxy registry () {
 		return RegistryMock();
 	}
