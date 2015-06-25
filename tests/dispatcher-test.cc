@@ -68,6 +68,9 @@ class DispatcherTest : public ::testing::Test
 			url_db_set_file_motification_time(db, "/testdir/intenter.url-dispatcher", &timestamp);
 			url_db_insert_url(db, "/testdir/intenter.url-dispatcher", "intent", "my.android.package");
 
+			url_db_set_file_motification_time(db, "/testdir/scoper.url-dispatcher", &timestamp);
+			url_db_insert_url(db, "/testdir/scoper.url-dispatcher", "scope", nullptr);
+
 			sqlite3_close(db);
 
 			testbus = g_test_dbus_new(G_TEST_DBUS_NONE);
@@ -92,6 +95,7 @@ class DispatcherTest : public ::testing::Test
 			g_main_loop_unref(mainloop);
 
 			ubuntu_app_launch_mock_clear_last_app_id();
+			scope_runtime.clearExceptions();
 
 			/* let other threads settle */
 			g_usleep(500000);
@@ -275,4 +279,14 @@ TEST_F(DispatcherTest, OverlayTest)
 	EXPECT_EQ("overlay://ubuntu.com", std::get<2>(tracker.addedOverlays[0]));
 
 	return;
+}
+
+TEST_F(DispatcherTest, ScopeTest)
+{
+	gchar * out_appid = nullptr;
+
+	/* Good sanity check */
+	dispatcher_url_to_appid("scope://simplescope.scopemaster_simplescope", &out_appid, nullptr);
+	EXPECT_STREQ("scoper", out_appid);
+	g_free(out_appid);
 }
