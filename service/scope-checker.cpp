@@ -90,7 +90,7 @@ scope_checker_is_scope_pid (ScopeChecker * checker, pid_t pid)
 
 	gchar * pkg = nullptr;
 	gchar * app = nullptr;
-	if (ubuntu_app_launch_app_id_parse(aa, &pkg, &app, nullptr)) {
+	if (ubuntu_app_launch_app_id_parse(appid.c_str(), &pkg, &app, nullptr)) {
 		appid= pkg;
 		appid += "_";
 		appid += app;
@@ -99,5 +99,6 @@ scope_checker_is_scope_pid (ScopeChecker * checker, pid_t pid)
 		g_free(app);
 	}
 
+	g_debug("PID %d is short App ID %s", pid, appid.c_str());
 	return scope_checker_is_scope(checker, appid.c_str());
 }
