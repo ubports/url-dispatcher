@@ -96,6 +96,10 @@ class ServiceTest : public ::testing::Test
 		}
 
 		virtual void TearDown() {
+			gchar * cmdline = g_strdup_printf("kill -TERM %d", dbus_test_process_get_pid(dispatcher));
+			g_spawn_command_line_sync(cmdline, nullptr, nullptr, nullptr, nullptr);
+			g_free(cmdline);
+
 			g_clear_object(&dispatcher);
 			g_clear_object(&mock);
 			g_clear_object(&dashmock);
