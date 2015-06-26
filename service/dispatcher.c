@@ -673,7 +673,7 @@ dispatcher_init (GMainLoop * mainloop, OverlayTracker * intracker, ScopeChecker 
 
 	applicationre = g_regex_new("^application:///([a-zA-Z0-9_\\.-]*)\\.desktop$", 0, 0, NULL);
 	appidre = g_regex_new("^appid://([a-z0-9\\.-]*)/([a-zA-Z0-9-]*)/([a-zA-Z0-9\\.-]*)$", 0, 0, NULL);
-	genericre = g_regex_new("^([a-z][a-z0-9]*):(?://(?:.*@)?([a-zA-Z0-9\\.-]*)(?::[0-9]*)?/?)?(.*)?$", 0, 0, NULL);
+	genericre = g_regex_new("^([a-z][a-z0-9]*):(?://(?:.*@)?([a-zA-Z0-9\\.-_]*)(?::[0-9]*)?/?)?(.*)?$", 0, 0, NULL);
 	intentre = g_regex_new("^intent://.*package=([a-zA-Z0-9\\.]*);.*$", 0, 0, NULL);
 
 	g_bus_get(G_BUS_TYPE_SESSION, cancellable, bus_got, mainloop);

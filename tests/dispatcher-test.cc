@@ -285,8 +285,23 @@ TEST_F(DispatcherTest, ScopeTest)
 {
 	gchar * out_appid = nullptr;
 
+	unity::scopes::NotFoundException scopeException("test", "badscope");
+	scope_runtime.addException("badscope.scopemaster_badscope", scopeException);
+	std::invalid_argument invalidException("confused");
+	scope_runtime.addException("confusedscope.scopemaster_confusedscope", invalidException);
+
 	/* Good sanity check */
 	dispatcher_url_to_appid("scope://simplescope.scopemaster_simplescope", &out_appid, nullptr);
 	EXPECT_STREQ("scoper", out_appid);
+	g_free(out_appid);
+
+	/* Bad scope */
+	dispatcher_url_to_appid("scope://badscope.scopemaster_badscope", &out_appid, nullptr);
+	EXPECT_STRNE("scoper", out_appid);
+	g_free(out_appid);
+
+	/* Confused scope */
+	dispatcher_url_to_appid("scope://confusedscope.scopemaster_confusedscope", &out_appid, nullptr);
+	EXPECT_STRNE("scoper", out_appid);
 	g_free(out_appid);
 }
