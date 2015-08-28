@@ -73,6 +73,10 @@ recoverable_problem_file (GObject * obj, GAsyncResult * res, gpointer user_data)
 	g_variant_get(pid_tuple, "(u)", &pid);
 	g_variant_unref(pid_tuple);
 
+	/* Popup the bad url dialog */
+	overlay_tracker_badurl(tracker, pid, badurl);
+
+	/* Report recoverable error */
 	const gchar * additional[3] = {
 		"BadURL",
 		badurl,
