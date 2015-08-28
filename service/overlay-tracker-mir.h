@@ -32,18 +32,30 @@ private:
 	GLib::ContextThread thread;
 	std::shared_ptr<MirConnection> mir;
 	std::set<std::tuple<std::string, std::string, std::shared_ptr<MirPromptSession>>> ongoingSessions;
+	std::set<std::pair<std::string, std::shared_ptr<MirPromptSession>>> badUrlSessions;
 
 public:
 	OverlayTrackerMir (); 
 	~OverlayTrackerMir (); 
 	bool addOverlay (const char * appid, unsigned long pid, const char * url) override;
+	bool badUrl (unsigned long pid, const char * url) override;
 
 private:
-	void removeSession (MirPromptSession * session);
+	/* Overlay Functions */
+	void removeOverlaySession (MirPromptSession * session);
 
-	static void sessionStateChangedStatic (MirPromptSession * session, MirPromptSessionState state, void * user_data);
-	void sessionStateChanged (MirPromptSession * session, MirPromptSessionState state);
+	static void overlaySessionStateChangedStatic (MirPromptSession * session, MirPromptSessionState state, void * user_data);
+	void overlaySessionStateChanged (MirPromptSession * session, MirPromptSessionState state);
 
-	static void untrustedHelperStoppedStatic (const gchar * appid, const gchar * instanceid, const gchar * helpertype, gpointer user_data);
-	void untrustedHelperStopped(const gchar * appid, const gchar * instanceid, const gchar * helpertype);
+	static void overlayHelperStoppedStatic (const gchar * appid, const gchar * instanceid, const gchar * helpertype, gpointer user_data);
+	void overlayHelperStopped(const gchar * appid, const gchar * instanceid, const gchar * helpertype);
+
+	/* Bad URL Functions */
+	void removeBadUrlSession (MirPromptSession * session);
+
+	static void badUrlSessionStateChangedStatic (MirPromptSession * session, MirPromptSessionState state, void * user_data);
+	void badUrlSessionStateChanged (MirPromptSession * session, MirPromptSessionState state);
+
+	static void badUrlHelperStoppedStatic (const gchar * appid, const gchar * instanceid, const gchar * helpertype, gpointer user_data);
+	void badUrlHelperStopped(const gchar * appid, const gchar * instanceid, const gchar * helpertype);
 };
