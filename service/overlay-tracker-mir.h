@@ -20,6 +20,7 @@
 #pragma once
 
 #include <set>
+#include <vector>
 
 #include <mir_toolkit/mir_connection.h>
 #include <mir_toolkit/mir_prompt_session.h>
@@ -29,9 +30,15 @@
 
 class OverlayTrackerMir : public OverlayTrackerIface {
 private:
+	struct OverlayData {
+		std::string appid;
+		std::string instanceid;
+		std::shared_ptr<MirPromptSession> session;
+	};
+
 	GLib::ContextThread thread;
 	std::shared_ptr<MirConnection> mir;
-	std::set<std::tuple<std::string, std::string, std::shared_ptr<MirPromptSession>>> ongoingSessions;
+	std::vector<OverlayData> ongoingSessions;
 	std::set<std::pair<std::string, std::shared_ptr<MirPromptSession>>> badUrlSessions;
 
 public:

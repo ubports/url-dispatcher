@@ -56,7 +56,7 @@ OverlayTrackerMir::~OverlayTrackerMir ()
 {
 	thread.executeOnThread<bool>([this] {
 		while (!ongoingSessions.empty()) {
-			removeOverlaySession(std::get<2>(*ongoingSessions.begin()).get());
+			removeOverlaySession(ongoingSessions.begin()->session.get());
 		}
 
 		while (!badUrlSessions.empty()) {
@@ -72,28 +72,30 @@ OverlayTrackerMir::~OverlayTrackerMir ()
 bool
 OverlayTrackerMir::addOverlay (const char * appid, unsigned long pid, const char * url)
 {
-	std::string sappid(appid);
+	OverlayData data;
+	data.appid = appid;
 	std::string surl(url);
 
-	return thread.executeOnThread<bool>([this, sappid, pid, surl] {
-		g_debug("Setting up over lay for PID %d with '%s'", pid, sappid.c_str());
+	return thread.executeOnThread<bool>([this, &data, pid, surl] {
+		g_debug("Setting up over lay for PID %d with '%s'", pid, data.appid.c_str());
 
-		auto session = std::shared_ptr<MirPromptSession>(
+		data.session = std::shared_ptr<MirPromptSession>(
 			mir_connection_create_prompt_session_sync(mir.get(), pid, overlaySessionStateChangedStatic, this),
 			[] (MirPromptSession * session) { if (session) mir_prompt_session_release_sync(session); });
-		if (!session) {
-			g_critical("Unable to create trusted prompt session for %d with appid '%s'", pid, sappid.c_str());
-			return false;
-		}
-		
-		std::array<const char *, 2> urls { surl.c_str(), nullptr };
-		auto instance = ubuntu_app_launch_start_session_helper(OVERLAY_HELPER_TYPE, session.get(), sappid.c_str(), urls.data());
-		if (instance == nullptr) {
-			g_critical("Unable to start helper for %d with appid '%s'", pid, sappid.c_str());
+		if (!data.session) {
+			g_critical("Unable to create trusted prompt session for %d with appid '%s'", pid, data.appid.c_str());
 			return false;
 		}
 
-		ongoingSessions.emplace(std::make_tuple(sappid, std::string(instance), session));
+		std::array<const char *, 2> urls { surl.c_str(), nullptr };
+		auto instance = ubuntu_app_launch_start_session_helper(OVERLAY_HELPER_TYPE, data.session.get(), data.appid.c_str(), urls.data());
+		if (instance == nullptr) {
+			g_critical("Unable to start helper for %d with appid '%s'", pid, data.appid.c_str());
+			return false;
+		}
+		data.instanceid = instance;
+
+		ongoingSessions.push_back(data);
 		g_free(instance);
 		return true;
 	});
@@ -138,8 +140,8 @@ void
 OverlayTrackerMir::removeOverlaySession (MirPromptSession * session)
 {
 	for (auto it = ongoingSessions.begin(); it != ongoingSessions.end(); it++) {
-		if (std::get<2>(*it).get() == session) {
-			ubuntu_app_launch_stop_multiple_helper(OVERLAY_HELPER_TYPE, std::get<0>(*it).c_str(), std::get<1>(*it).c_str());
+		if (it->session.get() == session) {
+			ubuntu_app_launch_stop_multiple_helper(OVERLAY_HELPER_TYPE, it->appid.c_str(), it->instanceid.c_str());
 			ongoingSessions.erase(it);
 			break;
 		}
@@ -181,7 +183,7 @@ OverlayTrackerMir::overlayHelperStopped(const gchar * appid, const gchar * insta
 	std::string sinstanceid(instanceid);
 
 	for (auto it = ongoingSessions.begin(); it != ongoingSessions.end(); it++) {
-		if (std::get<0>(*it) == sappid && std::get<1>(*it) == sinstanceid) {
+		if (it->appid == sappid && it->instanceid == sinstanceid) {
 			ongoingSessions.erase(it);
 			break;
 		}
