@@ -122,10 +122,16 @@ TEST_F(OverlayTrackerTest, UALSignalStop) {
 	});
 }
 
-TEST_F(OverlayTrackerTest, MirSignalStop) {
-	OverlayTrackerMir tracker;
+void
+mirStop (const char * helper_type, const char * appid, std::function<bool(OverlayTrackerMir *)> addFunc)
+{
+	g_clear_pointer(&ubuntu_app_launch_mock_last_stop_helper, g_free);
+	g_clear_pointer(&ubuntu_app_launch_mock_last_stop_appid, g_free);
+	g_clear_pointer(&ubuntu_app_launch_mock_last_stop_instance, g_free);
 
-	EXPECT_TRUE(tracker.addOverlay("app-id", 5, "http://no-name-yet.com"));
+	auto tracker = new OverlayTrackerMir();
+
+	EXPECT_TRUE(addFunc(tracker));
 
 	/* Try a badie */
 	mir_mock_last_trust_func((MirPromptSession *)1337, mir_prompt_session_state_stopped, mir_mock_last_trust_data);
@@ -133,9 +139,18 @@ TEST_F(OverlayTrackerTest, MirSignalStop) {
 	EXPECT_NE(nullptr, mir_mock_last_trust_func);
 	mir_mock_last_trust_func(mir_mock_valid_trust_session, mir_prompt_session_state_stopped, mir_mock_last_trust_data);
 
-	pause(100);
+	delete tracker;
 
-	EXPECT_STREQ("url-overlay", ubuntu_app_launch_mock_last_stop_helper);
-	EXPECT_STREQ("app-id", ubuntu_app_launch_mock_last_stop_appid);
+	EXPECT_STREQ(helper_type, ubuntu_app_launch_mock_last_stop_helper);
+	EXPECT_STREQ(appid, ubuntu_app_launch_mock_last_stop_appid);
 	EXPECT_STREQ("instance", ubuntu_app_launch_mock_last_stop_instance);
+}
+
+TEST_F(OverlayTrackerTest, MirSignalStop) {
+	mirStop("url-overlay", "app-id", [](OverlayTrackerMir * tracker) {
+		return tracker->addOverlay("app-id", 5, "http://no-name-yet.com");
+	});
+	mirStop("bad-url", "appid-isnt-used", [](OverlayTrackerMir * tracker) {
+		return tracker->badUrl(5, "http://no-name-yet.com");
+	});
 }
