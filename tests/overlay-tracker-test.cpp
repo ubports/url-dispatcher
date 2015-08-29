@@ -95,20 +95,31 @@ TEST_F(OverlayTrackerTest, OverlayABunch) {
 	}
 }
 
-TEST_F(OverlayTrackerTest, UALSignalStop) {
+void
+ualStop (const char * helper_type, std::function<bool(OverlayTrackerMir *)> addFunc)
+{
 	auto tracker = new OverlayTrackerMir();
 
 	/* Call with the overlay before it is set */
-	ubuntu_app_launch_mock_observer_helper_stop_func("app-id", "instance", "url-overlay", ubuntu_app_launch_mock_observer_helper_stop_user_data);
+	ubuntu_app_launch_mock_observer_helper_stop_func("app-id", "instance", helper_type, ubuntu_app_launch_mock_observer_helper_stop_user_data);
 
-	EXPECT_TRUE(tracker->addOverlay("app-id", 5, "http://no-name-yet.com"));
+	EXPECT_TRUE(addFunc(tracker));
 
 	mir_mock_last_released_session = nullptr;
-	ubuntu_app_launch_mock_observer_helper_stop_func("app-id", "instance", "url-overlay", ubuntu_app_launch_mock_observer_helper_stop_user_data);
+	ubuntu_app_launch_mock_observer_helper_stop_func("app-id", "instance", helper_type, ubuntu_app_launch_mock_observer_helper_stop_user_data);
 
 	delete tracker;
 
 	EXPECT_NE(nullptr, mir_mock_last_released_session);
+}
+
+TEST_F(OverlayTrackerTest, UALSignalStop) {
+	ualStop("url-overlay", [](OverlayTrackerMir * tracker) {
+		return tracker->addOverlay("app-id", 5, "http://no-name-yet.com");
+	});
+	ualStop("bad-url", [](OverlayTrackerMir * tracker) {
+		return tracker->badUrl(5, "http://no-name-yet.com");
+	});
 }
 
 TEST_F(OverlayTrackerTest, MirSignalStop) {
