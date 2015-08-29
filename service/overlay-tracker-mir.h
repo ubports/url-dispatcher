@@ -19,6 +19,7 @@
 
 #pragma once
 
+#include <map>
 #include <set>
 #include <vector>
 
@@ -38,7 +39,7 @@ private:
 
 	GLib::ContextThread thread;
 	std::shared_ptr<MirConnection> mir;
-	std::vector<OverlayData> ongoingSessions;
+	std::map<std::string, std::vector<OverlayData>> ongoingSessions;
 	std::set<std::pair<std::string, std::shared_ptr<MirPromptSession>>> badUrlSessions;
 
 public:

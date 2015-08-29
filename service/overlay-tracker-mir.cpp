@@ -55,8 +55,10 @@ OverlayTrackerMir::OverlayTrackerMir ()
 OverlayTrackerMir::~OverlayTrackerMir () 
 {
 	thread.executeOnThread<bool>([this] {
-		while (!ongoingSessions.empty()) {
-			removeOverlaySession(ongoingSessions.begin()->session.get());
+		for (auto& sessionType : ongoingSessions) {
+			while (!sessionType.second.empty()) {
+				removeOverlaySession(sessionType.second.begin()->session.get());
+			}
 		}
 
 		while (!badUrlSessions.empty()) {
@@ -95,7 +97,7 @@ OverlayTrackerMir::addOverlay (const char * appid, unsigned long pid, const char
 		}
 		data.instanceid = instance;
 
-		ongoingSessions.push_back(data);
+		ongoingSessions[OVERLAY_HELPER_TYPE].push_back(data);
 		g_free(instance);
 		return true;
 	});
@@ -139,10 +141,10 @@ OverlayTrackerMir::overlaySessionStateChangedStatic (MirPromptSession * session,
 void
 OverlayTrackerMir::removeOverlaySession (MirPromptSession * session)
 {
-	for (auto it = ongoingSessions.begin(); it != ongoingSessions.end(); it++) {
+	for (auto it = ongoingSessions[OVERLAY_HELPER_TYPE].begin(); it != ongoingSessions[OVERLAY_HELPER_TYPE].end(); it++) {
 		if (it->session.get() == session) {
 			ubuntu_app_launch_stop_multiple_helper(OVERLAY_HELPER_TYPE, it->appid.c_str(), it->instanceid.c_str());
-			ongoingSessions.erase(it);
+			ongoingSessions[OVERLAY_HELPER_TYPE].erase(it);
 			break;
 		}
 	}
@@ -182,9 +184,9 @@ OverlayTrackerMir::overlayHelperStopped(const gchar * appid, const gchar * insta
 	std::string sappid(appid);
 	std::string sinstanceid(instanceid);
 
-	for (auto it = ongoingSessions.begin(); it != ongoingSessions.end(); it++) {
+	for (auto it = ongoingSessions[OVERLAY_HELPER_TYPE].begin(); it != ongoingSessions[OVERLAY_HELPER_TYPE].end(); it++) {
 		if (it->appid == sappid && it->instanceid == sinstanceid) {
-			ongoingSessions.erase(it);
+			ongoingSessions[OVERLAY_HELPER_TYPE].erase(it);
 			break;
 		}
 	}
