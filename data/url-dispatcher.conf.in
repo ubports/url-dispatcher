@@ -9,3 +9,9 @@ respawn
 emits application-start
 
 exec @pkglibexecdir@/url-dispatcher
+
+pre-stop script
+	if [ $RESULT == "failed" ]; then
+		rm -rf ~/.cache/url-dispatcher/urls-1.db*
+	fi
+end script

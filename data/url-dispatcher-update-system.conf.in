@@ -1,6 +1,6 @@
 description "URL Dispatcher System Directory Watch"
 
-start on (file FILE=@datadir@/url-dispatcher/urls/*.url-dispatcher) or url-dispatcher-update-system
+start on (file FILE=@datadir@/url-dispatcher/urls/*.url-dispatcher) or url-dispatcher-update-system or stopping url-dispatcher RESULT=failed
 
 task
 
