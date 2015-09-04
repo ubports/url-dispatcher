@@ -89,6 +89,16 @@ DESTINATION "/usr/share/upstart/sessions"
 )
 
 ###########################
+# Upstart Failed Job
+###########################
+
+install(
+FILES
+"${CMAKE_CURRENT_SOURCE_DIR}/url-dispatcher-failed.conf"
+DESTINATION "/usr/share/upstart/sessions"
+)
+
+###########################
 # Click Hook
 ###########################
 

@@ -1,6 +1,6 @@
 description "URL Dispatcher User Directory Watch"
 
-start on (file FILE=~/.config/url-dispatcher/urls/*.url-dispatcher) or url-dispatcher-update-user or stopping url-dispatcher RESULT=failed
+start on (file FILE=~/.config/url-dispatcher/urls/*.url-dispatcher) or url-dispatcher-update-user or stopped url-dispatcher-failed
 
 task
 
