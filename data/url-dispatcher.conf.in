@@ -8,5 +8,11 @@ respawn
 
 emits application-start
 
-exec @pkglibexecdir@/url-dispatcher
+script
+	@pkglibexecdir@/url-dispatcher
+	if [ $? != 0 ]; then
+		rm -rf ${HOME}/.cache/url-dispatcher/urls-1.db*
+		start url-dispatcher-refresh
+	fi
+end script
 
