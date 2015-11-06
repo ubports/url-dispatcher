@@ -10,7 +10,7 @@ emits application-start
 
 script
 	@pkglibexecdir@/url-dispatcher
-	if [ $? != 0 ]; then
+	if [ $? -ne 0 ]; then
 		rm -rf ${HOME}/.cache/url-dispatcher/urls-1.db*
 		start url-dispatcher-refresh
 	fi
