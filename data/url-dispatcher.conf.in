@@ -11,8 +11,10 @@ emits application-start
 script
 	@pkglibexecdir@/url-dispatcher
 	if [ $? -ne 0 ]; then
+		retval = $?
 		rm -rf ${HOME}/.cache/url-dispatcher/urls-1.db*
 		start url-dispatcher-refresh
+		exit $retval
 	fi
 end script
 
