@@ -88,6 +88,18 @@ TEST_F(AppIdTest, BaseUrl)
 	g_clear_pointer(&out_appid, g_free);
 	out_url = nullptr;
 
+	/* App ID with periods */
+	dispatcher_url_to_appid("appid://container-id/org.canonical.app1/0.0", &out_appid, &out_url);
+	ASSERT_STREQ("container-id_org.canonical.app1_0.0", out_appid);
+	EXPECT_EQ(nullptr, out_url);
+
+	dispatcher_send_to_app(out_appid, out_url);
+	EXPECT_STREQ("container-id_org.canonical.app1_0.0", ubuntu_app_launch_mock_get_last_app_id());
+
+	ubuntu_app_launch_mock_clear_last_app_id();
+	g_clear_pointer(&out_appid, g_free);
+	out_url = nullptr;
+
 	/* No version at all */
 	dispatcher_url_to_appid("appid://com.test.good/app1", &out_appid, &out_url);
 
