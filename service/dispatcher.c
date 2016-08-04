@@ -556,7 +556,7 @@ dispatcher_init (GMainLoop * mainloop, OverlayTracker * intracker)
 	g_return_val_if_fail(urldb != NULL, FALSE);
 
 	applicationre = g_regex_new("^application:///([a-zA-Z0-9_\\.-]*)\\.desktop$", 0, 0, NULL);
-	appidre = g_regex_new("^appid://([a-z0-9\\.-]*)/([a-zA-Z0-9-]*)/([a-zA-Z0-9\\.-]*)$", 0, 0, NULL);
+	appidre = g_regex_new("^appid://([a-z0-9\\.-]*)/([a-zA-Z0-9-\\.]*)/([a-zA-Z0-9\\.-]*)$", 0, 0, NULL);
 	genericre = g_regex_new("^([a-z][a-z0-9]*):(?://(?:.*@)?([a-zA-Z0-9\\.-]*)(?::[0-9]*)?/?)?(.*)?$", 0, 0, NULL);
 	intentre = g_regex_new("^intent://.*package=([a-zA-Z0-9\\.]*);.*$", 0, 0, NULL);
 
