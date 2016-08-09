@@ -7,9 +7,17 @@ stop on stopping dbus
 respawn
 
 emits application-start
-emtis untrusted-helper-type-end
+emits untrusted-helper-type-end
 
-exec @pkglibexecdir@/url-dispatcher
+script
+	@pkglibexecdir@/url-dispatcher
+	if [ $? -ne 0 ]; then
+		retval = $?
+		rm -rf ${HOME}/.cache/url-dispatcher/urls-1.db*
+		start url-dispatcher-refresh
+		exit $retval
+	fi
+end script
 
 post-stop script
 	initctl emit untrusted-helper-type-end HELPER_TYPE=url-overlay
