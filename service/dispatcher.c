@@ -565,6 +565,7 @@ dispatcher_init (GMainLoop * mainloop, OverlayTracker * intracker)
 	cancellable = g_cancellable_new();
 
 	urldb = url_db_create_database();
+	g_return_val_if_fail(urldb != NULL, FALSE);
 
 	applicationre = g_regex_new("^application:///([a-zA-Z0-9_\\.-]*)\\.desktop$", 0, 0, NULL);
 	appidre = g_regex_new("^appid://([a-z0-9\\.-]*)/([a-zA-Z0-9-]*)/([a-zA-Z0-9\\.-]*)$", 0, 0, NULL);
