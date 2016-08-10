@@ -27,6 +27,10 @@ public:
 
 };
 
+/********
+  TODO: Look at replacing this with: #include <unity/scopes/testing/MockRegistry.h>
+ *******/
+
 class RegistryMock : public virtual unity::scopes::Registry
 {
 	std::shared_ptr<std::map<std::string, std::exception>> scopeExceptions;
