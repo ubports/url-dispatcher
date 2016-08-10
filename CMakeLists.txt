@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 2.8.9)
 
 string(TOLOWER "${CMAKE_BUILD_TYPE}" cmake_build_type_lower) # Build types should always be lowercase but sometimes they are not.
 
-if (${cmake_build_type_lower} STREQUAL debug)
+if ("${cmake_build_type_lower}" STREQUAL debug)
   option (werror "Treat warnings as errors." FALSE)
 else()
   option (werror "Treat warnings as errors." TRUE)
@@ -42,7 +42,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
 # Since gdbus-codegen does not produce warning-free code
 # and we use -Werror, only enable these warnings for debug
 # builds. Drop this once the issue has been fixed and landed.
-if (${cmake_build_type_lower} STREQUAL debug)
+if ("${cmake_build_type_lower}" STREQUAL debug)
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wpedantic")# -Wextra")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wpedantic -Wextra")
 endif()
