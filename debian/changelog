@@ -1,3 +1,21 @@
+url-dispatcher (0.1+16.04.20151110-0ubuntu1) xenial; urgency=medium
+
+  [ CI Train Bot ]
+  * New rebuild forced.
+
+  [ Ted Gould ]
+  * Remove the cache if the service fails to start. Fail to start if we
+    can't create the database. (LP: #1483854)
+
+ -- Bill Filler <ci-train-bot@canonical.com>  Tue, 10 Nov 2015 14:37:07 +0000
+
+url-dispatcher (0.1+15.10.20150717-0ubuntu1) wily; urgency=medium
+
+  [ Andreas Pokorny ]
+  * unchagned for mir release 0.14.0
+
+ -- CI Train Bot <ci-train-bot@canonical.com>  Fri, 17 Jul 2015 12:37:44 +0000
+
 url-dispatcher (0.1+15.10.20150612-0ubuntu1) wily; urgency=medium
 
   [ Ted Gould ]

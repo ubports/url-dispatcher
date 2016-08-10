@@ -47,7 +47,9 @@ main (int argc, char * argv[])
 		checker = scope_checker_new();
 
 	/* Initialize Dispatcher */
-	dispatcher_init(mainloop, tracker, checker);
+	if (!dispatcher_init(mainloop, tracker, checker)) {
+		return -1;
+	}
 
 	/* Run Main */
 	g_main_loop_run(mainloop);
