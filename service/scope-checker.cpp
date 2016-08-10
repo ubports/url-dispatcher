@@ -50,16 +50,16 @@ scope_checker_delete (ScopeChecker * checker)
 	delete runtime;
 }
 
-int
+bool
 scope_checker_is_scope (ScopeChecker * checker, const char * appid)
 {
 	if (checker == nullptr) {
 		g_warning("%s:%d: Checker is '(null)'", __FILE__, __LINE__);
-		return 0;
+		return false;
 	}
 	if (appid == nullptr) {
 		g_warning("%s:%d: appid is '(null)'", __FILE__, __LINE__);
-		return 0;
+		return false;
 	}
 
 	auto runtime = reinterpret_cast<RuntimeFacade *>(checker);
@@ -67,35 +67,35 @@ scope_checker_is_scope (ScopeChecker * checker, const char * appid)
 	try {
 		auto registry = runtime->registry();
 		registry->get_metadata(appid);
-		return !0;
+		return true;
 	} catch (unity::scopes::NotFoundException e) {
-		return 0;
+		return false;
 	} catch (...) {
 		g_warning("Unable to read the Unity Scopes Registry");
-		return 0;
+		return false;
 	}
 }
 
-int
+bool
 scope_checker_is_scope_pid (ScopeChecker * checker, pid_t pid)
 {
 	if (pid == 0)
-		return 0;
+		return false;
 
 	char * aa = nullptr;
 	if (aa_gettaskcon(pid, &aa, nullptr) != 0) {
-		return 0;
+		return false;
 	}
 
 	if (aa == nullptr)
-		return 0;
+		return false;
 
 	std::string appid(aa);
 	free(aa);
 
 	if (appid == "unconfined") {
 		/* We're not going to support unconfined scopes, too hard */
-		return 0;
+		return false;
 	}
 
 	gchar * pkg = nullptr;
