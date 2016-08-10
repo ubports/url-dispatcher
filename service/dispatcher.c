@@ -222,8 +222,7 @@ pid_for_upstart_job (GDBusConnection * conn, const gchar* jobname)
 		return 0;
 	}
 
-	GVariant* retval = NULL;
-	retval = g_dbus_connection_call_sync(
+	GVariant* retval = g_dbus_connection_call_sync(
 				 conn,
 				 "com.ubuntu.Upstart",
 				 "/com/ubuntu/Upstart",
