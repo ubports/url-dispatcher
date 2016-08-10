@@ -24,12 +24,6 @@ extern "C" {
 #include <unity-scopes.h>
 #include "scope-checker-facade.h"
 
-RuntimeFacade::RuntimeFacade () {
-}
-
-RuntimeFacade::~RuntimeFacade () {
-}
-
 class RuntimeReal : public RuntimeFacade {
 public:
 	unity::scopes::Runtime::UPtr runtime;
@@ -37,7 +31,7 @@ public:
 		runtime = unity::scopes::Runtime::create();
 	}
 
-	unity::scopes::RegistryProxy registry () {
+	unity::scopes::RegistryProxy registry () override {
 		return runtime->registry();
 	}
 };

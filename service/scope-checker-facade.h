@@ -21,7 +21,7 @@
 
 class RuntimeFacade {
 public:
-	RuntimeFacade ();
-	virtual ~RuntimeFacade ();
+	RuntimeFacade () = default;
+	virtual ~RuntimeFacade () = default;
 	virtual unity::scopes::RegistryProxy registry () = 0;
 };
