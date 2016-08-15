@@ -22,6 +22,7 @@
 
 static const char * OVERLAY_HELPER_TYPE = "url-overlay";
 static const char * BAD_URL_HELPER_TYPE = "bad-url";
+static const char * BAD_URL_APP_ID = "url-dispatcher-bad-url-helper";
 
 OverlayTrackerMir::OverlayTrackerMir () 
 	: thread([this] {
@@ -128,7 +129,7 @@ OverlayTrackerMir::badUrl (unsigned long pid, const char * url)
 		}
 		
 		std::array<const char *, 2> urls { surl.c_str(), nullptr };
-		auto instance = ubuntu_app_launch_start_session_helper(BAD_URL_HELPER_TYPE, session.get(), "appid-isnt-used", urls.data());
+		auto instance = ubuntu_app_launch_start_session_helper(BAD_URL_HELPER_TYPE, session.get(), BAD_URL_APP_ID, urls.data());
 		if (instance == nullptr) {
 			g_critical("Unable to start bad url helper for %d with url '%s'", int(pid), surl.c_str());
 			return false;
