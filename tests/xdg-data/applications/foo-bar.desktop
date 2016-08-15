@@ -2,3 +2,4 @@
 Name=Foo Bar
 Exec=foo-bar
 Type=Application
+Icon=foo-bar.png
