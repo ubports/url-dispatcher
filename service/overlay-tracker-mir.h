@@ -50,20 +50,13 @@ public:
 
 private:
 	/* Overlay Functions */
-	void removeOverlaySession (MirPromptSession * session);
+	void removeSession (const std::string &type, MirPromptSession * session);
 
+	static void badUrlSessionStateChangedStatic (MirPromptSession * session, MirPromptSessionState state, void * user_data);
 	static void overlaySessionStateChangedStatic (MirPromptSession * session, MirPromptSessionState state, void * user_data);
-	void overlaySessionStateChanged (MirPromptSession * session, MirPromptSessionState state);
+	void sessionStateChanged (MirPromptSession * session, MirPromptSessionState state, const std::string &type);
 
 	static void overlayHelperStoppedStatic (const gchar * appid, const gchar * instanceid, const gchar * helpertype, gpointer user_data);
 	void overlayHelperStopped(const gchar * appid, const gchar * instanceid, const gchar * helpertype);
 
-	/* Bad URL Functions */
-	void removeBadUrlSession (MirPromptSession * session);
-
-	static void badUrlSessionStateChangedStatic (MirPromptSession * session, MirPromptSessionState state, void * user_data);
-	void badUrlSessionStateChanged (MirPromptSession * session, MirPromptSessionState state);
-
-	static void badUrlHelperStoppedStatic (const gchar * appid, const gchar * instanceid, const gchar * helpertype, gpointer user_data);
-	void badUrlHelperStopped(const gchar * appid, const gchar * instanceid, const gchar * helpertype);
 };
