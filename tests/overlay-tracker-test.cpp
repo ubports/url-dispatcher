@@ -150,7 +150,7 @@ TEST_F(OverlayTrackerTest, MirSignalStop) {
 	mirStop("url-overlay", "app-id", [](OverlayTrackerMir * tracker) {
 		return tracker->addOverlay("app-id", 5, "http://no-name-yet.com");
 	});
-	mirStop("bad-url", "appid-isnt-used", [](OverlayTrackerMir * tracker) {
+	mirStop("bad-url", "url-dispatcher-bad-url-helper", [](OverlayTrackerMir * tracker) {
 		return tracker->badUrl(5, "http://no-name-yet.com");
 	});
 }

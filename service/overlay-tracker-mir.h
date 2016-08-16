@@ -40,7 +40,6 @@ private:
 	GLib::ContextThread thread;
 	std::shared_ptr<MirConnection> mir;
 	std::map<std::string, std::vector<OverlayData>> ongoingSessions;
-	std::set<std::pair<std::string, std::shared_ptr<MirPromptSession>>> badUrlSessions;
 
 public:
 	OverlayTrackerMir (); 
@@ -58,5 +57,7 @@ private:
 
 	static void overlayHelperStoppedStatic (const gchar * appid, const gchar * instanceid, const gchar * helpertype, gpointer user_data);
 	void overlayHelperStopped(const gchar * appid, const gchar * instanceid, const gchar * helpertype);
+
+	bool addOverlayCore (const gchar * helperid, const gchar * appid, unsigned long pid, const gchar * url, void (*stateChangedFunction) (MirPromptSession*, MirPromptSessionState, void *));
 
 };

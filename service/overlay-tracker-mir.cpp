@@ -71,15 +71,21 @@ OverlayTrackerMir::~OverlayTrackerMir ()
 bool
 OverlayTrackerMir::addOverlay (const char * appid, unsigned long pid, const char * url)
 {
+	return addOverlayCore(OVERLAY_HELPER_TYPE, appid, pid, url, overlaySessionStateChangedStatic);
+}
+
+bool
+OverlayTrackerMir::addOverlayCore (const char * helper_id, const char * appid, unsigned long pid, const char * url, void (*stateChangedFunction) (MirPromptSession*, MirPromptSessionState, void *))
+{
 	OverlayData data;
 	data.appid = appid;
 	std::string surl(url);
 
-	return thread.executeOnThread<bool>([this, &data, pid, surl] {
+	return thread.executeOnThread<bool>([this, helper_id, &data, pid, surl, stateChangedFunction] {
 		g_debug("Setting up over lay for PID %d with '%s'", (int)pid, data.appid.c_str());
 
 		data.session = std::shared_ptr<MirPromptSession>(
-			mir_connection_create_prompt_session_sync(mir.get(), pid, overlaySessionStateChangedStatic, this),
+			mir_connection_create_prompt_session_sync(mir.get(), pid, stateChangedFunction, this),
 			[] (MirPromptSession * session) { if (session) mir_prompt_session_release_sync(session); });
 		if (!data.session) {
 			g_critical("Unable to create trusted prompt session for %d with appid '%s'", (int)pid, data.appid.c_str());
@@ -87,58 +93,23 @@ OverlayTrackerMir::addOverlay (const char * appid, unsigned long pid, const char
 		}
 
 		std::array<const char *, 2> urls { surl.c_str(), nullptr };
-		auto instance = ubuntu_app_launch_start_session_helper(OVERLAY_HELPER_TYPE, data.session.get(), data.appid.c_str(), urls.data());
+		auto instance = ubuntu_app_launch_start_session_helper(helper_id, data.session.get(), data.appid.c_str(), urls.data());
 		if (instance == nullptr) {
 			g_critical("Unable to start helper for %d with appid '%s'", (int)pid, data.appid.c_str());
 			return false;
 		}
 		data.instanceid = instance;
 
-		ongoingSessions[OVERLAY_HELPER_TYPE].push_back(data);
+		ongoingSessions[helper_id].push_back(data);
 		g_free(instance);
 		return true;
 	});
 }
-
-/*
-bool
-OverlayTrackerMir::addOverlay (const char * appid, unsigned long pid, const char * url)
-{
-	OverlayData data;
-	data.appid = appid;
-	std::string surl(url);
-
-	addOverlay(data, pid, surl);
-}
-*/
 
 bool
 OverlayTrackerMir::badUrl (unsigned long pid, const char * url)
 {
-	std::string surl(url);
-
-	return thread.executeOnThread<bool>([this, pid, surl] {
-		g_debug("Setting up bad URL for PID %d for '%s'", (int)pid, surl.c_str());
-
-		auto session = std::shared_ptr<MirPromptSession>(
-			mir_connection_create_prompt_session_sync(mir.get(), pid, badUrlSessionStateChangedStatic, this),
-			[] (MirPromptSession * session) { if (session) mir_prompt_session_release_sync(session); });
-		if (!session) {
-			g_critical("Unable to create a bad url trusted prompt session for %d on url '%s'", (int)pid, surl.c_str());
-			return false;
-		}
-		
-		std::array<const char *, 2> urls { surl.c_str(), nullptr };
-		auto instance = ubuntu_app_launch_start_session_helper(BAD_URL_HELPER_TYPE, session.get(), BAD_URL_APP_ID, urls.data());
-		if (instance == nullptr) {
-			g_critical("Unable to start bad url helper for %d with url '%s'", int(pid), surl.c_str());
-			return false;
-		}
-
-		badUrlSessions.emplace(std::make_pair(std::string(instance), session));
-		g_free(instance);
-		return true;
-	});
+	return addOverlayCore(BAD_URL_HELPER_TYPE, BAD_URL_APP_ID, pid, url, badUrlSessionStateChangedStatic);
 }
 
 void
@@ -156,6 +127,8 @@ OverlayTrackerMir::badUrlSessionStateChangedStatic (MirPromptSession * session, 
 void
 OverlayTrackerMir::removeSession (const std::string &type, MirPromptSession * session)
 {
+	g_debug("Removing session: %p", (void*)session);
+
 	for (auto it = ongoingSessions[type].begin(); it != ongoingSessions[type].end(); it++) {
 		if (it->session.get() == session) {
 			ubuntu_app_launch_stop_multiple_helper(type.c_str(), it->appid.c_str(), it->instanceid.c_str());
