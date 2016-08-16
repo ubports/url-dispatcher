@@ -39,7 +39,8 @@ Multi-Arch: same
 Pre-Depends: ${misc:Pre-Depends},
 Depends: ${misc:Depends},
          ${shlibs:Depends},
-         qtchooser, # For the bad URL dialog
+# For the bad URL dialog
+         qtchooser,
          qtdeclarative5-ubuntu-ui-toolkit-plugin,
 Description: service to allow sending of URLs and get handlers started
  Allows applications to request a URL to be opened and handled by another
