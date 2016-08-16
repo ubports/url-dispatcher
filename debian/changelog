@@ -1,8 +1,8 @@
-url-dispatcher (0.1+16.04.20151110-0ubuntu3) yakkety; urgency=medium
+url-dispatcher (0.1+16.10.20160816.1-0ubuntu1) yakkety; urgency=medium
 
   * No chnage rebuild for UAL migration
 
- -- Ted Gould <ted@ubuntu.com>  Tue, 16 Aug 2016 10:18:30 -0500
+ -- Ted Gould <ted@gould.cx>  Tue, 16 Aug 2016 15:20:27 +0000
 
 url-dispatcher (0.1+16.04.20151110-0ubuntu2) xenial; urgency=high
  
