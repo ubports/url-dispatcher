@@ -1,3 +1,9 @@
+url-dispatcher (0.1+16.04.20151110-0ubuntu3) yakkety; urgency=medium
+
+  * No chnage rebuild for UAL migration
+
+ -- Ted Gould <ted@ubuntu.com>  Tue, 16 Aug 2016 10:18:30 -0500
+
 url-dispatcher (0.1+16.04.20151110-0ubuntu2) xenial; urgency=high
  
   * No change rebuild for s390x.
