@@ -40,7 +40,9 @@ main (int argc, char * argv[])
 	guint term_source = g_unix_signal_add(SIGTERM, sig_term, mainloop);
 
 	OverlayTracker * tracker = overlay_tracker_new();
-	dispatcher_init(mainloop, tracker);
+	if (!dispatcher_init(mainloop, tracker)) {
+		return -1;
+	}
 
 	/* Run Main */
 	g_main_loop_run(mainloop);
