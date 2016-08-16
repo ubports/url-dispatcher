@@ -5,3 +5,4 @@ usr/share/dbus-1
 usr/share/upstart/sessions
 usr/share/url-dispatcher
 usr/bin/url-dispatcher-dump
+debian/apparmor/url-dispatcher-bad-url-helper etc/apparmor.d
