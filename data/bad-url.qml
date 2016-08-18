@@ -27,11 +27,11 @@ MainView {
 	Component {
 		id: dialog
 		Dialog {
-			title: "Unrecognized Address"
-			text: qsTr("Ubuntu can't open addresses of type “%1”.").arg(Qt.application.arguments[2].split(':')[0])
+			title: i18n.tr("Unrecognized Address")
+			text: i18n.tr("Ubuntu can't open addresses of type “%1”.").arg(Qt.application.arguments[2].split(':')[0])
 
 			Button {
-				text: "OK"
+				text: i18n.tr("OK")
 				color: UbuntuColors.orange
 				onClicked: Qt.quit()
 			}
