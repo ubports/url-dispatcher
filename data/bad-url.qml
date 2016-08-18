@@ -28,7 +28,7 @@ MainView {
 		id: dialog
 		Dialog {
 			title: "Unrecognized Address"
-			text: qsTr("Ubuntu can't open addresses of type “%1”.").arg(Qt.application.arguments[2])
+			text: qsTr("Ubuntu can't open addresses of type “%1”.").arg(Qt.application.arguments[2].split(':')[0])
 
 			Button {
 				text: "OK"
