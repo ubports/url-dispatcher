@@ -12,7 +12,7 @@ script
 	@pkglibexecdir@/url-dispatcher
 	if [ $? -ne 0 ]; then
 		retval = $?
-		rm -rf ${HOME}/.cache/url-dispatcher/urls-1.db*
+		rm -rf "${XDG_CACHE_HOME:-$HOME/.cache}"/url-dispatcher/urls-1.db*
 		start url-dispatcher-refresh
 		exit $retval
 	fi
