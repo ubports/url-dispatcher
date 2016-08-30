@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 2.8.9)
 
 string(TOLOWER "${CMAKE_BUILD_TYPE}" cmake_build_type_lower) # Build types should always be lowercase but sometimes they are not.
 
-if ("${cmake_build_type_lower}" STREQUAL debug)
+if ("${cmake_build_type_lower}" STREQUAL "debug")
   option (werror "Treat warnings as errors." FALSE)
 else()
   option (werror "Treat warnings as errors." TRUE)
@@ -30,7 +30,7 @@ include(UseGdbusCodegen)
 include(UseConstantBuilder)
 
 # Workaround for libexecdir on debian
-if (EXISTS "/etc/debian_version") 
+if (EXISTS "/etc/debian_version")
   set(CMAKE_INSTALL_LIBEXECDIR ${CMAKE_INSTALL_LIBDIR})
   set(CMAKE_INSTALL_FULL_LIBEXECDIR "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBEXECDIR}")
 endif()
@@ -50,7 +50,7 @@ endif()
 if (${werror})
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Werror")
   set(CMAKE_C_FLAGS "${CMAKE_CXX_FLAGS} -Werror")
-endif() 
+endif()
 
 pkg_check_modules(UBUNTU_APP_LAUNCH REQUIRED ubuntu-app-launch-2>=0.5)
 include_directories(${UBUNTU_APP_LAUNCH_INCLUDE_DIRS})
@@ -121,4 +121,3 @@ if (${enable_tests})
   endif ()
   add_subdirectory(tests)
 endif ()
-
