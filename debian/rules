@@ -3,6 +3,9 @@
 export DPKG_GENSYMBOLS_CHECK_LEVEL = 4
 export G_MESSAGES_DEBUG=all
 export URL_DISPATCHER_DISABLE_RECOVERABLE_ERROR=1
+ifneq ($(DEB_BUILD_GNU_TYPE),$(DEB_HOST_GNU_TYPE))
+export DEB_BUILD_PROFILES := cross
+endif
 
 %:
 	dh $@ --fail-missing --with click
