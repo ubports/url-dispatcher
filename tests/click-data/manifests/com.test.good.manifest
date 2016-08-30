@@ -3,7 +3,7 @@
 	"name": "com.test.good",
 	"hooks": {
 		"app1": {
-			"test": "test"
+			"desktop": "app1.desktop"
 		}
 	}
 }

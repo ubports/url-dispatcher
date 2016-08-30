@@ -23,6 +23,8 @@
 #include "ubuntu-app-launch-mock.h"
 #include "overlay-tracker-mock.h"
 
+#include "ubuntu-app-launch/registry.h"
+
 class AppIdTest : public ::testing::Test
 {
 	private:
@@ -33,8 +35,15 @@ class AppIdTest : public ::testing::Test
 
 	protected:
 		virtual void SetUp() {
+			/* Click DB Config */
 			g_setenv("TEST_CLICK_DB", "click-db", TRUE);
 			g_setenv("TEST_CLICK_USER", "test-user", TRUE);
+
+			/* Make sure we don't use the local snapd */
+			g_setenv("UBUNTU_APP_LAUNCH_SNAPD_SOCKET", "/this/should/not/exist", TRUE);
+
+			/* UAL Desktop Hook check */
+			g_setenv("UBUNTU_APP_LAUNCH_LINK_FARM", CMAKE_SOURCE_DIR "/tests/ual-link-farm", TRUE);
 
 			cachedir = g_build_filename(CMAKE_BINARY_DIR, "app-id-test-cache", nullptr);
 			g_setenv("URL_DISPATCHER_CACHE_DIR", cachedir, TRUE);
@@ -50,6 +59,7 @@ class AppIdTest : public ::testing::Test
 
 		virtual void TearDown() {
 			dispatcher_shutdown();
+			ubuntu::app_launch::Registry::clearDefault();
 
 			/* Clean up queued events */
 			while (g_main_pending()) {
@@ -211,52 +221,3 @@ TEST_F(AppIdTest, OrderingUrl)
 
 	return;
 }
-
-TEST_F(AppIdTest, BadDirectory)
-{
-	gchar * out_appid = nullptr;
-	const gchar * out_url = nullptr;
-
-	g_setenv("TEST_CLICK_DB", "not-click-db", TRUE);
-
-	dispatcher_url_to_appid("appid://com.test.good/app1/current-user-version", &out_appid, &out_url);
-
-	EXPECT_EQ(nullptr, out_appid);
-	EXPECT_EQ(nullptr, out_url);
-
-	return;
-}
-
-TEST_F(AppIdTest, BadUser)
-{
-	gchar * out_appid = nullptr;
-	const gchar * out_url = nullptr;
-
-	g_setenv("TEST_CLICK_USER", "not-test-user", TRUE);
-
-	dispatcher_url_to_appid("appid://com.test.good/app1/current-user-version", &out_appid, &out_url);
-
-	EXPECT_EQ(nullptr, out_appid);
-	EXPECT_EQ(nullptr, out_url);
-}
-
-TEST_F(AppIdTest, BadVersion)
-{
-	gchar * out_appid = nullptr;
-	const gchar * out_url = nullptr;
-
-	/* Good sanity check */
-	dispatcher_url_to_appid("appid://com.test.good/app1/1.2.3", &out_appid, &out_url);
-	ASSERT_STREQ("com.test.good_app1_1.2.3", out_appid);
-	g_free(out_appid);
-
-	/* Variable version */
-	dispatcher_url_to_appid("appid://com.test.good/app1/current-user-version", &out_appid, &out_url);
-	ASSERT_STREQ("com.test.good_app1_1.2.3", out_appid);
-	g_free(out_appid);
-
-	/* Wrong version */
-	dispatcher_url_to_appid("appid://com.test.good/app1/1.2.4", &out_appid, &out_url);
-	EXPECT_EQ(nullptr, out_appid);
-}
-
