@@ -109,6 +109,7 @@ add_subdirectory(data)
 add_subdirectory(service)
 add_subdirectory(liburl-dispatcher)
 add_subdirectory(tools)
+add_subdirectory(gui)
 
 # testing & coverage
 if (${enable_tests})

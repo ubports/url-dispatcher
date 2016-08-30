@@ -59,6 +59,19 @@ Description: tools for working with the URL Dispatcher.
  .
  This package provides tools for working with the URL Dispatcher.
 
+Package: url-dispatcher-tools-gui
+Architecture: any
+Depends: url-dispatcher (= ${binary:Version}),
+         ${misc:Depends},
+         ${shlibs:Depends},
+         qtchooser,
+Description: GUI tools for working with the URL Dispatcher.
+ Allows applications to request a URL to be opened and handled by another
+ process without seeing the list of other applications on the system or
+ starting them inside its own Application Confinement.
+ .
+ This package provides GUI tools for working with the URL Dispatcher.
+
 Package: liburl-dispatcher1
 Section: libs
 Architecture: any
