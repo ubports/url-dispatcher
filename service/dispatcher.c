@@ -23,10 +23,12 @@
 #include "dispatcher.h"
 #include "service-iface.h"
 #include "recoverable-problem.h"
+#include "scope-checker.h"
 #include "url-db.h"
 
 /* Globals */
 static OverlayTracker * tracker = NULL;
+static ScopeChecker * checker = NULL;
 static GCancellable * cancellable = NULL;
 static ServiceIfaceComCanonicalURLDispatcher * skel = NULL;
 static GRegex * applicationre = NULL;
@@ -210,13 +212,109 @@ dispatcher_send_to_app (const gchar * app_id, const gchar * url)
 	return TRUE;
 }
 
+/* Queries Upstart for the PID of a given upstart job */
+pid_t
+pid_for_upstart_job (GDBusConnection * conn, const gchar* jobname)
+{
+	GError* error = NULL;
+
+	if (jobname == NULL) {
+		return 0;
+	}
+
+	GVariant* retval = g_dbus_connection_call_sync(
+				 conn,
+				 "com.ubuntu.Upstart",
+				 "/com/ubuntu/Upstart",
+				 "com.ubuntu.Upstart0_6",
+				 "GetJobByName",
+				 g_variant_new("(s)", jobname),
+				 G_VARIANT_TYPE("(o)"),
+				 G_DBUS_CALL_FLAGS_NO_AUTO_START,
+				 -1, /* timeout */
+				 NULL, /* cancel */
+				 &error);
+
+	if (error != NULL) {
+		g_warning("Unable to get path for job '%s': %s", jobname, error->message);
+		g_error_free(error);
+		return 0;
+	}
+
+	gchar* path = NULL;
+	g_variant_get(retval, "(o)", &path);
+	g_variant_unref(retval);
+
+	retval = g_dbus_connection_call_sync(
+				 conn,
+				 "com.ubuntu.Upstart",
+				 path,
+				 "com.ubuntu.Upstart0_6.Job",
+				 "GetInstanceByName",
+				 g_variant_new("(s)", ""),
+				 G_VARIANT_TYPE("(o)"),
+				 G_DBUS_CALL_FLAGS_NO_AUTO_START,
+				 -1, /* timeout */
+				 NULL, /* cancel */
+				 &error);
+
+	g_free(path);
+
+	if (error != NULL) {
+		g_warning("Unable to get instance for job '%s': %s", jobname, error->message);
+		g_error_free(error);
+		return 0;
+	}
+
+	g_variant_get(retval, "(o)", &path);
+	g_variant_unref(retval);
+
+	retval = g_dbus_connection_call_sync(
+				 conn,
+				 "com.ubuntu.Upstart",
+				 path,
+				 "org.freedesktop.DBus.Properties",
+				 "Get",
+				 g_variant_new("(ss)", "com.ubuntu.Upstart0_6.Instance", "processes"),
+				 G_VARIANT_TYPE("(v)"),
+				 G_DBUS_CALL_FLAGS_NO_AUTO_START,
+				 -1, /* timeout */
+				 NULL, /* cancel */
+				 &error);
+
+	g_free(path);
+
+	if (error != NULL) {
+		g_warning("Unable to get processes for job '%s': %s", jobname, error->message);
+		g_error_free(error);
+		return 0;
+	}
+
+	GPid pid = 0;
+	GVariant* variant = g_variant_get_child_value(retval, 0);
+	GVariant* array = g_variant_get_variant(variant);
+	if (g_variant_n_children(array) > 0) {
+		/* (si) */
+		GVariant* firstitem = g_variant_get_child_value(array, 0);
+		GVariant* vpid = g_variant_get_child_value(firstitem, 1);
+		pid = g_variant_get_int32(vpid);
+		g_variant_unref(vpid);
+		g_variant_unref(firstitem);
+	}
+	g_variant_unref(variant);
+	g_variant_unref(array);
+	g_variant_unref(retval);
+
+	return pid;
+}
+
+
 /* Handles setting up the overlay with the URL */
 gboolean
 dispatcher_send_to_overlay (const gchar * app_id, const gchar * url, GDBusConnection * conn, const gchar * sender)
 {
 	GError * error = NULL;
 
-	/* TODO: Detect if a scope is what we need to overlay on */
 	GVariant * callret = g_dbus_connection_call_sync(conn,
 		"org.freedesktop.DBus",
 		"/",
@@ -238,6 +336,12 @@ dispatcher_send_to_overlay (const gchar * app_id, const gchar * url, GDBusConnec
 	unsigned int pid = 0;
 	g_variant_get_child(callret, 0, "u", &pid);
 	g_variant_unref(callret);
+
+	/* If it is from a scope we need to overlay onto the
+	   dash instead */
+	if (scope_checker_is_scope_pid(checker, pid)) {
+		pid = pid_for_upstart_job(conn, "unity8-dash");
+	}
 
 	return overlay_tracker_add(tracker, app_id, pid, url);
 }
@@ -493,6 +597,17 @@ dispatcher_url_to_appid (const gchar * url, gchar ** out_appid, const gchar ** o
 			}
 		}
 
+		if (g_strcmp0(protocol, "scope") == 0) {
+			/* Add a check for the scope if we can do that, since it is
+			   a system URL that we can do more checking on */
+			if (!scope_checker_is_scope(checker, domain)) {
+				found = FALSE;
+				g_clear_pointer(out_appid, g_free);
+				if (out_url != NULL)
+					g_clear_pointer(out_url, g_free);
+			}
+		}
+
 		g_free(protocol);
 		g_free(domain);
 
@@ -557,9 +672,10 @@ bus_got (GObject * obj, GAsyncResult * res, gpointer user_data)
 
 /* Initialize all the globals */
 gboolean
-dispatcher_init (GMainLoop * mainloop, OverlayTracker * intracker)
+dispatcher_init (GMainLoop * mainloop, OverlayTracker * intracker, ScopeChecker * inchecker)
 {
 	tracker = intracker;
+	checker = inchecker;
 	cancellable = g_cancellable_new();
 
 	urldb = url_db_create_database();
@@ -567,7 +683,7 @@ dispatcher_init (GMainLoop * mainloop, OverlayTracker * intracker)
 
 	applicationre = g_regex_new("^application:///([a-zA-Z0-9_\\.-]*)\\.desktop$", 0, 0, NULL);
 	appidre = g_regex_new("^appid://([a-z0-9\\.-]*)/([a-zA-Z0-9-]*)/([a-zA-Z0-9\\.-]*)$", 0, 0, NULL);
-	genericre = g_regex_new("^([a-z][a-z0-9]*):(?://(?:.*@)?([a-zA-Z0-9\\.-]*)(?::[0-9]*)?/?)?(.*)?$", 0, 0, NULL);
+	genericre = g_regex_new("^([a-z][a-z0-9]*):(?://(?:.*@)?([a-zA-Z0-9\\.-_]*)(?::[0-9]*)?/?)?(.*)?$", 0, 0, NULL);
 	intentre = g_regex_new("^intent://.*package=([a-zA-Z0-9\\.]*);.*$", 0, 0, NULL);
 
 	g_bus_get(G_BUS_TYPE_SESSION, cancellable, bus_got, mainloop);

@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 2.8.9)
 
 string(TOLOWER "${CMAKE_BUILD_TYPE}" cmake_build_type_lower) # Build types should always be lowercase but sometimes they are not.
 
-if (${cmake_build_type_lower} STREQUAL debug)
+if ("${cmake_build_type_lower}" STREQUAL debug)
   option (werror "Treat warnings as errors." FALSE)
 else()
   option (werror "Treat warnings as errors." TRUE)
@@ -42,7 +42,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
 # Since gdbus-codegen does not produce warning-free code
 # and we use -Werror, only enable these warnings for debug
 # builds. Drop this once the issue has been fixed and landed.
-if (${cmake_build_type_lower} STREQUAL debug)
+if ("${cmake_build_type_lower}" STREQUAL debug)
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wpedantic")# -Wextra")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wpedantic -Wextra")
 endif()
@@ -78,6 +78,12 @@ include_directories(${SQLITE_INCLUDE_DIRS})
 
 pkg_check_modules(CLICK REQUIRED click-0.4)
 include_directories(${CLICK_INCLUDE_DIRS})
+
+pkg_check_modules(SCOPES REQUIRED libunity-scopes)
+include_directories(${SCOPES_INCLUDE_DIRS})
+
+pkg_check_modules(APPARMOR REQUIRED libapparmor)
+include_directories(${APPARMOR_INCLUDE_DIRS})
 
 if(${LOCAL_INSTALL})
   set(DBUSSERVICEDIR "${CMAKE_INSTALL_DATADIR}/dbus-1/services/")

@@ -43,7 +43,7 @@ class AppIdTest : public ::testing::Test
 			g_test_dbus_up(testbus);
 
 			mainloop = g_main_loop_new(nullptr, FALSE);
-			dispatcher_init(mainloop, reinterpret_cast<OverlayTracker *>(&tracker));
+			dispatcher_init(mainloop, reinterpret_cast<OverlayTracker *>(&tracker), nullptr);
 
 			return;
 		}
