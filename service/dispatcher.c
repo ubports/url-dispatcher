@@ -153,6 +153,11 @@ send_open_cb (GObject * object, GAsyncResult * res, gpointer user_data)
 gboolean
 send_to_dash (const gchar * url)
 {
+	if (url == NULL) {
+		g_warning("Can not send nothing to the dash");
+		return FALSE;
+	}
+
 	GDBusConnection * bus = g_bus_get_sync(G_BUS_TYPE_SESSION, NULL, NULL);
 	g_return_val_if_fail(bus != NULL, FALSE);
 
