@@ -647,7 +647,7 @@ bus_got (GObject * obj, GAsyncResult * res, gpointer user_data)
 
 	if (error != NULL) {
 		if (!g_error_matches(error, G_IO_ERROR, G_IO_ERROR_CANCELLED)) {
-			g_error("Unable to connect to D-Bus: %s", error->message);
+			g_error("Unable to connect to D-Bus");
 			g_main_loop_quit(mainloop);
 		}
 		g_error_free(error);
