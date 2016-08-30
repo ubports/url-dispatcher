@@ -122,3 +122,5 @@ if (${enable_tests})
   endif ()
   add_subdirectory(tests)
 endif ()
+
+add_subdirectory(po)

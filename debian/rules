@@ -15,6 +15,7 @@ override_dh_install:
 	install -m 644 debian/source_url-dispatcher.py debian/url-dispatcher/usr/share/apport/package-hooks/
 	mkdir -p debian/url-dispatcher/etc/apport/crashdb.conf.d/
 	install -m 644 debian/url-dispatcher-crashdb.conf debian/url-dispatcher/etc/apport/crashdb.conf.d/
+	dh_apparmor --profile-name=url-dispatcher-bad-url-helper -p url-dispatcher
 	dh_install --fail-missing
 
 override_dh_click:

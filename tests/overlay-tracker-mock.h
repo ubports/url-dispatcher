@@ -22,9 +22,15 @@ class OverlayTrackerMock : public OverlayTrackerIface
 {
 	public:
 		std::vector<std::tuple<std::string, unsigned long, std::string>> addedOverlays;
+		std::vector<std::pair<unsigned long, std::string>> addedBadUrl;
 
 		bool addOverlay (const char * appid, unsigned long pid, const char * url) {
 			addedOverlays.push_back(std::make_tuple(std::string(appid), pid, std::string(url)));
+			return true;
+		}
+
+		bool badUrl (unsigned long pid, const char * url) {
+			addedBadUrl.push_back(std::make_pair(pid, std::string(url)));
 			return true;
 		}
 };

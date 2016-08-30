@@ -52,3 +52,12 @@ overlay_tracker_add (OverlayTracker * tracker, const char * appid, unsigned long
 
 	return reinterpret_cast<OverlayTrackerIface *>(tracker)->addOverlay(appid, pid, url) ? TRUE : FALSE;
 }
+
+gboolean
+overlay_tracker_badurl (OverlayTracker * tracker, unsigned long pid, const gchar * url) {
+	g_return_val_if_fail(tracker != nullptr, FALSE);
+	g_return_val_if_fail(pid != 0, FALSE);
+	g_return_val_if_fail(url != nullptr, FALSE);
+
+	return reinterpret_cast<OverlayTrackerIface *>(tracker)->badUrl(pid, url) ? TRUE : FALSE;
+}
