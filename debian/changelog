@@ -1,3 +1,26 @@
+url-dispatcher (0.1+16.04.20151110-0ubuntu2) UNRELEASED; urgency=medium
+
+  [ Florian Boucault ]
+  * Crossbuilding Fixes
+
+  [ Larry Price ]
+  * App ID should allow package names with dots. (LP: #1591342) (LP: #1606498)
+
+  [ Ted Gould ]
+  * Check versions of appid:// urls to reduce the number of invalid appids
+    we send to UAL (LP: #1352656)
+  * Scope testing for the scope:// URL and overlays that should be over
+    the dash 
+  * Protect the dash from getting NULL urls (LP: #1476257)
+  * Make sure URL Overlays are shutdown on exit
+  * Remove the wildcard that is confusing the update script (LP: #1461496)
+  * Not using a message that isn't set properly (LP: #1608009)
+  * Fixing tests to adjust for UAL changes
+  * Add a small GUI helper tool for testing
+  * Show error dialog over apps that use Bad URLs (LP: #1370008)
+
+ -- Ted Gould <ted@ubuntu.com>  Tue, 20 Sep 2016 16:17:26 -0500
+
 url-dispatcher (0.1+16.04.20151110-0ubuntu1) xenial; urgency=medium
 
   [ CI Train Bot ]
