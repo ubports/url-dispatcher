@@ -45,6 +45,10 @@ class AppIdTest : public ::testing::Test
 			/* UAL Desktop Hook check */
 			g_setenv("UBUNTU_APP_LAUNCH_LINK_FARM", CMAKE_SOURCE_DIR "/tests/ual-link-farm", TRUE);
 
+			/* XDG Data home for libertine */
+			g_setenv("XDG_DATA_HOME", CMAKE_SOURCE_DIR "/tests/xdg-data", TRUE);
+			g_setenv("XDG_CACHE_HOME", CMAKE_SOURCE_DIR "/tests/xdg-cache", TRUE);
+
 			cachedir = g_build_filename(CMAKE_BINARY_DIR, "app-id-test-cache", nullptr);
 			g_setenv("URL_DISPATCHER_CACHE_DIR", cachedir, TRUE);
 
