@@ -128,11 +128,12 @@ void
 OverlayTrackerMir::removeSession (const std::string &type, MirPromptSession * session)
 {
 	g_debug("Removing session: %p", (void*)session);
+	auto& sessions = ongoingSessions[type];
 
-	for (auto it = ongoingSessions[type].begin(); it != ongoingSessions[type].end(); it++) {
+	for (auto it = sessions.begin(); it != sessions.end(); it++) {
 		if (it->session.get() == session) {
 			ubuntu_app_launch_stop_multiple_helper(type.c_str(), it->appid.c_str(), it->instanceid.c_str());
-			ongoingSessions[type].erase(it);
+			sessions.erase(it);
 			break;
 		}
 	}
