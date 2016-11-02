@@ -82,7 +82,7 @@ OverlayTrackerMir::addOverlayCore (const char * helper_id, const char * appid, u
 	std::string surl(url);
 
 	return thread.executeOnThread<bool>([this, helper_id, &data, pid, surl, stateChangedFunction] {
-		g_debug("Setting up over lay for PID %d with '%s'", (int)pid, data.appid.c_str());
+		g_debug("Setting up over lay for PID %d with '%s'", int(pid), data.appid.c_str());
 
 		data.session = std::shared_ptr<MirPromptSession>(
 			mir_connection_create_prompt_session_sync(mir.get(), pid, stateChangedFunction, this),
@@ -95,7 +95,7 @@ OverlayTrackerMir::addOverlayCore (const char * helper_id, const char * appid, u
 		std::array<const char *, 2> urls { surl.c_str(), nullptr };
 		auto instance = ubuntu_app_launch_start_session_helper(helper_id, data.session.get(), data.appid.c_str(), urls.data());
 		if (instance == nullptr) {
-			g_critical("Unable to start helper for %d with appid '%s'", (int)pid, data.appid.c_str());
+			g_critical("Unable to start helper for %d with appid '%s'", int(pid), data.appid.c_str());
 			return false;
 		}
 		data.instanceid = instance;
