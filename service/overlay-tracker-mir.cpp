@@ -82,7 +82,7 @@ OverlayTrackerMir::addOverlayCore (const char * helper_id, const char * appid, u
 	std::string surl(url);
 
 	return thread.executeOnThread<bool>([this, helper_id, &data, pid, surl, stateChangedFunction] {
-		g_debug("Setting up over lay for PID %d with '%s'", (int)pid, data.appid.c_str());
+		g_debug("Setting up over lay for PID %d with '%s'", int(pid), data.appid.c_str());
 
 		data.session = std::shared_ptr<MirPromptSession>(
 			mir_connection_create_prompt_session_sync(mir.get(), pid, stateChangedFunction, this),
@@ -95,7 +95,7 @@ OverlayTrackerMir::addOverlayCore (const char * helper_id, const char * appid, u
 		std::array<const char *, 2> urls { surl.c_str(), nullptr };
 		auto instance = ubuntu_app_launch_start_session_helper(helper_id, data.session.get(), data.appid.c_str(), urls.data());
 		if (instance == nullptr) {
-			g_critical("Unable to start helper for %d with appid '%s'", (int)pid, data.appid.c_str());
+			g_critical("Unable to start helper for %d with appid '%s'", int(pid), data.appid.c_str());
 			return false;
 		}
 		data.instanceid = instance;
@@ -128,11 +128,12 @@ void
 OverlayTrackerMir::removeSession (const std::string &type, MirPromptSession * session)
 {
 	g_debug("Removing session: %p", (void*)session);
+	auto& sessions = ongoingSessions[type];
 
-	for (auto it = ongoingSessions[type].begin(); it != ongoingSessions[type].end(); it++) {
+	for (auto it = sessions.begin(); it != sessions.end(); it++) {
 		if (it->session.get() == session) {
 			ubuntu_app_launch_stop_multiple_helper(type.c_str(), it->appid.c_str(), it->instanceid.c_str());
-			ongoingSessions[type].erase(it);
+			sessions.erase(it);
 			break;
 		}
 	}
