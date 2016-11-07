@@ -13,4 +13,4 @@ pre-start script
 	fi
 end script
 
-exec @pkglibexecdir@/update-directory "~/.config/url-dispatcher/urls/*.url-dispatcher"
+exec @pkglibexecdir@/update-directory "${HOME}/.config/url-dispatcher/urls/"

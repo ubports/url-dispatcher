@@ -17,11 +17,26 @@
  *   Ted Gould <ted.gould@canonical.com>
  */
 
-#pragma once
+#include <gio/gio.h>
+#include <ubuntu-app-launch.h>
 
-class OverlayTrackerIface {
-public:
-	virtual ~OverlayTrackerIface() = default;
-	virtual bool addOverlay (const char * appid, unsigned long pid, const char * url) = 0;
-	virtual bool badUrl (unsigned long pid, const char * url) = 0;
-};
+int
+main (int argc, char * argv[])
+{
+	GDBusConnection * bus = g_bus_get_sync(G_BUS_TYPE_SESSION, NULL, NULL);
+	g_return_val_if_fail(bus != NULL, -1);
+
+	gchar * exec = g_strdup_printf("qmlscene %s %s", QML_BAD_URL, g_getenv("APP_URIS"));
+
+	gboolean sended = ubuntu_app_launch_helper_set_exec(exec, NULL);
+	g_free(exec);
+
+	/* Ensuring the messages get on the bus before we quit */
+	g_dbus_connection_flush_sync(bus, NULL, NULL);
+	g_clear_object(&bus);
+
+	if (sended)
+		return 0;
+	else
+		return -1;
+}
