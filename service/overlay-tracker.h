@@ -25,4 +25,5 @@ typedef struct _OverlayTracker OverlayTracker;
 OverlayTracker * overlay_tracker_new ();
 void overlay_tracker_delete (OverlayTracker * tracker);
 gboolean overlay_tracker_add (OverlayTracker * tracker, const char * appid, unsigned long pid, const char * url);
+gboolean overlay_tracker_badurl (OverlayTracker * tracker, unsigned long pid, const char * url);
 

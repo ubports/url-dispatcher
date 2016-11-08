@@ -1,0 +1,6 @@
+[Desktop Entry]
+Name=URL Dispatcher GUI
+Icon=@CMAKE_INSTALL_PREFIX@/@CMAKE_INSTALL_DATADIR@/url-dispatcher/gui/url-dispatcher-gui.svg
+Type=Application
+Exec=qmlscene @CMAKE_INSTALL_PREFIX@/@CMAKE_INSTALL_DATADIR@/url-dispatcher/gui/url-dispatcher-gui.qml
+X-Ubuntu-Touch=true

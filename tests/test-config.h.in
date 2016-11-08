@@ -11,6 +11,6 @@
 #define UPDATE_DIRECTORY_VARIED "@CMAKE_CURRENT_SOURCE_DIR@/test-urls-varied"
 #define UPDATE_DIRECTORY_INTENT "@CMAKE_CURRENT_SOURCE_DIR@/test-urls-intent"
 #define OVERLAY_TEST_DIR "@CMAKE_CURRENT_SOURCE_DIR@/overlay-dir"
-#define EXEC_TOOL "@CMAKE_BINARY_DIR@/service/exec-tool"
+#define EXEC_TOOL "@CMAKE_BINARY_DIR@/service/url-overlay/exec-tool"
 #define MIR_MOCK_PATH "@CMAKE_CURRENT_BINARY_DIR@/libmir-mock.so"
 #define CLICK_DATA_DIR "@CMAKE_CURRENT_SOURCE_DIR@/click-data"

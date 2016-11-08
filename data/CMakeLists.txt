@@ -102,3 +102,13 @@ configure_file("url-dispatcher.url-overlay.click-hook.in"
 	@ONLY
 )
 
+###########################
+# QML
+###########################
+
+install(
+FILES
+bad-url.qml
+DESTINATION ${datadir}/url-dispatcher
+)
+

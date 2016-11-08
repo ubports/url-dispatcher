@@ -3,13 +3,13 @@
 	"name": "com.test.good",
 	"hooks": {
 		"app-first": {
-			"test": "test"
+			"desktop": "app-first.desktop"
 		},
 		"app-middle": {
-			"test": "test"
+			"desktop": "app-middle.desktop"
 		},
 		"app-last": {
-			"test": "test"
+			"desktop": "app-last.desktop"
 		}
 	}
 }
