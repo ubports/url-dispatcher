@@ -10,7 +10,7 @@ emits application-start
 emits untrusted-helper-type-end
 
 script
-	@pkglibexecdir@/url-dispatcher
+	${SNAP}@pkglibexecdir@/url-dispatcher
 	if [ $? -ne 0 ]; then
 		retval = $?
 		rm -rf ${HOME}/.cache/url-dispatcher/urls-1.db*
