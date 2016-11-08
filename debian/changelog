@@ -1,3 +1,9 @@
+url-dispatcher (0.1+17.04.20161108-0ubuntu1) zesty; urgency=medium
+
+  * Support running inside a snap.
+
+ -- Michael Terry <michael.terry@canonical.com>  Tue, 08 Nov 2016 22:16:56 +0000
+
 url-dispatcher (0.1+17.04.20161107-0ubuntu1) zesty; urgency=medium
 
   [ Florian Boucault ]
