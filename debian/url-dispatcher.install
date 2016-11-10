@@ -1,5 +1,8 @@
 usr/lib/*/url-dispatcher
 usr/lib/*/ubuntu-app-launch/url-overlay/exec-tool
+usr/lib/*/ubuntu-app-launch/bad-url/exec-tool
 usr/share/dbus-1
 usr/share/upstart/sessions
+usr/share/url-dispatcher/bad-url.qml
 usr/bin/url-dispatcher-dump
+debian/apparmor/url-dispatcher-bad-url-helper etc/apparmor.d

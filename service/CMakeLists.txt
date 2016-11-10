@@ -47,15 +47,20 @@ add_library(dispatcher-lib STATIC
 	overlay-tracker.cpp
 	overlay-tracker-iface.h
 	overlay-tracker-mir.h
-	overlay-tracker-mir.cpp)
+	overlay-tracker-mir.cpp
+	scope-checker-facade.h
+	scope-checker.h
+	scope-checker.cpp)
 
 target_link_libraries(dispatcher-lib
 	url-db-lib
 	service-generated
 	-pthread
+	${APPARMOR_LIBRARIES}
 	${GLIB2_LIBRARIES}
 	${GOBJECT2_LIBRARIES}
 	${GIO2_LIBRARIES}
+	${SCOPES_LIBRARIES}
 	${SQLITE_LIBRARIES}
 	${UBUNTU_APP_LAUNCH_LIBRARIES}
 )
@@ -106,14 +111,6 @@ set_target_properties(update-directory PROPERTIES OUTPUT_NAME "update-directory"
 target_link_libraries(update-directory ${GIO2_LIBRARIES} ${JSONGLIB_LIBRARIES} url-db-lib)
 
 ###########################
-# URL Overlay Exec Tool
-###########################
-
-add_executable(url-overlay-exec-tool url-overlay.c recoverable-problem.c)
-set_target_properties(url-overlay-exec-tool PROPERTIES OUTPUT_NAME "exec-tool")
-target_link_libraries(url-overlay-exec-tool ${GIO2_LIBRARIES} ${UBUNTU_APP_LAUNCH_LIBRARIES} ${CLICK_LIBRARIES})
-
-###########################
 # Installation
 ###########################
 
@@ -122,8 +119,9 @@ install(
   RUNTIME DESTINATION "${CMAKE_INSTALL_FULL_LIBEXECDIR}/url-dispatcher"
 )
 
-install(
-  TARGETS url-overlay-exec-tool
-  RUNTIME DESTINATION "${CMAKE_INSTALL_FULL_LIBEXECDIR}/ubuntu-app-launch/url-overlay"
-)
+###########################
+# Exec Tools
+###########################
 
+add_subdirectory(url-overlay)
+add_subdirectory(bad-url)

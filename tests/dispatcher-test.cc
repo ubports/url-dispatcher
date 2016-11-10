@@ -19,10 +19,13 @@
 
 #include <gio/gio.h>
 #include <gtest/gtest.h>
+#include <libdbustest/dbus-test.h>
 #include "dispatcher.h"
 #include "ubuntu-app-launch-mock.h"
 #include "overlay-tracker-mock.h"
 #include "url-db.h"
+#include "scope-mock.h"
+#include "apparmor-mock.h"
 
 class DispatcherTest : public ::testing::Test
 {
@@ -33,6 +36,7 @@ class DispatcherTest : public ::testing::Test
 
 	protected:
 		OverlayTrackerMock tracker;
+		RuntimeMock scope_runtime;
 		GDBusConnection * session = nullptr;
 
 		virtual void SetUp() {
@@ -66,6 +70,9 @@ class DispatcherTest : public ::testing::Test
 			url_db_set_file_motification_time(db, "/testdir/intenter.url-dispatcher", &timestamp);
 			url_db_insert_url(db, "/testdir/intenter.url-dispatcher", "intent", "my.android.package");
 
+			url_db_set_file_motification_time(db, "/testdir/scoper.url-dispatcher", &timestamp);
+			url_db_insert_url(db, "/testdir/scoper.url-dispatcher", "scope", nullptr);
+
 			sqlite3_close(db);
 
 			testbus = g_test_dbus_new(G_TEST_DBUS_NONE);
@@ -74,7 +81,7 @@ class DispatcherTest : public ::testing::Test
 			session = g_bus_get_sync(G_BUS_TYPE_SESSION, NULL, NULL);
 
 			mainloop = g_main_loop_new(nullptr, FALSE);
-			dispatcher_init(mainloop, reinterpret_cast<OverlayTracker *>(&tracker));
+			dispatcher_init(mainloop, reinterpret_cast<OverlayTracker *>(&tracker), reinterpret_cast<ScopeChecker *>(&scope_runtime));
 
 			return;
 		}
@@ -90,6 +97,7 @@ class DispatcherTest : public ::testing::Test
 			g_main_loop_unref(mainloop);
 
 			ubuntu_app_launch_mock_clear_last_app_id();
+			scope_runtime.clearExceptions();
 
 			/* let other threads settle */
 			g_usleep(500000);
@@ -260,6 +268,42 @@ TEST_F(DispatcherTest, IntentTest)
 	return;
 }
 
+DbusTestDbusMock *
+setupUpstartMock ()
+{
+	auto mock = dbus_test_dbus_mock_new("com.ubuntu.Upstart");
+	auto obj = dbus_test_dbus_mock_get_object(mock, "/com/ubuntu/Upstart", "com.ubuntu.Upstart0_6", nullptr);
+
+	dbus_test_dbus_mock_object_add_method(mock, obj,
+		"GetJobByName",
+		G_VARIANT_TYPE_STRING,
+		G_VARIANT_TYPE_OBJECT_PATH, /* out */
+		"ret = dbus.ObjectPath('/job')", /* python */
+		nullptr); /* error */
+
+	auto jobobj = dbus_test_dbus_mock_get_object(mock, "/job", "com.ubuntu.Upstart0_6.Job", nullptr);
+
+	dbus_test_dbus_mock_object_add_method(mock, jobobj,
+		"GetInstanceByName",
+		G_VARIANT_TYPE_STRING,
+		G_VARIANT_TYPE_OBJECT_PATH, /* out */
+		"ret = dbus.ObjectPath('/instance')", /* python */
+		NULL); /* error */
+
+	auto instobj = dbus_test_dbus_mock_get_object(mock, "/instance", "com.ubuntu.Upstart0_6.Instance", NULL);
+
+	dbus_test_dbus_mock_object_add_property(mock, instobj,
+		"processes",
+		G_VARIANT_TYPE("a(si)"),
+		g_variant_new_parsed("[('main', 1234)]"),
+		NULL);
+
+	dbus_test_task_set_name(DBUS_TEST_TASK(mock), "Upstart");
+	dbus_test_task_run(DBUS_TEST_TASK(mock));
+
+	return mock;
+}
+
 TEST_F(DispatcherTest, OverlayTest)
 {
 	EXPECT_TRUE(dispatcher_is_overlay("com.test.good_application_1.2.3"));
@@ -272,5 +316,44 @@ TEST_F(DispatcherTest, OverlayTest)
 	EXPECT_EQ(getpid(), std::get<1>(tracker.addedOverlays[0]));
 	EXPECT_EQ("overlay://ubuntu.com", std::get<2>(tracker.addedOverlays[0]));
 
+	tracker.addedOverlays.clear();
+	aa_mock_gettask_profile = "simplescope.scopemaster_simplescope_1.2.3";
+
+	auto upstartMock = setupUpstartMock();
+
+	EXPECT_TRUE(dispatcher_send_to_overlay ("com.test.good_application_1.2.3", "overlay://ubuntu.com", session, g_dbus_connection_get_unique_name(session)));
+
+	ASSERT_EQ(1, tracker.addedOverlays.size());
+	EXPECT_EQ("com.test.good_application_1.2.3", std::get<0>(tracker.addedOverlays[0]));
+	EXPECT_EQ(1234, std::get<1>(tracker.addedOverlays[0]));
+	EXPECT_EQ("overlay://ubuntu.com", std::get<2>(tracker.addedOverlays[0]));
+
+	g_object_unref(upstartMock);
+
 	return;
+}
+
+TEST_F(DispatcherTest, ScopeTest)
+{
+	gchar * out_appid = nullptr;
+
+	unity::scopes::NotFoundException scopeException("test", "badscope");
+	scope_runtime.addException("badscope.scopemaster_badscope", scopeException);
+	std::invalid_argument invalidException("confused");
+	scope_runtime.addException("confusedscope.scopemaster_confusedscope", invalidException);
+
+	/* Good sanity check */
+	dispatcher_url_to_appid("scope://simplescope.scopemaster_simplescope", &out_appid, nullptr);
+	EXPECT_STREQ("scoper", out_appid);
+	g_free(out_appid);
+
+	/* Bad scope */
+	dispatcher_url_to_appid("scope://badscope.scopemaster_badscope", &out_appid, nullptr);
+	EXPECT_STRNE("scoper", out_appid);
+	g_free(out_appid);
+
+	/* Confused scope */
+	dispatcher_url_to_appid("scope://confusedscope.scopemaster_confusedscope", &out_appid, nullptr);
+	EXPECT_STRNE("scoper", out_appid);
+	g_free(out_appid);
 }

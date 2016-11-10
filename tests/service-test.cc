@@ -38,6 +38,7 @@ class ServiceTest : public ::testing::Test
 		virtual void SetUp() {
 			g_setenv("UBUNTU_APP_LAUNCH_USE_SESSION", "1", TRUE);
 			g_setenv("URL_DISPATCHER_DISABLE_RECOVERABLE_ERROR", "1", TRUE);
+			g_setenv("URL_DISPATCHER_DISABLE_SCOPE_CHECKING", "1", TRUE);
 			g_setenv("XDG_DATA_DIRS", XDG_DATA_DIRS, TRUE);
 			g_setenv("LD_PRELOAD", MIR_MOCK_PATH, TRUE);
 
@@ -95,6 +96,10 @@ class ServiceTest : public ::testing::Test
 		}
 
 		virtual void TearDown() {
+			gchar * cmdline = g_strdup_printf("kill -TERM %d", dbus_test_process_get_pid(dispatcher));
+			g_spawn_command_line_sync(cmdline, nullptr, nullptr, nullptr, nullptr);
+			g_free(cmdline);
+
 			g_clear_object(&dispatcher);
 			g_clear_object(&mock);
 			g_clear_object(&dashmock);
@@ -123,7 +128,7 @@ class ServiceTest : public ::testing::Test
 			GTimeVal time = {0, 0};
 			time.tv_sec = 5;
 			url_db_set_file_motification_time(db, "/unity8-dash.url-dispatcher", &time);
-			url_db_insert_url(db, "/unity8-dash.url-dispatcher", "scope", nullptr);
+			url_db_insert_url(db, "/unity8-dash.url-dispatcher", "scopeish", nullptr);
 			sqlite3_close(db);
 		}
 
@@ -271,7 +276,7 @@ TEST_F(ServiceTest, Unity8DashTest) {
 	GMainLoop * main = g_main_loop_new(nullptr, FALSE);
 
 	/* Send an invalid URL */
-	url_dispatch_send("scope://foo-bar", simple_cb, main);
+	url_dispatch_send("scopeish://foo-bar", simple_cb, main);
 
 	/* Give it some time to send and reply */
 	g_main_loop_run(main);
@@ -288,7 +293,7 @@ TEST_F(ServiceTest, Unity8DashTest) {
 	calls = dbus_test_dbus_mock_object_get_method_calls(dashmock, fdoobj, "Open", &callslen, nullptr);
 
 	EXPECT_EQ(1, callslen);
-	EXPECT_TRUE(g_variant_equal(calls[0].params, g_variant_new_parsed("(['scope://foo-bar'], @a{sv} {})")));
+	EXPECT_TRUE(g_variant_equal(calls[0].params, g_variant_new_parsed("(['scopeish://foo-bar'], @a{sv} {})")));
 
 	EXPECT_EQ(1, focus_count);
 

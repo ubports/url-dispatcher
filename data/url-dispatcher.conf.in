@@ -7,9 +7,10 @@ stop on stopping dbus
 respawn
 
 emits application-start
+emits untrusted-helper-type-end
 
 script
-	@pkglibexecdir@/url-dispatcher
+	${SNAP}@pkglibexecdir@/url-dispatcher
 	if [ $? -ne 0 ]; then
 		retval = $?
 		rm -rf "${XDG_CACHE_HOME:-$HOME/.cache}"/url-dispatcher/urls-1.db*
@@ -18,3 +19,6 @@ script
 	fi
 end script
 
+post-stop script
+	initctl emit untrusted-helper-type-end HELPER_TYPE=url-overlay
+end script

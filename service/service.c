@@ -40,7 +40,14 @@ main (int argc, char * argv[])
 	guint term_source = g_unix_signal_add(SIGTERM, sig_term, mainloop);
 
 	OverlayTracker * tracker = overlay_tracker_new();
-	if (!dispatcher_init(mainloop, tracker)) {
+
+	ScopeChecker * checker = NULL;
+	/* Allow disabing for testing */
+	if (g_getenv("URL_DISPATCHER_DISABLE_SCOPE_CHECKING") == NULL)
+		checker = scope_checker_new();
+
+	/* Initialize Dispatcher */
+	if (!dispatcher_init(mainloop, tracker, checker)) {
 		return -1;
 	}
 
@@ -50,6 +57,7 @@ main (int argc, char * argv[])
 	/* Clean up globals */
 	dispatcher_shutdown();
 	overlay_tracker_delete(tracker);
+	scope_checker_delete(checker);
 	g_source_remove(term_source);
 	g_main_loop_unref(mainloop);
 

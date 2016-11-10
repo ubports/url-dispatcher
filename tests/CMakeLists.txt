@@ -25,6 +25,8 @@ add_library (gtest STATIC
 ###########################
 
 add_library(mock-lib STATIC
+	apparmor-mock.h
+	apparmor-mock.c
 	recoverable-problem-mock.c
 	ubuntu-app-launch-mock.h
 	ubuntu-app-launch-mock.c)
@@ -62,6 +64,7 @@ target_link_libraries (dispatcher-test
 	mock-lib
 	gtest
 	${UBUNTU_APP_LAUNCH_LIBRARIES}
+	${DBUSTEST_LIBRARIES}
 	${GTEST_LIBS})
 
 add_test (dispatcher-test dispatcher-test)

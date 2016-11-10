@@ -1,3 +1,32 @@
+url-dispatcher (0.1+17.04.20161108-0ubuntu1) zesty; urgency=medium
+
+  * Support running inside a snap.
+
+ -- Michael Terry <michael.terry@canonical.com>  Tue, 08 Nov 2016 22:16:56 +0000
+
+url-dispatcher (0.1+17.04.20161107-0ubuntu1) zesty; urgency=medium
+
+  [ Florian Boucault ]
+  * Crossbuilding Fixes
+
+  [ Larry Price ]
+  * App ID should allow package names with dots. (LP: #1591342) (LP: #1606498)
+
+  [ Ted Gould ]
+  * Check versions of appid:// urls to reduce the number of invalid appids
+    we send to UAL (LP: #1352656)
+  * Scope testing for the scope:// URL and overlays that should be over
+    the dash 
+  * Protect the dash from getting NULL urls (LP: #1476257)
+  * Make sure URL Overlays are shutdown on exit
+  * Remove the wildcard that is confusing the update script (LP: #1461496)
+  * Not using a message that isn't set properly (LP: #1608009)
+  * Fixing tests to adjust for UAL changes
+  * Add a small GUI helper tool for testing
+  * Show error dialog over apps that use Bad URLs (LP: #1370008)
+
+ -- Ted Gould <ted@gould.cx>  Mon, 07 Nov 2016 16:33:15 +0000
+
 url-dispatcher (0.1+16.10.20160816.1-0ubuntu1) yakkety; urgency=medium
 
   * No chnage rebuild for UAL migration
@@ -5,9 +34,9 @@ url-dispatcher (0.1+16.10.20160816.1-0ubuntu1) yakkety; urgency=medium
  -- Ted Gould <ted@gould.cx>  Tue, 16 Aug 2016 15:20:27 +0000
 
 url-dispatcher (0.1+16.04.20151110-0ubuntu2) xenial; urgency=high
- 
+
   * No change rebuild for s390x.
- 
+
  -- Dimitri John Ledkov <xnox@ubuntu.com>  Fri, 11 Dec 2015 01:30:51 +0000
 
 url-dispatcher (0.1+16.04.20151110-0ubuntu1) xenial; urgency=medium
