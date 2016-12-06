@@ -1,3 +1,12 @@
+url-dispatcher (0.1+17.04.20161206-0ubuntu1) zesty; urgency=medium
+
+  [ Ted Gould ]
+  * Instead of sleeping make the refresh tasks low enough priority they
+    don't get in the way (LP: #1645793)
+  * Start after Unity8 so it has a chance to set the MIR_SOCKET
+
+ -- Michael Terry <michael.terry@canonical.com>  Tue, 06 Dec 2016 14:38:17 +0000
+
 url-dispatcher (0.1+17.04.20161108-0ubuntu1) zesty; urgency=medium
 
   * Support running inside a snap.
