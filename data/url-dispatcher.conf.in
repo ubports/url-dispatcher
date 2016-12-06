@@ -1,8 +1,8 @@
 description "URL Dispatcher"
 author "Ted Gould <ted@ubuntu.com>"
 
-start on started dbus
-stop on stopping dbus
+start on started unity8
+stop on stopping unity8
 
 respawn
 
