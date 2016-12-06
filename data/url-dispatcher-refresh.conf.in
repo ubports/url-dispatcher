@@ -4,14 +4,6 @@ start on started url-dispatcher
 
 emits url-dispatcher-update-user url-dispatcher-update-system
 
-pre-start script
-# If we're starting with url-dispatcher let's let the rest of the
-# system have a chance to settle.
-	if [ "$UPSTART_EVENTS" = "started" ] ; then
-		sleep 60
-	fi
-end script
-
 script
 	initctl emit url-dispatcher-update-system
 	initctl emit url-dispatcher-update-user

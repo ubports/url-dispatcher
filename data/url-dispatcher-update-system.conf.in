@@ -3,6 +3,7 @@ description "URL Dispatcher System Directory Watch"
 start on (file FILE=@datadir@/url-dispatcher/urls/*.url-dispatcher) or url-dispatcher-update-system
 
 task
+nice 19
 
 pre-start script
 	RUNNING=$(initctl status url-dispatcher | grep start/running 2> /dev/null)
