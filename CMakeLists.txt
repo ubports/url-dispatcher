@@ -52,7 +52,7 @@ if (${werror})
   set(CMAKE_C_FLAGS "${CMAKE_CXX_FLAGS} -Werror")
 endif()
 
-pkg_check_modules(UBUNTU_APP_LAUNCH REQUIRED ubuntu-app-launch-2>=0.5)
+pkg_check_modules(UBUNTU_APP_LAUNCH REQUIRED ubuntu-app-launch-3>=0.5)
 include_directories(${UBUNTU_APP_LAUNCH_INCLUDE_DIRS})
 
 pkg_check_modules(GLIB2 REQUIRED glib-2.0)
