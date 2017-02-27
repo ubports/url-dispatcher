@@ -1,3 +1,14 @@
+url-dispatcher (0.1+17.04.20170227.2-0ubuntu1) zesty; urgency=medium
+
+  [ Ken VanDine ]
+  * Handle UAL API bump
+
+  [ Rodney Dawes ]
+  * Remove tests that depend on libertine, as url-dispatcher has no
+    support for handlers in libertine anyway.
+
+ -- Rodney Dawes <rodney.dawes@canonical.com>  Mon, 27 Feb 2017 19:07:50 +0000
+
 url-dispatcher (0.1+17.04.20161206-0ubuntu1) zesty; urgency=medium
 
   [ Ted Gould ]
