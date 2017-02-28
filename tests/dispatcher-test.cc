@@ -40,8 +40,6 @@ class DispatcherTest : public ::testing::Test
 		GDBusConnection * session = nullptr;
 
 		virtual void SetUp() {
-			g_setenv("TEST_CLICK_DB", "click-db", TRUE);
-			g_setenv("TEST_CLICK_USER", "test-user", TRUE);
 			g_setenv("URL_DISPATCHER_OVERLAY_DIR", OVERLAY_TEST_DIR, TRUE);
 
 			cachedir = g_build_filename(CMAKE_BINARY_DIR, "dispatcher-test-cache", nullptr);

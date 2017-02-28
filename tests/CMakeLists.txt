@@ -3,13 +3,6 @@ configure_file(test-config.h.in test-config.h)
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 ###########################
-# Click Database
-###########################
-
-configure_file ("click-db/test.conf.in" "${CMAKE_CURRENT_BINARY_DIR}/click-db/test.conf" @ONLY)
-set_directory_properties (PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES "${CMAKE_CURRENT_BINARY_DIR}/click-db/test.conf")
-
-###########################
 # Google Test
 ###########################
 

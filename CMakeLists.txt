@@ -76,9 +76,6 @@ include_directories(${DBUSTEST_INCLUDE_DIRS})
 pkg_check_modules(SQLITE REQUIRED sqlite3)
 include_directories(${SQLITE_INCLUDE_DIRS})
 
-pkg_check_modules(CLICK REQUIRED click-0.4)
-include_directories(${CLICK_INCLUDE_DIRS})
-
 pkg_check_modules(SCOPES REQUIRED libunity-scopes)
 include_directories(${SCOPES_INCLUDE_DIRS})
 

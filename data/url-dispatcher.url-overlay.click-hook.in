@@ -1,3 +1,0 @@
-Pattern: ${home}/.cache/url-dispatcher/url-overlays/${id}.desktop
-User-Level: yes
-Hook-Name: url-overlay
