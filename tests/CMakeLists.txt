@@ -168,7 +168,7 @@ add_test (overlay-tracker-test overlay-tracker-test)
 set_property(
   GLOBAL
   APPEND
-  PROPERTY COVERAGE_TARGETS
+  PROPERTY COVERAGE_TESTS
 
   app-id-test
   directory-update-test
