@@ -9,7 +9,7 @@ else()
   option (werror "Treat warnings as errors." TRUE)
 endif()
 
-option (enable_tests "Build tests" ON)
+enable_testing ()
 option (enable_lcov "Generate Coverage Reports" ON)
 
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake" "${CMAKE_MODULE_PATH}")
@@ -107,17 +107,11 @@ add_subdirectory(service)
 add_subdirectory(liburl-dispatcher)
 add_subdirectory(tools)
 add_subdirectory(gui)
+add_subdirectory(tests)
 
 # testing & coverage
-if (${enable_tests})
-  set (GTEST_SOURCE_DIR /usr/src/gtest/src)
-  set (GTEST_INCLUDE_DIR ${GTEST_SOURCE_DIR}/..)
-  set (GTEST_LIBS -pthread)
-  enable_testing ()
-  if (${enable_lcov})
+if (${enable_lcov})
 #    include(GCov)
-  endif ()
-  add_subdirectory(tests)
 endif ()
 
 add_subdirectory(po)
