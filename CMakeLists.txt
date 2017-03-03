@@ -24,7 +24,6 @@ find_package(PkgConfig REQUIRED)
 include(GNUInstallDirs)
 include(CheckIncludeFile)
 include(CheckFunctionExists)
-include(Coverage)
 include(UseGlibGeneration)
 include(UseGdbusCodegen)
 include(UseConstantBuilder)
@@ -107,11 +106,15 @@ add_subdirectory(service)
 add_subdirectory(liburl-dispatcher)
 add_subdirectory(tools)
 add_subdirectory(gui)
+add_subdirectory(po)
 add_subdirectory(tests)
 
-# testing & coverage
-if (${enable_lcov})
-#    include(GCov)
-endif ()
-
-add_subdirectory(po)
+# coverage reporting
+find_package(CoverageReport)
+get_property(COVERAGE_TARGETS GLOBAL PROPERTY COVERAGE_TARGETS)
+get_property(COVERAGE_TESTS GLOBAL PROPERTY COVERAGE_TESTS)
+ENABLE_COVERAGE_REPORT(
+  TARGETS ${COVERAGE_TARGETS}
+  TESTS ${COVERAGE_TESTS}
+  FILTER /usr/include ${CMAKE_BINARY_DIR}/*
+)

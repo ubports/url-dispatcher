@@ -110,6 +110,15 @@ set_target_properties(update-directory PROPERTIES OUTPUT_NAME "update-directory"
 target_link_libraries(update-directory ${GIO2_LIBRARIES} ${JSONGLIB_LIBRARIES} url-db-lib)
 
 ###########################
+# Coverage
+###########################
+set_property(
+  GLOBAL
+  APPEND
+  PROPERTY
+  COVERAGE_TARGETS dispatcher-lib url-db-lib service-exec update-directory)
+
+###########################
 # Installation
 ###########################
 
