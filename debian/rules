@@ -8,7 +8,7 @@ export DEB_BUILD_PROFILES := cross
 endif
 
 %:
-	dh $@ --fail-missing
+	dh $@ --fail-missing --with translations
 
 override_dh_install:
 	mkdir -p debian/url-dispatcher/usr/share/apport/package-hooks/

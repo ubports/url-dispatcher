@@ -2,3 +2,7 @@ build
 .settings
 .project
 .cproject
+__pycache__
+po/Makefile.in.in
+po/POTFILES.in
+
