@@ -17,9 +17,6 @@ set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake" "${CMAKE_MODULE_PATH}")
 set(PACKAGE ${CMAKE_PROJECT_NAME})
 set(GETTEXT_PACKAGE ${CMAKE_PROJECT_NAME})
 
-# Trick the H10enable_coverage script into enabling coverage by including the text below:
-# CMAKE_BUILD_TYPE coverage
-
 find_package(PkgConfig REQUIRED)
 include(GNUInstallDirs)
 include(CheckIncludeFile)
