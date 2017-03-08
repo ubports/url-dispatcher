@@ -268,6 +268,19 @@ TEST_F(DispatcherTest, IntentTest)
 	return;
 }
 
+DbusTestDbusMock * setupPidMock()
+{
+    auto mock = dbus_test_dbus_mock_new("com.canonical.Unity8Dash");
+    auto obj = dbus_test_dbus_mock_get_object(mock,
+                                              "/", "com.canonical.Unity8Dash",
+                                              nullptr);
+
+    dbus_test_task_set_name(DBUS_TEST_TASK(mock), "Unity8Dash");
+    dbus_test_task_run(DBUS_TEST_TASK(mock));
+
+    return mock;
+}
+
 TEST_F(DispatcherTest, OverlayTest)
 {
 	EXPECT_TRUE(dispatcher_is_overlay("com.test.good_application_1.2.3"));
@@ -283,12 +296,16 @@ TEST_F(DispatcherTest, OverlayTest)
 	tracker.addedOverlays.clear();
 	aa_mock_gettask_profile = "simplescope.scopemaster_simplescope_1.2.3";
 
+	auto pidmock = setupPidMock();
+
 	EXPECT_TRUE(dispatcher_send_to_overlay ("com.test.good_application_1.2.3", "overlay://ubuntu.com", session, g_dbus_connection_get_unique_name(session)));
 
 	ASSERT_EQ(1, tracker.addedOverlays.size());
 	EXPECT_EQ("com.test.good_application_1.2.3", std::get<0>(tracker.addedOverlays[0]));
-	EXPECT_EQ(1234, std::get<1>(tracker.addedOverlays[0]));
+	EXPECT_NE(0, std::get<1>(tracker.addedOverlays[0]));
 	EXPECT_EQ("overlay://ubuntu.com", std::get<2>(tracker.addedOverlays[0]));
+
+	g_object_unref(pidmock);
 
 	return;
 }

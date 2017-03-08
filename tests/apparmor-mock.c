@@ -34,25 +34,3 @@ int aa_gettaskcon (pid_t pid, char ** profile, char ** mode)
 
 	return 0;
 }
-
-/* override the unity8 pid for tests */
-gboolean g_spawn_command_line_sync (const gchar * command_line,
-                                    gchar ** standard_output,
-                                    gchar ** standard_error,
-                                    gint * exit_status,
-                                    GError ** error)
-{
-    if (g_strcmp0(command_line, "pidof unity8-dash") == 0) {
-        /* We only use standard_output arg in the real code for this. */
-        *standard_output = g_strdup("1234");
-        return TRUE;
-    } else {
-        gchar ** args;
-        g_shell_parse_argv(command_line, NULL, &args, NULL);
-        gboolean result = g_spawn_sync(NULL, args, NULL, 0, NULL, NULL,
-                                       standard_output, standard_error,
-                                       exit_status, error);
-        g_strfreev(args);
-        return result;
-    }
-}

@@ -221,59 +221,48 @@ dispatcher_send_to_app (const gchar * app_id, const gchar * url)
 	return TRUE;
 }
 
-unsigned int _get_unity8_pid(const gchar * sender, const gchar * url)
+unsigned int _get_pid_from_dbus(GDBusConnection * conn, const gchar * sender)
 {
 	GError * error = NULL;
-    gchar * pidof_out = NULL;
-    g_spawn_command_line_sync("pidof unity8-dash",
-                              &pidof_out, NULL, NULL, &error);
+	unsigned int pid = 0;
+
+	GVariant * callret = g_dbus_connection_call_sync(conn,
+                                                     "org.freedesktop.DBus",
+                                                     "/",
+                                                     "org.freedesktop.DBus",
+                                                     "GetConnectionUnixProcessID",
+                                                     g_variant_new("(s)", sender),
+                                                     G_VARIANT_TYPE("(u)"),
+                                                     G_DBUS_CALL_FLAGS_NONE,
+                                                     -1, /* timeout */
+                                                     NULL, /* cancellable */
+                                                     &error);
+
     if (error != NULL) {
-        g_warning("Unable to get PID for '%s' when processing URL '%s': %s", sender, url, error->message);
+        g_warning("Unable to get PID for '%s' from dbus: %s",
+                  sender, error->message);
         g_clear_error(&error);
-        return 0;
+    } else {
+        g_variant_get_child(callret, 0, "u", &pid);
+        g_variant_unref(callret);
     }
 
-    if (pidof_out != NULL) {
-        unsigned int pid = g_ascii_strtoull(pidof_out, NULL, 10);
-        g_free(pidof_out);
-        return pid;
-    }
-
-    return 0;
+    return pid;
 }
 
 /* Handles setting up the overlay with the URL */
 gboolean
 dispatcher_send_to_overlay (const gchar * app_id, const gchar * url, GDBusConnection * conn, const gchar * sender)
 {
-	GError * error = NULL;
-
-	GVariant * callret = g_dbus_connection_call_sync(conn,
-		"org.freedesktop.DBus",
-		"/",
-		"org.freedesktop.DBus",
-		"GetConnectionUnixProcessID",
-		g_variant_new("(s)", sender),
-		G_VARIANT_TYPE("(u)"),
-		G_DBUS_CALL_FLAGS_NONE,
-		-1, /* timeout */
-		NULL, /* cancellable */
-		&error);
-
-	if (error != NULL) {
-		g_warning("Unable to get PID for '%s' when processing URL '%s': %s", sender, url, error->message);
-		g_clear_error(&error);
-		return FALSE;
-	}
-
-	unsigned int pid = 0;
-	g_variant_get_child(callret, 0, "u", &pid);
-	g_variant_unref(callret);
+    unsigned int pid = _get_pid_from_dbus(conn, sender);
+    if (pid == 0) {
+        return FALSE;
+    }
 
 	/* If it is from a scope we need to overlay onto the
 	   dash instead */
 	if (scope_checker_is_scope_pid(checker, pid)) {
-		pid = _get_unity8_pid(sender, url);
+        pid = _get_pid_from_dbus(conn, "com.canonical.Unity8Dash");
 	}
 
 	return overlay_tracker_add(tracker, app_id, pid, url);
