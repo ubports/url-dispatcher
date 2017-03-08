@@ -259,13 +259,13 @@ dispatcher_send_to_overlay (const gchar * app_id, const gchar * url, GDBusConnec
         return FALSE;
     }
 
-	/* If it is from a scope we need to overlay onto the
-	   dash instead */
-	if (scope_checker_is_scope_pid(checker, pid)) {
+    /* If it is from a scope we need to overlay onto the
+       dash instead */
+    if (scope_checker_is_scope_pid(checker, pid)) {
         pid = _get_pid_from_dbus(conn, "com.canonical.Unity8Dash");
-	}
+    }
 
-	return overlay_tracker_add(tracker, app_id, pid, url);
+    return overlay_tracker_add(tracker, app_id, pid, url);
 }
 
 /* Check to see if this is an overlay AppID */
