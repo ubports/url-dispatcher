@@ -223,10 +223,10 @@ dispatcher_send_to_app (const gchar * app_id, const gchar * url)
 
 unsigned int _get_pid_from_dbus(GDBusConnection * conn, const gchar * sender)
 {
-	GError * error = NULL;
-	unsigned int pid = 0;
+    GError * error = NULL;
+    unsigned int pid = 0;
 
-	GVariant * callret = g_dbus_connection_call_sync(conn,
+    GVariant * callret = g_dbus_connection_call_sync(conn,
                                                      "org.freedesktop.DBus",
                                                      "/",
                                                      "org.freedesktop.DBus",
