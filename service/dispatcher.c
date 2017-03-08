@@ -273,7 +273,7 @@ dispatcher_send_to_overlay (const gchar * app_id, const gchar * url, GDBusConnec
 	/* If it is from a scope we need to overlay onto the
 	   dash instead */
 	if (scope_checker_is_scope_pid(checker, pid)) {
-        pid = _get_unity8_pid(sender, url);
+		pid = _get_unity8_pid(sender, url);
 	}
 
 	return overlay_tracker_add(tracker, app_id, pid, url);
