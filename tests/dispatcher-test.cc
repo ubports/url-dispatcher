@@ -268,42 +268,6 @@ TEST_F(DispatcherTest, IntentTest)
 	return;
 }
 
-DbusTestDbusMock *
-setupUpstartMock ()
-{
-	auto mock = dbus_test_dbus_mock_new("com.ubuntu.Upstart");
-	auto obj = dbus_test_dbus_mock_get_object(mock, "/com/ubuntu/Upstart", "com.ubuntu.Upstart0_6", nullptr);
-
-	dbus_test_dbus_mock_object_add_method(mock, obj,
-		"GetJobByName",
-		G_VARIANT_TYPE_STRING,
-		G_VARIANT_TYPE_OBJECT_PATH, /* out */
-		"ret = dbus.ObjectPath('/job')", /* python */
-		nullptr); /* error */
-
-	auto jobobj = dbus_test_dbus_mock_get_object(mock, "/job", "com.ubuntu.Upstart0_6.Job", nullptr);
-
-	dbus_test_dbus_mock_object_add_method(mock, jobobj,
-		"GetInstanceByName",
-		G_VARIANT_TYPE_STRING,
-		G_VARIANT_TYPE_OBJECT_PATH, /* out */
-		"ret = dbus.ObjectPath('/instance')", /* python */
-		NULL); /* error */
-
-	auto instobj = dbus_test_dbus_mock_get_object(mock, "/instance", "com.ubuntu.Upstart0_6.Instance", NULL);
-
-	dbus_test_dbus_mock_object_add_property(mock, instobj,
-		"processes",
-		G_VARIANT_TYPE("a(si)"),
-		g_variant_new_parsed("[('main', 1234)]"),
-		NULL);
-
-	dbus_test_task_set_name(DBUS_TEST_TASK(mock), "Upstart");
-	dbus_test_task_run(DBUS_TEST_TASK(mock));
-
-	return mock;
-}
-
 TEST_F(DispatcherTest, OverlayTest)
 {
 	EXPECT_TRUE(dispatcher_is_overlay("com.test.good_application_1.2.3"));
@@ -319,16 +283,12 @@ TEST_F(DispatcherTest, OverlayTest)
 	tracker.addedOverlays.clear();
 	aa_mock_gettask_profile = "simplescope.scopemaster_simplescope_1.2.3";
 
-	auto upstartMock = setupUpstartMock();
-
 	EXPECT_TRUE(dispatcher_send_to_overlay ("com.test.good_application_1.2.3", "overlay://ubuntu.com", session, g_dbus_connection_get_unique_name(session)));
 
 	ASSERT_EQ(1, tracker.addedOverlays.size());
 	EXPECT_EQ("com.test.good_application_1.2.3", std::get<0>(tracker.addedOverlays[0]));
 	EXPECT_EQ(1234, std::get<1>(tracker.addedOverlays[0]));
 	EXPECT_EQ("overlay://ubuntu.com", std::get<2>(tracker.addedOverlays[0]));
-
-	g_object_unref(upstartMock);
 
 	return;
 }
