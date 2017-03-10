@@ -18,7 +18,33 @@
 #include <ubuntu-app-launch.h>
 #include "ubuntu-app-launch-mock.h"
 
+#include <string.h>
+
 static gchar * last_appid = NULL;
+static gchar * last_version = NULL;
+
+gchar *
+ubuntu_app_launch_triplet_to_app_id (const gchar * pkg, const gchar * app, const gchar * version)
+{
+    g_return_val_if_fail(pkg != NULL, NULL);
+    g_return_val_if_fail(app != NULL, NULL);
+
+    if (version != NULL && strlen(version) != 0) {
+        ubuntu_app_launch_mock_clear_last_version();
+        last_version = g_strdup(version);
+    } else if (last_version == NULL) {
+        last_version = g_strdup("current-user-version");
+    }
+
+    return g_strdup_printf("%s_%s_%s", pkg, app, last_version);
+}
+
+void
+ubuntu_app_launch_mock_clear_last_version ()
+{
+    g_free(last_version);
+    last_version = NULL;
+}
 
 gboolean
 ubuntu_app_launch_start_application (const gchar * appid, const gchar * const * uris)
