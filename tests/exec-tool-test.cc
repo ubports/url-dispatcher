@@ -33,9 +33,6 @@ class ExecToolTest : public ::testing::Test
 			g_setenv("URL_DISPATCHER_DISABLE_RECOVERABLE_ERROR", "1", TRUE);
 			g_setenv("URL_DISPATCHER_OVERLAY_DIR", OVERLAY_TEST_DIR, TRUE);
 
-			g_setenv("TEST_CLICK_DB", "click-db", TRUE);
-			g_setenv("TEST_CLICK_USER", "test-user", TRUE);
-
 			service = dbus_test_service_new(nullptr);
 
 			/* Upstart Mock */

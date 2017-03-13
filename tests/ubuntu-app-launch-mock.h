@@ -23,6 +23,8 @@
 
 G_BEGIN_DECLS
 
+void ubuntu_app_launch_mock_clear_last_version ();
+
 void ubuntu_app_launch_mock_clear_last_app_id ();
 gchar * ubuntu_app_launch_mock_get_last_app_id ();
 

@@ -1,3 +1,9 @@
+url-dispatcher (0.1+17.04.20170308.1-0ubuntu1) zesty; urgency=medium
+
+  * Don't use upstart to get unity8 pid.
+
+ -- Rodney Dawes <rodney.dawes@canonical.com>  Wed, 08 Mar 2017 20:43:30 +0000
+
 url-dispatcher (0.1+17.04.20170227.2-0ubuntu1) zesty; urgency=medium
 
   [ Ken VanDine ]

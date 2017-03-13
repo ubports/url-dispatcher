@@ -54,22 +54,6 @@ target_link_libraries (dispatcher-test
 add_test (dispatcher-test dispatcher-test)
 
 ###########################
-# App ID URL test
-###########################
-
-include_directories("${CMAKE_BINARY_DIR}/service")
-
-add_executable (app-id-test app-id-test.cc)
-target_link_libraries (app-id-test
-	dispatcher-lib
-	mock-lib
-	gtest
-	${UBUNTU_APP_LAUNCH_LIBRARIES}
-	${GMOCK_LIBRARIES})
-
-add_test (app-id-test app-id-test)
-
-###########################
 # lib test
 ###########################
 

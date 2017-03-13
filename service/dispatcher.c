@@ -220,138 +220,51 @@ dispatcher_send_to_app (const gchar * app_id, const gchar * url)
 	return TRUE;
 }
 
-/* Queries Upstart for the PID of a given upstart job */
-pid_t
-pid_for_upstart_job (GDBusConnection * conn, const gchar* jobname)
+unsigned int _get_pid_from_dbus(GDBusConnection * conn, const gchar * sender)
 {
-	GError* error = NULL;
+    GError * error = NULL;
+    unsigned int pid = 0;
 
-	if (jobname == NULL) {
-		return 0;
-	}
+    GVariant * callret = g_dbus_connection_call_sync(conn,
+                                                     "org.freedesktop.DBus",
+                                                     "/",
+                                                     "org.freedesktop.DBus",
+                                                     "GetConnectionUnixProcessID",
+                                                     g_variant_new("(s)", sender),
+                                                     G_VARIANT_TYPE("(u)"),
+                                                     G_DBUS_CALL_FLAGS_NONE,
+                                                     -1, /* timeout */
+                                                     NULL, /* cancellable */
+                                                     &error);
 
-	GVariant* retval = g_dbus_connection_call_sync(
-				 conn,
-				 "com.ubuntu.Upstart",
-				 "/com/ubuntu/Upstart",
-				 "com.ubuntu.Upstart0_6",
-				 "GetJobByName",
-				 g_variant_new("(s)", jobname),
-				 G_VARIANT_TYPE("(o)"),
-				 G_DBUS_CALL_FLAGS_NO_AUTO_START,
-				 -1, /* timeout */
-				 NULL, /* cancel */
-				 &error);
+    if (error != NULL) {
+        g_warning("Unable to get PID for '%s' from dbus: %s",
+                  sender, error->message);
+        g_clear_error(&error);
+    } else {
+        g_variant_get_child(callret, 0, "u", &pid);
+        g_variant_unref(callret);
+    }
 
-	if (error != NULL) {
-		g_warning("Unable to get path for job '%s': %s", jobname, error->message);
-		g_error_free(error);
-		return 0;
-	}
-
-	gchar* path = NULL;
-	g_variant_get(retval, "(o)", &path);
-	g_variant_unref(retval);
-
-	retval = g_dbus_connection_call_sync(
-				 conn,
-				 "com.ubuntu.Upstart",
-				 path,
-				 "com.ubuntu.Upstart0_6.Job",
-				 "GetInstanceByName",
-				 g_variant_new("(s)", ""),
-				 G_VARIANT_TYPE("(o)"),
-				 G_DBUS_CALL_FLAGS_NO_AUTO_START,
-				 -1, /* timeout */
-				 NULL, /* cancel */
-				 &error);
-
-	g_free(path);
-
-	if (error != NULL) {
-		g_warning("Unable to get instance for job '%s': %s", jobname, error->message);
-		g_error_free(error);
-		return 0;
-	}
-
-	g_variant_get(retval, "(o)", &path);
-	g_variant_unref(retval);
-
-	retval = g_dbus_connection_call_sync(
-				 conn,
-				 "com.ubuntu.Upstart",
-				 path,
-				 "org.freedesktop.DBus.Properties",
-				 "Get",
-				 g_variant_new("(ss)", "com.ubuntu.Upstart0_6.Instance", "processes"),
-				 G_VARIANT_TYPE("(v)"),
-				 G_DBUS_CALL_FLAGS_NO_AUTO_START,
-				 -1, /* timeout */
-				 NULL, /* cancel */
-				 &error);
-
-	g_free(path);
-
-	if (error != NULL) {
-		g_warning("Unable to get processes for job '%s': %s", jobname, error->message);
-		g_error_free(error);
-		return 0;
-	}
-
-	GPid pid = 0;
-	GVariant* variant = g_variant_get_child_value(retval, 0);
-	GVariant* array = g_variant_get_variant(variant);
-	if (g_variant_n_children(array) > 0) {
-		/* (si) */
-		GVariant* firstitem = g_variant_get_child_value(array, 0);
-		GVariant* vpid = g_variant_get_child_value(firstitem, 1);
-		pid = g_variant_get_int32(vpid);
-		g_variant_unref(vpid);
-		g_variant_unref(firstitem);
-	}
-	g_variant_unref(variant);
-	g_variant_unref(array);
-	g_variant_unref(retval);
-
-	return pid;
+    return pid;
 }
-
 
 /* Handles setting up the overlay with the URL */
 gboolean
 dispatcher_send_to_overlay (const gchar * app_id, const gchar * url, GDBusConnection * conn, const gchar * sender)
 {
-	GError * error = NULL;
+    unsigned int pid = _get_pid_from_dbus(conn, sender);
+    if (pid == 0) {
+        return FALSE;
+    }
 
-	GVariant * callret = g_dbus_connection_call_sync(conn,
-		"org.freedesktop.DBus",
-		"/",
-		"org.freedesktop.DBus",
-		"GetConnectionUnixProcessID",
-		g_variant_new("(s)", sender),
-		G_VARIANT_TYPE("(u)"),
-		G_DBUS_CALL_FLAGS_NONE,
-		-1, /* timeout */
-		NULL, /* cancellable */
-		&error);
+    /* If it is from a scope we need to overlay onto the
+       dash instead */
+    if (scope_checker_is_scope_pid(checker, pid)) {
+        pid = _get_pid_from_dbus(conn, "com.canonical.Unity8Dash");
+    }
 
-	if (error != NULL) {
-		g_warning("Unable to get PID for '%s' when processing URL '%s': %s", sender, url, error->message);
-		g_error_free(error);
-		return FALSE;
-	}
-
-	unsigned int pid = 0;
-	g_variant_get_child(callret, 0, "u", &pid);
-	g_variant_unref(callret);
-
-	/* If it is from a scope we need to overlay onto the
-	   dash instead */
-	if (scope_checker_is_scope_pid(checker, pid)) {
-		pid = pid_for_upstart_job(conn, "unity8-dash");
-	}
-
-	return overlay_tracker_add(tracker, app_id, pid, url);
+    return overlay_tracker_add(tracker, app_id, pid, url);
 }
 
 /* Check to see if this is an overlay AppID */
