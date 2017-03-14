@@ -40,8 +40,6 @@ class DispatcherTest : public ::testing::Test
 		GDBusConnection * session = nullptr;
 
 		virtual void SetUp() {
-			g_setenv("TEST_CLICK_DB", "click-db", TRUE);
-			g_setenv("TEST_CLICK_USER", "test-user", TRUE);
 			g_setenv("URL_DISPATCHER_OVERLAY_DIR", OVERLAY_TEST_DIR, TRUE);
 
 			cachedir = g_build_filename(CMAKE_BINARY_DIR, "dispatcher-test-cache", nullptr);
@@ -114,6 +112,46 @@ class DispatcherTest : public ::testing::Test
 			return;
 		}
 };
+
+TEST_F(DispatcherTest, AppIdTest)
+{
+	gchar * out_appid = nullptr;
+	const gchar * out_url = nullptr;
+
+	/* Good sanity check */
+	dispatcher_url_to_appid("appid://foobar/baz/1.2.3", &out_appid, &out_url);
+	ASSERT_STREQ("foobar_baz_1.2.3", out_appid);
+
+	dispatcher_send_to_app(out_appid, out_url);
+	EXPECT_STREQ("foobar_baz_1.2.3", ubuntu_app_launch_mock_get_last_app_id());
+	ubuntu_app_launch_mock_clear_last_app_id();
+	ubuntu_app_launch_mock_clear_last_version();
+	g_clear_pointer(&out_appid, g_free);
+	out_url = nullptr;
+
+	/* No version at all */
+	dispatcher_url_to_appid("appid://com.test.good/app1", &out_appid, &out_url);
+
+	EXPECT_STREQ(nullptr, out_appid);
+	EXPECT_EQ(nullptr, out_url);
+
+	ubuntu_app_launch_mock_clear_last_app_id();
+	ubuntu_app_launch_mock_clear_last_version();
+	g_clear_pointer(&out_appid, g_free);
+	out_url = nullptr;
+
+	/* App that would be in a libertine container */
+	dispatcher_url_to_appid("appid://container-id/org.canonical.app1/0.0", &out_appid, &out_url);
+	EXPECT_STREQ("container-id_org.canonical.app1_0.0", out_appid);
+	EXPECT_EQ(nullptr, out_url);
+
+	dispatcher_send_to_app(out_appid, out_url);
+	EXPECT_STREQ("container-id_org.canonical.app1_0.0", ubuntu_app_launch_mock_get_last_app_id());
+
+	ubuntu_app_launch_mock_clear_last_app_id();
+	g_clear_pointer(&out_appid, g_free);
+	out_url = nullptr;
+}
 
 TEST_F(DispatcherTest, ApplicationTest)
 {

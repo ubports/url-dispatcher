@@ -18,7 +18,6 @@
  */
 
 #include <gio/gio.h>
-#include <json-glib/json-glib.h>
 #include <ubuntu-app-launch.h>
 #include "dispatcher.h"
 #include "service-iface.h"
@@ -289,13 +288,6 @@ dispatcher_is_overlay (const gchar * appid)
 		gchar * sysdir = g_build_filename(systemdir, desktopname, NULL);
 		found = g_file_test(sysdir, G_FILE_TEST_EXISTS);
 		g_free(sysdir);
-	}
-
-	/* Check user dir (clicks) */
-	if (!found) {
-		gchar * usrdir = g_build_filename(g_get_user_cache_dir(), "url-dispatcher", "url-overlays", desktopname, NULL);
-		found = g_file_test(usrdir, G_FILE_TEST_EXISTS);
-		g_free(usrdir);
 	}
 
 	g_free(desktopname);

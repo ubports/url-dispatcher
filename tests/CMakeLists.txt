@@ -3,13 +3,6 @@ configure_file(test-config.h.in test-config.h)
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 ###########################
-# Click Database
-###########################
-
-configure_file ("click-db/test.conf.in" "${CMAKE_CURRENT_BINARY_DIR}/click-db/test.conf" @ONLY)
-set_directory_properties (PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES "${CMAKE_CURRENT_BINARY_DIR}/click-db/test.conf")
-
-###########################
 # Google Test
 ###########################
 
@@ -68,22 +61,6 @@ target_link_libraries (dispatcher-test
 	${GTEST_LIBS})
 
 add_test (dispatcher-test dispatcher-test)
-
-###########################
-# App ID URL test
-###########################
-
-include_directories("${CMAKE_BINARY_DIR}/service")
-
-add_executable (app-id-test app-id-test.cc)
-target_link_libraries (app-id-test
-	dispatcher-lib
-	mock-lib
-	gtest
-	${UBUNTU_APP_LAUNCH_LIBRARIES}
-	${GTEST_LIBS})
-
-add_test (app-id-test app-id-test)
 
 ###########################
 # lib test
