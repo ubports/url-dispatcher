@@ -18,11 +18,11 @@ set(PACKAGE ${CMAKE_PROJECT_NAME})
 set(GETTEXT_PACKAGE ${CMAKE_PROJECT_NAME})
 
 find_package(PkgConfig REQUIRED)
+find_package(GDbus)
 include(GNUInstallDirs)
 include(CheckIncludeFile)
 include(CheckFunctionExists)
 include(UseGlibGeneration)
-include(UseGdbusCodegen)
 include(UseConstantBuilder)
 
 # Workaround for libexecdir on debian
