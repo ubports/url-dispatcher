@@ -26,7 +26,6 @@ Build-Depends: cmake,
                python3-nose <!cross>,
                python3-testtools <!cross>,
                sqlite3,
-               upstart,
 Standards-Version: 3.9.4
 Homepage: http://launchpad.net/url-dispatcher
 # If you aren't a member of ~indicator-applet-developers but need to upload

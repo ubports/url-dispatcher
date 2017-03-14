@@ -33,8 +33,6 @@ class FakeURLDispatcherService:
 
     def start(self):
         """Start the fake URL Dispatcher service."""
-        # Stop the real url-dispatcher.
-        subprocess.call(['initctl', 'stop', 'url-dispatcher'])
         self.dbus_mock_server = dbusmock.DBusTestCase.spawn_server(
             'com.canonical.URLDispatcher',
             '/com/canonical/URLDispatcher',
