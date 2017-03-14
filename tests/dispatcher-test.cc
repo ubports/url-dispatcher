@@ -308,12 +308,9 @@ TEST_F(DispatcherTest, IntentTest)
 
 DbusTestDbusMock * setupPidMock()
 {
-    auto mock = dbus_test_dbus_mock_new("com.canonical.Unity8Dash");
-    auto obj = dbus_test_dbus_mock_get_object(mock,
-                                              "/", "com.canonical.Unity8Dash",
-                                              nullptr);
+    auto mock = dbus_test_dbus_mock_new("com.canonical.UnityDash");
 
-    dbus_test_task_set_name(DBUS_TEST_TASK(mock), "Unity8Dash");
+    dbus_test_task_set_name(DBUS_TEST_TASK(mock), "UnityDash");
     dbus_test_task_run(DBUS_TEST_TASK(mock));
 
     return mock;
