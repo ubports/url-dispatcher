@@ -1,3 +1,18 @@
+url-dispatcher (0.1+17.04.20170314-0ubuntu1) zesty; urgency=medium
+
+  [ Charles Kerr ]
+  * Honor XDG_CACHE_HOME in url-dispatcher-dump and url-dispatcher.conf
+
+  [ Rodney Dawes ]
+  * Remove click usage and support.
+  * Use gmock module from cmake-extras.
+  * Use the coverage support from cmake-extras.
+  * Use cmake-extras intltool support.
+  * Use gdbus integration from cmake-extras.
+  * Remove unused gsettings cmake module.
+
+ -- Rodney Dawes <rodney.dawes@canonical.com>  Tue, 14 Mar 2017 14:35:03 +0000
+
 url-dispatcher (0.1+17.04.20170308.1-0ubuntu1) zesty; urgency=medium
 
   * Don't use upstart to get unity8 pid.
