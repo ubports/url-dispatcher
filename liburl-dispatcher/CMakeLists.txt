@@ -65,6 +65,11 @@ ${GOBJECT2_LIBRARIES}
 )
 
 ###########################
+# Coverage
+###########################
+set_property(GLOBAL APPEND PROPERTY COVERAGE_TARGETS dispatcher)
+
+###########################
 # Pkg Config
 ###########################
 

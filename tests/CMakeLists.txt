@@ -145,3 +145,20 @@ target_link_libraries (overlay-tracker-test
 	${DBUSTEST_LIBRARIES})
 
 add_test (overlay-tracker-test overlay-tracker-test)
+
+###########################
+# Coverage
+###########################
+set_property(
+  GLOBAL
+  APPEND
+  PROPERTY COVERAGE_TESTS
+
+  directory-update-test
+  dispatcher-test
+  exec-tool-test
+  lib-test
+  overlay-tracker-test
+  service-test
+  url-db-test
+  )

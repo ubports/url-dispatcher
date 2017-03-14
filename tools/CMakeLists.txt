@@ -21,3 +21,7 @@ install(
   DESTINATION "${CMAKE_INSTALL_BINDIR}"
 )
 
+##########################
+# Coverage
+###########################
+set_property(GLOBAL APPEND PROPERTY COVERAGE_TARGETS url-dispatcher)
