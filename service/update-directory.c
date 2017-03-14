@@ -19,8 +19,8 @@
 
 #include <gio/gio.h>
 #include <json-glib/json-glib.h>
+#include <libwhoopsie/recoverable-problem.h>
 #include "url-db.h"
-#include "recoverable-problem.h"
 
 typedef struct {
 	const gchar * filename;
@@ -79,7 +79,7 @@ each_url (JsonArray * array, guint index, JsonNode * value, gpointer user_data)
 		additional[3] = protocol;
 		additional[5] = suffix;
 
-		report_recoverable_problem("url-dispatcher-update-sqlite-insert-error", 0, TRUE, additional);
+		whoopsie_report_recoverable_problem("url-dispatcher-update-sqlite-insert-error", 0, TRUE, additional);
 	}
 }
 
@@ -148,7 +148,7 @@ check_file_outofdate (const gchar * filename, sqlite3 * db)
 		};
 		additional[1] = filename;
 
-		report_recoverable_problem("url-dispatcher-update-sqlite-fileupdate-error", 0, TRUE, additional);
+		whoopsie_report_recoverable_problem("url-dispatcher-update-sqlite-fileupdate-error", 0, TRUE, additional);
 		return FALSE;
 	}
 
@@ -170,7 +170,7 @@ remove_file (gpointer key, gpointer value, gpointer user_data)
 		};
 		additional[1] = filename;
 
-		report_recoverable_problem("url-dispatcher-update-remove-file-error", 0, TRUE, additional);
+		whoopsie_report_recoverable_problem("url-dispatcher-update-remove-file-error", 0, TRUE, additional);
 	}
 }
 
@@ -249,7 +249,7 @@ main (int argc, char * argv[])
 		gchar * status = g_strdup_printf("%d", close_status);
 		additional[1] = status;
 
-		report_recoverable_problem("url-dispatcher-sqlite-close-error", 0, TRUE, additional);
+		whoopsie_report_recoverable_problem("url-dispatcher-sqlite-close-error", 0, TRUE, additional);
 		g_free(status);
 	}
 

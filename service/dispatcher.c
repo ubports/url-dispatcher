@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2013 Canonical, Ltd.
+ * Copyright (C) 2013-2017 Canonical, Ltd.
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License version 3, as published by
@@ -18,10 +18,10 @@
  */
 
 #include <gio/gio.h>
+#include <libwhoopsie/recoverable-problem.h>
 #include <ubuntu-app-launch.h>
 #include "dispatcher.h"
 #include "service-iface.h"
-#include "recoverable-problem.h"
 #include "scope-checker.h"
 #include "url-db.h"
 
@@ -84,7 +84,7 @@ recoverable_problem_file (GObject * obj, GAsyncResult * res, gpointer user_data)
 		NULL
 	};
 
-	report_recoverable_problem("url-dispatcher-bad-url", pid, FALSE, additional);
+	whoopsie_report_recoverable_problem("url-dispatcher-bad-url", pid, FALSE, additional);
 
 	g_free(badurl);
 

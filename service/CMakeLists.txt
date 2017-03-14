@@ -53,6 +53,7 @@ target_link_libraries(dispatcher-lib
 	${SCOPES_LIBRARIES}
 	${SQLITE_LIBRARIES}
 	${UBUNTU_APP_LAUNCH_LIBRARIES}
+    ${WHOOPSIE_LIBRARIES}
 )
 
 ###########################
@@ -86,19 +87,19 @@ target_link_libraries(url-db-lib
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
-add_executable(service-exec service.c recoverable-problem.h recoverable-problem.c)
+add_executable(service-exec service.c)
 
 set_target_properties(service-exec PROPERTIES OUTPUT_NAME "url-dispatcher")
 
-target_link_libraries(service-exec dispatcher-lib)
+target_link_libraries(service-exec ${WHOOPSIE_LIBRARIES} dispatcher-lib)
 
 ###########################
 # Update Directory
 ###########################
 
-add_executable(update-directory update-directory.c recoverable-problem.c)
+add_executable(update-directory update-directory.c)
 set_target_properties(update-directory PROPERTIES OUTPUT_NAME "update-directory")
-target_link_libraries(update-directory ${GIO2_LIBRARIES} ${JSONGLIB_LIBRARIES} url-db-lib)
+target_link_libraries(update-directory ${GIO2_LIBRARIES} ${JSONGLIB_LIBRARIES} ${WHOOPSIE_LIBRARIES} url-db-lib)
 
 ###########################
 # Coverage

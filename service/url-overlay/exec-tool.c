@@ -18,9 +18,8 @@
  */
 
 #include <glib.h>
+#include <libwhoopsie/recoverable-problem.h>
 #include <ubuntu-app-launch.h>
-
-#include "recoverable-problem.h"
 
 gchar *
 build_exec (const gchar * appid, const gchar * directory)
@@ -80,7 +79,7 @@ main (int argc, char * argv[])
 	/* Build up our exec */
 	const gchar * appid = g_getenv("APP_ID");
 	if (appid == NULL) {
-		report_recoverable_problem("url-dispatcher-url-overlay-no-appid", 0, TRUE, NULL);
+		whoopsie_report_recoverable_problem("url-dispatcher-url-overlay-no-appid", 0, TRUE, NULL);
 		return -1;
 	}
 
@@ -104,7 +103,7 @@ main (int argc, char * argv[])
 			NULL
 		};
 
-		report_recoverable_problem("url-dispatcher-url-overlay-bad-appid", 0, TRUE, props);
+		whoopsie_report_recoverable_problem("url-dispatcher-url-overlay-bad-appid", 0, TRUE, props);
 		return -1;
 	}
 
