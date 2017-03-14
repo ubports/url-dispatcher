@@ -1,17 +1,8 @@
+find_package(GMock)
+
 set(APP_ID_TEST_URI 1)
 configure_file(test-config.h.in test-config.h)
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
-
-###########################
-# Google Test
-###########################
-
-include_directories(${GTEST_INCLUDE_DIR})
-
-add_library (gtest STATIC
-             ${GTEST_SOURCE_DIR}/gtest-all.cc
-             ${GTEST_SOURCE_DIR}/gtest_main.cc)
-
 
 ###########################
 # Mock Lib
@@ -58,7 +49,7 @@ target_link_libraries (dispatcher-test
 	gtest
 	${UBUNTU_APP_LAUNCH_LIBRARIES}
 	${DBUSTEST_LIBRARIES}
-	${GTEST_LIBS})
+	${GMOCK_LIBRARIES})
 
 add_test (dispatcher-test dispatcher-test)
 
@@ -74,7 +65,7 @@ target_link_libraries (lib-test
 	dispatcher
 	gtest
 	${DBUSTEST_LIBRARIES}
-	${GTEST_LIBS})
+	${GMOCK_LIBRARIES})
 
 add_test (lib-test lib-test)
 
@@ -89,7 +80,7 @@ target_link_libraries (service-test
 	gtest
 	${DBUSTEST_LIBRARIES}
 	${UBUNTU_APP_LAUNCH_LIBRARIES}
-	${GTEST_LIBS})
+	${GMOCK_LIBRARIES})
 
 add_test (service-test service-test)
 
@@ -109,7 +100,7 @@ add_executable (directory-update-test directory-update-test.cc)
 target_link_libraries (directory-update-test
 	url-db-lib
 	gtest
-	${GTEST_LIBS})
+	${GMOCK_LIBRARIES})
 
 add_test (directory-update-test directory-update-test)
 
@@ -121,7 +112,7 @@ add_executable (url-db-test url-db-test.cc)
 target_link_libraries (url-db-test
 	url-db-lib
 	gtest
-	${GTEST_LIBS})
+	${GMOCK_LIBRARIES})
 
 add_test (url-db-test url-db-test)
 add_subdirectory(url_dispatcher_testability)
@@ -133,7 +124,7 @@ add_subdirectory(url_dispatcher_testability)
 add_executable (exec-tool-test exec-tool-test.cc)
 target_link_libraries (exec-tool-test
 	gtest
-	${GTEST_LIBS}
+	${GMOCK_LIBRARIES}
 	${GIO2_LIBRARIES}
 	${DBUSTEST_LIBRARIES})
 
@@ -149,7 +140,7 @@ target_link_libraries (overlay-tracker-test
 	mir-mock-lib
 	mock-lib
 	gtest
-	${GTEST_LIBS}
+	${GMOCK_LIBRARIES}
 	${GIO2_LIBRARIES}
 	${DBUSTEST_LIBRARIES})
 
