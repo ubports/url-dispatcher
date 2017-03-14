@@ -53,7 +53,7 @@ target_link_libraries(dispatcher-lib
 	${SCOPES_LIBRARIES}
 	${SQLITE_LIBRARIES}
 	${UBUNTU_APP_LAUNCH_LIBRARIES}
-    ${WHOOPSIE_LIBRARIES}
+	${WHOOPSIE_LIBRARIES}
 )
 
 ###########################
