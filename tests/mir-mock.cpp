@@ -52,7 +52,7 @@ mir_prompt_session_release_sync (MirPromptSession * session)
 }
 
 MirWaitHandle *
-mir_prompt_session_new_fds_for_prompt_providers (MirPromptSession * session, unsigned int numfds, mir_client_fd_callback cb, void * data) {
+mir_prompt_session_new_fds_for_prompt_providers (MirPromptSession * session, unsigned int numfds, MirClientFdCallback cb, void * data) {
 	if (session != mir_mock_valid_trust_session) {
 		std::cerr << "Releasing a Mir Trusted Prompt that isn't valid" << std::endl;
 		exit(1);
