@@ -73,7 +73,7 @@ add_test (lib-test lib-test)
 # service test
 ###########################
 
-add_executable (service-test service-test.cc)
+add_executable (service-test service-test.cc ${CMAKE_SOURCE_DIR}/service/glib-thread.cpp)
 target_link_libraries (service-test
 	url-db-lib
 	dispatcher
