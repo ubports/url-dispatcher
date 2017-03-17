@@ -18,9 +18,19 @@
  */
 
 #include <ubuntu-app-launch/helper.h>
+#include <glib.h>
 
 int
 main (int argc, char * argv[])
 {
-	ubuntu::app_launch::Helper::setExec({"qmlscene", QML_BAD_URL});
+	try {
+		ubuntu::app_launch::Helper::setExec({"qmlscene", QML_BAD_URL});
+		return EXIT_SUCCESS;
+	} catch (std::runtime_error &e) {
+		g_warning("Unable to set helper: %s", e.what());
+		return EXIT_FAILURE;
+	} catch (...) {
+		g_warning("Unknown failure setting exec line");
+		return EXIT_FAILURE;
+	}
 }
