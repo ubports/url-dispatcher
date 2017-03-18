@@ -1,3 +1,10 @@
+url-dispatcher (0.1+17.04.20170318-0ubuntu1) zesty; urgency=medium
+
+  * Update bad-url exec tool to UAL C++ interface
+  * Remove Upstart from the test suite and replace it with systemd
+
+ -- Ted Gould <ted@gould.cx>  Sat, 18 Mar 2017 19:59:26 +0000
+
 url-dispatcher (0.1+17.04.20170314-0ubuntu1) zesty; urgency=medium
 
   [ Charles Kerr ]
