@@ -17,26 +17,20 @@
  *   Ted Gould <ted.gould@canonical.com>
  */
 
-#include <gio/gio.h>
-#include <ubuntu-app-launch.h>
+#include <ubuntu-app-launch/helper.h>
+#include <glib.h>
 
 int
 main (int argc, char * argv[])
 {
-	GDBusConnection * bus = g_bus_get_sync(G_BUS_TYPE_SESSION, NULL, NULL);
-	g_return_val_if_fail(bus != NULL, -1);
-
-	gchar * exec = g_strdup_printf("qmlscene %s %s", QML_BAD_URL, g_getenv("APP_URIS"));
-
-	gboolean sended = ubuntu_app_launch_helper_set_exec(exec, NULL);
-	g_free(exec);
-
-	/* Ensuring the messages get on the bus before we quit */
-	g_dbus_connection_flush_sync(bus, NULL, NULL);
-	g_clear_object(&bus);
-
-	if (sended)
-		return 0;
-	else
-		return -1;
+    try {
+        ubuntu::app_launch::Helper::setExec({"qmlscene", QML_BAD_URL});
+        return EXIT_SUCCESS;
+    } catch (std::runtime_error &e) {
+        g_warning("Unable to set helper: %s", e.what());
+        return EXIT_FAILURE;
+    } catch (...) {
+        g_warning("Unknown failure setting exec line");
+        return EXIT_FAILURE;
+    }
 }

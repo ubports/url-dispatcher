@@ -4,3 +4,4 @@ Icon=@CMAKE_INSTALL_PREFIX@/@CMAKE_INSTALL_DATADIR@/url-dispatcher/gui/url-dispa
 Type=Application
 Exec=qmlscene @CMAKE_INSTALL_PREFIX@/@CMAKE_INSTALL_DATADIR@/url-dispatcher/gui/url-dispatcher-gui.qml
 X-Ubuntu-Touch=true
+X-Ubuntu-Single-Instance=true

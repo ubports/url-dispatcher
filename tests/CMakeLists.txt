@@ -118,19 +118,6 @@ add_test (url-db-test url-db-test)
 add_subdirectory(url_dispatcher_testability)
 
 ###########################
-# exec tool test
-###########################
-
-add_executable (exec-tool-test exec-tool-test.cc)
-target_link_libraries (exec-tool-test
-	gtest
-	${GMOCK_LIBRARIES}
-	${GIO2_LIBRARIES}
-	${DBUSTEST_LIBRARIES})
-
-add_test (exec-tool-test exec-tool-test)
-
-###########################
 # overlay tracker test
 ###########################
 
