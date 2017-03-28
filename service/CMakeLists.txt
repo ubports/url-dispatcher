@@ -87,7 +87,7 @@ target_link_libraries(url-db-lib
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
-add_executable(service-exec service.c)
+add_executable(service-exec service.cpp)
 
 set_target_properties(service-exec PROPERTIES OUTPUT_NAME "url-dispatcher")
 
