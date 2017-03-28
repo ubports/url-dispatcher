@@ -1,3 +1,12 @@
+url-dispatcher (0.1+17.04.20170328-0ubuntu1) zesty; urgency=medium
+
+  * Fix deprecation warning in mir mock.
+  * The unity8-dash interface is actually com.canonical.UnityDash.
+  * Use libwhoopsie for reporting recoverable problems.
+  * Convert service main process and url-dispatcher tool code to C++.
+
+ -- Rodney Dawes <rodney.dawes@canonical.com>  Tue, 28 Mar 2017 18:29:07 +0000
+
 url-dispatcher (0.1+17.04.20170318-0ubuntu1) zesty; urgency=medium
 
   * Update bad-url exec tool to UAL C++ interface
