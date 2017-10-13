@@ -1,3 +1,9 @@
+url-dispatcher (0.2+ubports) xenial; urgency=medium
+
+  * Imported to UBports
+
+ -- UBports auto importer <infra@ubports.com>  Fri, 13 Oct 2017 19:54:36 +0200
+
 url-dispatcher (0.1+16.10.20160816.1-0ubuntu1) yakkety; urgency=medium
 
   * No chnage rebuild for UAL migration
