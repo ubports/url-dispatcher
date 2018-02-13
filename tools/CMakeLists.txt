@@ -5,7 +5,7 @@
 
 include_directories(${CMAKE_SOURCE_DIR}/liburl-dispatcher)
 
-add_executable(url-dispatcher url-dispatcher.c)
+add_executable(url-dispatcher url-dispatcher.cpp)
 
 target_link_libraries(url-dispatcher
   dispatcher
@@ -21,3 +21,7 @@ install(
   DESTINATION "${CMAKE_INSTALL_BINDIR}"
 )
 
+##########################
+# Coverage
+###########################
+set_property(GLOBAL APPEND PROPERTY COVERAGE_TARGETS url-dispatcher)

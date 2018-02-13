@@ -1,0 +1,14 @@
+{
+    "containerList": [
+        {
+            "distro": "xenial",
+            "id": "container-id",
+            "installStatus": "ready",
+            "installedApps": [],
+            "multiarch": "disabled",
+            "name": "Ubuntu 'Xenial Xerus'",
+            "type": "lxc"
+        }
+    ],
+    "defaultContainer": "container-id"
+}

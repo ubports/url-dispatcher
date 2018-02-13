@@ -23,21 +23,26 @@
 #include <libdbustest/dbus-test.h>
 
 #include "url-db.h"
+#include "systemd-mock.h"
+
+#define CGROUP_DIR (CMAKE_BINARY_DIR "/systemd-service-test-cgroups")
 
 class ServiceTest : public ::testing::Test
 {
 	protected:
 		DbusTestService * service = nullptr;
-		DbusTestDbusMock * mock = nullptr;
 		DbusTestDbusMock * dashmock = nullptr;
-		DbusTestDbusMockObject * obj = nullptr;
-		DbusTestDbusMockObject * jobobj = nullptr;
 		DbusTestProcess * dispatcher = nullptr;
+		std::shared_ptr<SystemdMock> systemd;
 		GDBusConnection * bus = nullptr;
 
 		virtual void SetUp() {
 			g_setenv("UBUNTU_APP_LAUNCH_USE_SESSION", "1", TRUE);
+			g_setenv("UBUNTU_APP_LAUNCH_SYSTEMD_CGROUP_ROOT", CGROUP_DIR, TRUE);
+			g_setenv("UBUNTU_APP_LAUNCH_SYSTEMD_PATH", "/this/should/not/exist", TRUE);
+
 			g_setenv("URL_DISPATCHER_DISABLE_RECOVERABLE_ERROR", "1", TRUE);
+			g_setenv("URL_DISPATCHER_DISABLE_SCOPE_CHECKING", "1", TRUE);
 			g_setenv("XDG_DATA_DIRS", XDG_DATA_DIRS, TRUE);
 			g_setenv("LD_PRELOAD", MIR_MOCK_PATH, TRUE);
 
@@ -49,28 +54,12 @@ class ServiceTest : public ::testing::Test
 			dbus_test_task_set_name(DBUS_TEST_TASK(dispatcher), "Dispatcher");
 			dbus_test_service_add_task(service, DBUS_TEST_TASK(dispatcher));
 
-			/* Upstart Mock */
-			mock = dbus_test_dbus_mock_new("com.ubuntu.Upstart");
-			obj = dbus_test_dbus_mock_get_object(mock, "/com/ubuntu/Upstart", "com.ubuntu.Upstart0_6", nullptr);
-
-			dbus_test_dbus_mock_object_add_method(mock, obj,
-				"GetJobByName",
-				G_VARIANT_TYPE_STRING,
-				G_VARIANT_TYPE_OBJECT_PATH, /* out */
-				"ret = dbus.ObjectPath('/job')", /* python */
-				nullptr); /* error */
-
-			jobobj = dbus_test_dbus_mock_get_object(mock, "/job", "com.ubuntu.Upstart0_6.Job", nullptr);
-
-			dbus_test_dbus_mock_object_add_method(mock, jobobj,
-				"Start",
-				G_VARIANT_TYPE("(asb)"),
-				G_VARIANT_TYPE_OBJECT_PATH, /* out */
-				"ret = dbus.ObjectPath('/instance')", /* python */
-				nullptr); /* error */
-
-			dbus_test_task_set_name(DBUS_TEST_TASK(mock), "Upstart");
-			dbus_test_service_add_task(service, DBUS_TEST_TASK(mock));
+			/* Systemd Mock */
+			systemd = std::make_shared<SystemdMock>(
+					std::list<SystemdMock::Instance>{
+						{"application-legacy", "single", {}, getpid(), {getpid()}},
+					}, CGROUP_DIR);
+			dbus_test_service_add_task(service, *systemd);
 
 			/* Dash Mock */
 			dashmock = dbus_test_dbus_mock_new("com.canonical.UnityDash");
@@ -95,8 +84,10 @@ class ServiceTest : public ::testing::Test
 		}
 
 		virtual void TearDown() {
+			kill(dbus_test_process_get_pid(dispatcher), SIGTERM);
+
+			systemd.reset();
 			g_clear_object(&dispatcher);
-			g_clear_object(&mock);
 			g_clear_object(&dashmock);
 			g_clear_object(&service);
 
@@ -123,7 +114,7 @@ class ServiceTest : public ::testing::Test
 			GTimeVal time = {0, 0};
 			time.tv_sec = 5;
 			url_db_set_file_motification_time(db, "/unity8-dash.url-dispatcher", &time);
-			url_db_insert_url(db, "/unity8-dash.url-dispatcher", "scope", nullptr);
+			url_db_insert_url(db, "/unity8-dash.url-dispatcher", "scopeish", nullptr);
 			sqlite3_close(db);
 		}
 
@@ -160,10 +151,8 @@ TEST_F(ServiceTest, InvalidTest) {
 	g_main_loop_run(main);
 	g_main_loop_unref(main);
 
-	guint callslen = 0;
-	dbus_test_dbus_mock_object_get_method_calls(mock, jobobj, "Start", &callslen, nullptr);
-
-	ASSERT_EQ(callslen, 0);
+	auto calls = systemd->unitCalls();
+	ASSERT_EQ(0u, calls.size());
 }
 
 TEST_F(ServiceTest, ApplicationTest) {
@@ -176,30 +165,10 @@ TEST_F(ServiceTest, ApplicationTest) {
 	g_main_loop_run(main);
 	g_main_loop_unref(main);
 
-	guint callslen = 0;
-	const DbusTestDbusMockCall * calls = dbus_test_dbus_mock_object_get_method_calls(mock, jobobj, "Start", &callslen, nullptr);
-
-	ASSERT_EQ(callslen, 1);
-
-	/* Making sure the APP_ID is here.  We're not testing more to
-	   make it so the tests break less, that should be tested in
-	   Upstart App Launch, we don't need to retest */
-	GVariant * env = g_variant_get_child_value(calls->params, 0);
-	GVariantIter iter;
-	bool found_appid = false;
-	g_variant_iter_init(&iter, env);
-	gchar * var = nullptr;
-
-	while (g_variant_iter_loop(&iter, "s", &var)) {
-		if (g_strcmp0(var, "APP_ID=foo-bar") == 0) {
-			ASSERT_FALSE(found_appid);
-			found_appid = true;
-		}
-	}
-
-	g_variant_unref(env);
-
-	ASSERT_TRUE(found_appid);
+	/* Check to see it called systemd */
+	auto calls = systemd->unitCalls();
+	ASSERT_EQ(1u, calls.size());
+	EXPECT_EQ(SystemdMock::instanceName({"application-legacy", "foo-bar", "", 0, {}}), calls.begin()->name);
 }
 
 TEST_F(ServiceTest, TestURLTest) {
@@ -210,7 +179,7 @@ TEST_F(ServiceTest, TestURLTest) {
 	};
 
 	gchar ** appids = url_dispatch_url_appid(testurls);
-	ASSERT_EQ(1, g_strv_length(appids));
+	ASSERT_EQ(1u, g_strv_length(appids));
 
 	EXPECT_STREQ("foo-bar", appids[0]);
 
@@ -224,7 +193,7 @@ TEST_F(ServiceTest, TestURLTest) {
 	};
 
 	gchar ** multiappids = url_dispatch_url_appid(multiurls);
-	ASSERT_EQ(2, g_strv_length(multiappids));
+	ASSERT_EQ(2u, g_strv_length(multiappids));
 
 	EXPECT_STREQ("bar-foo", multiappids[0]);
 	EXPECT_STREQ("foo-bar", multiappids[1]);
@@ -238,7 +207,7 @@ TEST_F(ServiceTest, TestURLTest) {
 	};
 
 	gchar ** errorappids = url_dispatch_url_appid(errorurls);
-	ASSERT_EQ(0, g_strv_length(errorappids));
+	ASSERT_EQ(0u, g_strv_length(errorappids));
 
 	g_strfreev(errorappids);
 }
@@ -271,26 +240,19 @@ TEST_F(ServiceTest, Unity8DashTest) {
 	GMainLoop * main = g_main_loop_new(nullptr, FALSE);
 
 	/* Send an invalid URL */
-	url_dispatch_send("scope://foo-bar", simple_cb, main);
+	url_dispatch_send("scopeish://foo-bar", simple_cb, main);
 
 	/* Give it some time to send and reply */
 	g_main_loop_run(main);
 	g_main_loop_unref(main);
 
 	guint callslen = 0;
-	const DbusTestDbusMockCall * calls = nullptr;
-	calls = dbus_test_dbus_mock_object_get_method_calls(mock, jobobj, "Start", &callslen, nullptr);
+	auto calls = dbus_test_dbus_mock_object_get_method_calls(dashmock, fdoobj, "Open", &callslen, nullptr);
 
-	EXPECT_NE(calls, nullptr);
-	EXPECT_EQ(0, callslen);
+	EXPECT_EQ(1u, callslen);
+	EXPECT_TRUE(g_variant_equal(calls[0].params, g_variant_new_parsed("(['scopeish://foo-bar'], @a{sv} {})")));
 
-	callslen = 0;
-	calls = dbus_test_dbus_mock_object_get_method_calls(dashmock, fdoobj, "Open", &callslen, nullptr);
-
-	EXPECT_EQ(1, callslen);
-	EXPECT_TRUE(g_variant_equal(calls[0].params, g_variant_new_parsed("(['scope://foo-bar'], @a{sv} {})")));
-
-	EXPECT_EQ(1, focus_count);
+	EXPECT_EQ(1u, focus_count);
 
 	g_dbus_connection_signal_unsubscribe(bus, focus_signal);
 	g_clear_object(&bus);

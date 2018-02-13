@@ -3,6 +3,7 @@ description "URL Dispatcher User Directory Watch"
 start on (file FILE=~/.config/url-dispatcher/urls/*.url-dispatcher) or url-dispatcher-update-user
 
 task
+nice 19
 
 pre-start script
 	RUNNING=$(initctl status url-dispatcher | grep start/running 2> /dev/null)
@@ -13,4 +14,4 @@ pre-start script
 	fi
 end script
 
-exec @pkglibexecdir@/update-directory "~/.config/url-dispatcher/urls/*.url-dispatcher"
+exec ${SNAP}@pkglibexecdir@/update-directory "${HOME}/.config/url-dispatcher/urls/"

@@ -3,17 +3,17 @@
 export DPKG_GENSYMBOLS_CHECK_LEVEL = 4
 export G_MESSAGES_DEBUG=all
 export URL_DISPATCHER_DISABLE_RECOVERABLE_ERROR=1
+ifneq ($(DEB_BUILD_GNU_TYPE),$(DEB_HOST_GNU_TYPE))
+export DEB_BUILD_PROFILES := cross
+endif
 
 %:
-	dh $@ --fail-missing --with click
+	dh $@ --fail-missing --with translations
 
 override_dh_install:
 	mkdir -p debian/url-dispatcher/usr/share/apport/package-hooks/
 	install -m 644 debian/source_url-dispatcher.py debian/url-dispatcher/usr/share/apport/package-hooks/
 	mkdir -p debian/url-dispatcher/etc/apport/crashdb.conf.d/
 	install -m 644 debian/url-dispatcher-crashdb.conf debian/url-dispatcher/etc/apport/crashdb.conf.d/
+	dh_apparmor --profile-name=url-dispatcher-bad-url-helper -p url-dispatcher
 	dh_install --fail-missing
-
-override_dh_click:
-	dh_click --name urls
-	dh_click --name url-overlay

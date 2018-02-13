@@ -20,16 +20,20 @@
 #include "overlay-tracker-mir.h"
 #include <ubuntu-app-launch.h>
 
-static const char * HELPER_TYPE = "url-overlay";
+static const char * OVERLAY_HELPER_TYPE = "url-overlay";
+static const char * BAD_URL_HELPER_TYPE = "bad-url";
+static const char * BAD_URL_APP_ID = "url-dispatcher-bad-url-helper";
 
 OverlayTrackerMir::OverlayTrackerMir () 
 	: thread([this] {
 		/* Setup Helper Observer */
-		ubuntu_app_launch_observer_add_helper_stop(untrustedHelperStoppedStatic, HELPER_TYPE, this);
+		ubuntu_app_launch_observer_add_helper_stop(overlayHelperStoppedStatic, OVERLAY_HELPER_TYPE, this);
+		ubuntu_app_launch_observer_add_helper_stop(overlayHelperStoppedStatic, BAD_URL_HELPER_TYPE, this);
 		},
 		[this] {
 		/* Remove Helper Observer */
-		ubuntu_app_launch_observer_delete_helper_stop(untrustedHelperStoppedStatic, HELPER_TYPE, this);
+		ubuntu_app_launch_observer_delete_helper_stop(overlayHelperStoppedStatic, OVERLAY_HELPER_TYPE, this);
+		ubuntu_app_launch_observer_delete_helper_stop(overlayHelperStoppedStatic, BAD_URL_HELPER_TYPE, this);
 		})
 {
 	mir = std::shared_ptr<MirConnection>([] {
@@ -52,8 +56,10 @@ OverlayTrackerMir::OverlayTrackerMir ()
 OverlayTrackerMir::~OverlayTrackerMir () 
 {
 	thread.executeOnThread<bool>([this] {
-		while (!ongoingSessions.empty()) {
-			removeSession(std::get<2>(*ongoingSessions.begin()).get());
+		for (auto& sessionType : ongoingSessions) {
+			while (!sessionType.second.empty()) {
+				removeSession(sessionType.first, sessionType.second.begin()->session.get());
+			}
 		}
 
 		return true;
@@ -65,53 +71,76 @@ OverlayTrackerMir::~OverlayTrackerMir ()
 bool
 OverlayTrackerMir::addOverlay (const char * appid, unsigned long pid, const char * url)
 {
-	std::string sappid(appid);
+	return addOverlayCore(OVERLAY_HELPER_TYPE, appid, pid, url, overlaySessionStateChangedStatic);
+}
+
+bool
+OverlayTrackerMir::addOverlayCore (const char * helper_id, const char * appid, unsigned long pid, const char * url, void (*stateChangedFunction) (MirPromptSession*, MirPromptSessionState, void *))
+{
+	OverlayData data;
+	data.appid = appid;
 	std::string surl(url);
 
-	return thread.executeOnThread<bool>([this, sappid, pid, surl] {
-		g_debug("Setting up over lay for PID %d with '%s'", pid, sappid.c_str());
+	return thread.executeOnThread<bool>([this, helper_id, &data, pid, surl, stateChangedFunction] {
+		g_debug("Setting up over lay for PID %d with '%s'", int(pid), data.appid.c_str());
 
-		auto session = std::shared_ptr<MirPromptSession>(
-			mir_connection_create_prompt_session_sync(mir.get(), pid, sessionStateChangedStatic, this),
+		data.session = std::shared_ptr<MirPromptSession>(
+			mir_connection_create_prompt_session_sync(mir.get(), pid, stateChangedFunction, this),
 			[] (MirPromptSession * session) { if (session) mir_prompt_session_release_sync(session); });
-		if (!session) {
-			g_critical("Unable to create trusted prompt session for %d with appid '%s'", pid, sappid.c_str());
-			return false;
-		}
-		
-		std::array<const char *, 2> urls { surl.c_str(), nullptr };
-		auto instance = ubuntu_app_launch_start_session_helper(HELPER_TYPE, session.get(), sappid.c_str(), urls.data());
-		if (instance == nullptr) {
-			g_critical("Unable to start helper for %d with appid '%s'", pid, sappid.c_str());
+		if (!data.session) {
+			g_critical("Unable to create trusted prompt session for %d with appid '%s'", (int)pid, data.appid.c_str());
 			return false;
 		}
 
-		ongoingSessions.emplace(std::make_tuple(sappid, std::string(instance), session));
+		std::array<const char *, 2> urls { surl.c_str(), nullptr };
+		auto instance = ubuntu_app_launch_start_session_helper(helper_id, data.session.get(), data.appid.c_str(), urls.data());
+		if (instance == nullptr) {
+			g_critical("Unable to start helper for %d with appid '%s'", int(pid), data.appid.c_str());
+			return false;
+		}
+		data.instanceid = instance;
+
+		ongoingSessions[helper_id].push_back(data);
 		g_free(instance);
 		return true;
 	});
 }
 
-void
-OverlayTrackerMir::sessionStateChangedStatic (MirPromptSession * session, MirPromptSessionState state, void * user_data)
+bool
+OverlayTrackerMir::badUrl (unsigned long pid, const char * url)
 {
-	reinterpret_cast<OverlayTrackerMir *>(user_data)->sessionStateChanged(session, state);
+	return addOverlayCore(BAD_URL_HELPER_TYPE, BAD_URL_APP_ID, pid, url, badUrlSessionStateChangedStatic);
 }
 
 void
-OverlayTrackerMir::removeSession (MirPromptSession * session)
+OverlayTrackerMir::overlaySessionStateChangedStatic (MirPromptSession * session, MirPromptSessionState state, void * user_data)
 {
-	for (auto it = ongoingSessions.begin(); it != ongoingSessions.end(); it++) {
-		if (std::get<2>(*it).get() == session) {
-			ubuntu_app_launch_stop_multiple_helper(HELPER_TYPE, std::get<0>(*it).c_str(), std::get<1>(*it).c_str());
-			ongoingSessions.erase(it);
+	reinterpret_cast<OverlayTrackerMir *>(user_data)->sessionStateChanged(session, state, OVERLAY_HELPER_TYPE);
+}
+
+void
+OverlayTrackerMir::badUrlSessionStateChangedStatic (MirPromptSession * session, MirPromptSessionState state, void * user_data)
+{
+	reinterpret_cast<OverlayTrackerMir *>(user_data)->sessionStateChanged(session, state, BAD_URL_HELPER_TYPE);
+}
+
+void
+OverlayTrackerMir::removeSession (const std::string &type, MirPromptSession * session)
+{
+	g_debug("Removing session: %p", (void*)session);
+	auto& sessions = ongoingSessions[type];
+
+	for (auto it = sessions.begin(); it != sessions.end(); it++) {
+		if (it->session.get() == session) {
+			ubuntu_app_launch_stop_multiple_helper(type.c_str(), it->appid.c_str(), it->instanceid.c_str());
+			sessions.erase(it);
 			break;
 		}
 	}
 }
 
 void
-OverlayTrackerMir::sessionStateChanged (MirPromptSession * session, MirPromptSessionState state)
+OverlayTrackerMir::sessionStateChanged (MirPromptSession * session, MirPromptSessionState state, const std::string &type)
 {
 	if (state != mir_prompt_session_state_stopped) {
 		/* We only care about the stopped state */
@@ -120,23 +149,24 @@ OverlayTrackerMir::sessionStateChanged (MirPromptSession * session, MirPromptSes
 
 	/* Executing on the Mir thread, which is nice and all, but we
 	   want to get back on our thread */
-	thread.executeOnThread([this, session]() {
-		removeSession(session);
+	thread.executeOnThread([this, type, session]() {
+		removeSession(type, session);
 	});
 }
 
 void
-OverlayTrackerMir::untrustedHelperStoppedStatic (const gchar * appid, const gchar * instanceid, const gchar * helpertype, gpointer user_data)
+OverlayTrackerMir::overlayHelperStoppedStatic (const gchar * appid, const gchar * instanceid, const gchar * helpertype, gpointer user_data)
 {
-	reinterpret_cast<OverlayTrackerMir *>(user_data)->untrustedHelperStopped(appid, instanceid, helpertype);
+	reinterpret_cast<OverlayTrackerMir *>(user_data)->overlayHelperStopped(appid, instanceid, helpertype);
 }
 
 void 
-OverlayTrackerMir::untrustedHelperStopped(const gchar * appid, const gchar * instanceid, const gchar * helpertype)
+OverlayTrackerMir::overlayHelperStopped(const gchar * appid, const gchar * instanceid, const gchar * helpertype)
 {
 	/* This callback will happen on our thread already, we don't need
 	   to proxy it on */
-	if (g_strcmp0(helpertype, HELPER_TYPE) != 0) {
+	if (g_strcmp0(helpertype, OVERLAY_HELPER_TYPE) != 0
+			&& g_strcmp0(helpertype, BAD_URL_HELPER_TYPE) != 0) {
 		return;
 	}
 
@@ -144,10 +174,11 @@ OverlayTrackerMir::untrustedHelperStopped(const gchar * appid, const gchar * ins
 	std::string sappid(appid);
 	std::string sinstanceid(instanceid);
 
-	for (auto it = ongoingSessions.begin(); it != ongoingSessions.end(); it++) {
-		if (std::get<0>(*it) == sappid && std::get<1>(*it) == sinstanceid) {
-			ongoingSessions.erase(it);
+	for (auto it = ongoingSessions[helpertype].begin(); it != ongoingSessions[helpertype].end(); it++) {
+		if (it->appid == sappid && it->instanceid == sinstanceid) {
+			ongoingSessions[helpertype].erase(it);
 			break;
 		}
 	}
 }
+

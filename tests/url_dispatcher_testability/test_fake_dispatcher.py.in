@@ -29,9 +29,15 @@ class FakeDispatcherTestCase(testtools.TestCase):
 
     def test_url_dispatcher(self):
         bin_dir = "@PROJECT_BINARY_DIR@"
-        call([bin_dir + '/tools/url-dispatcher', 'test://testurl'])
+        result = call([bin_dir + '/tools/url-dispatcher', 'test://testurl'])
+        self.assertEqual(0, result)
         try:
             last_url = self.dispatcher.get_last_dispatch_url_call_parameter()
         except fake_dispatcher.FakeDispatcherException:
             last_url = None
         self.assertEqual(last_url, 'test://testurl')
+
+    def test_url_dispatcher_no_args(self):
+        bin_dir = "@PROJECT_BINARY_DIR@"
+        result = call([bin_dir + '/tools/url-dispatcher'])
+        self.assertEqual(1, result)

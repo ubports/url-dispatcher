@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2013 Canonical, Ltd.
+ * Copyright (C) 2013-2017 Canonical, Ltd.
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License version 3, as published by
@@ -18,15 +18,16 @@
  */
 
 #include <gio/gio.h>
-#include <json-glib/json-glib.h>
+#include <libwhoopsie/recoverable-problem.h>
 #include <ubuntu-app-launch.h>
 #include "dispatcher.h"
 #include "service-iface.h"
-#include "recoverable-problem.h"
+#include "scope-checker.h"
 #include "url-db.h"
 
 /* Globals */
 static OverlayTracker * tracker = NULL;
+static ScopeChecker * checker = NULL;
 static GCancellable * cancellable = NULL;
 static ServiceIfaceComCanonicalURLDispatcher * skel = NULL;
 static GRegex * applicationre = NULL;
@@ -73,13 +74,17 @@ recoverable_problem_file (GObject * obj, GAsyncResult * res, gpointer user_data)
 	g_variant_get(pid_tuple, "(u)", &pid);
 	g_variant_unref(pid_tuple);
 
+	/* Popup the bad url dialog */
+	overlay_tracker_badurl(tracker, pid, badurl);
+
+	/* Report recoverable error */
 	const gchar * additional[3] = {
 		"BadURL",
 		badurl,
 		NULL
 	};
 
-	report_recoverable_problem("url-dispatcher-bad-url", pid, FALSE, additional);
+	whoopsie_report_recoverable_problem("url-dispatcher-bad-url", pid, FALSE, additional);
 
 	g_free(badurl);
 
@@ -151,6 +156,11 @@ send_open_cb (GObject * object, GAsyncResult * res, gpointer user_data)
 gboolean
 send_to_dash (const gchar * url)
 {
+	if (url == NULL) {
+		g_warning("Can not send nothing to the dash");
+		return FALSE;
+	}
+
 	GDBusConnection * bus = g_bus_get_sync(G_BUS_TYPE_SESSION, NULL, NULL);
 	g_return_val_if_fail(bus != NULL, FALSE);
 
@@ -210,36 +220,51 @@ dispatcher_send_to_app (const gchar * app_id, const gchar * url)
 	return TRUE;
 }
 
+unsigned int _get_pid_from_dbus(GDBusConnection * conn, const gchar * sender)
+{
+    GError * error = NULL;
+    unsigned int pid = 0;
+
+    GVariant * callret = g_dbus_connection_call_sync(conn,
+                                                     "org.freedesktop.DBus",
+                                                     "/",
+                                                     "org.freedesktop.DBus",
+                                                     "GetConnectionUnixProcessID",
+                                                     g_variant_new("(s)", sender),
+                                                     G_VARIANT_TYPE("(u)"),
+                                                     G_DBUS_CALL_FLAGS_NONE,
+                                                     -1, /* timeout */
+                                                     NULL, /* cancellable */
+                                                     &error);
+
+    if (error != NULL) {
+        g_warning("Unable to get PID for '%s' from dbus: %s",
+                  sender, error->message);
+        g_clear_error(&error);
+    } else {
+        g_variant_get_child(callret, 0, "u", &pid);
+        g_variant_unref(callret);
+    }
+
+    return pid;
+}
+
 /* Handles setting up the overlay with the URL */
 gboolean
 dispatcher_send_to_overlay (const gchar * app_id, const gchar * url, GDBusConnection * conn, const gchar * sender)
 {
-	GError * error = NULL;
+    unsigned int pid = _get_pid_from_dbus(conn, sender);
+    if (pid == 0) {
+        return FALSE;
+    }
 
-	/* TODO: Detect if a scope is what we need to overlay on */
-	GVariant * callret = g_dbus_connection_call_sync(conn,
-		"org.freedesktop.DBus",
-		"/",
-		"org.freedesktop.DBus",
-		"GetConnectionUnixProcessID",
-		g_variant_new("(s)", sender),
-		G_VARIANT_TYPE("(u)"),
-		G_DBUS_CALL_FLAGS_NONE,
-		-1, /* timeout */
-		NULL, /* cancellable */
-		&error);
+    /* If it is from a scope we need to overlay onto the
+       dash instead */
+    if (scope_checker_is_scope_pid(checker, pid)) {
+        pid = _get_pid_from_dbus(conn, "com.canonical.UnityDash");
+    }
 
-	if (error != NULL) {
-		g_warning("Unable to get PID for '%s' when processing URL '%s': %s", sender, url, error->message);
-		g_error_free(error);
-		return FALSE;
-	}
-
-	unsigned int pid = 0;
-	g_variant_get_child(callret, 0, "u", &pid);
-	g_variant_unref(callret);
-
-	return overlay_tracker_add(tracker, app_id, pid, url);
+    return overlay_tracker_add(tracker, app_id, pid, url);
 }
 
 /* Check to see if this is an overlay AppID */
@@ -263,13 +288,6 @@ dispatcher_is_overlay (const gchar * appid)
 		gchar * sysdir = g_build_filename(systemdir, desktopname, NULL);
 		found = g_file_test(sysdir, G_FILE_TEST_EXISTS);
 		g_free(sysdir);
-	}
-
-	/* Check user dir (clicks) */
-	if (!found) {
-		gchar * usrdir = g_build_filename(g_get_user_cache_dir(), "url-dispatcher", "url-overlays", desktopname, NULL);
-		found = g_file_test(usrdir, G_FILE_TEST_EXISTS);
-		g_free(usrdir);
 	}
 
 	g_free(desktopname);
@@ -437,7 +455,17 @@ dispatcher_url_to_appid (const gchar * url, gchar ** out_appid, const gchar ** o
 
 		*out_appid = ubuntu_app_launch_triplet_to_app_id(package, app, version);
 		if (*out_appid != NULL) {
-			retval = TRUE;
+			/* Look at the current version of the app and ensure
+			   we're not asking for an older version */
+			gchar * testappid = ubuntu_app_launch_triplet_to_app_id(package, app, NULL);
+			if (g_strcmp0(*out_appid, testappid) != 0) {
+				retval = FALSE;
+				g_clear_pointer(out_appid, g_free);
+			} else {
+				retval = TRUE;
+			}
+
+			g_free(testappid);
 		}
 
 		g_free(package);
@@ -483,6 +511,17 @@ dispatcher_url_to_appid (const gchar * url, gchar ** out_appid, const gchar ** o
 			}
 		}
 
+		if (g_strcmp0(protocol, "scope") == 0) {
+			/* Add a check for the scope if we can do that, since it is
+			   a system URL that we can do more checking on */
+			if (!scope_checker_is_scope(checker, domain)) {
+				found = FALSE;
+				g_clear_pointer(out_appid, g_free);
+				if (out_url != NULL)
+					g_clear_pointer(out_url, g_free);
+			}
+		}
+
 		g_free(protocol);
 		g_free(domain);
 
@@ -517,7 +556,7 @@ bus_got (GObject * obj, GAsyncResult * res, gpointer user_data)
 
 	if (error != NULL) {
 		if (!g_error_matches(error, G_IO_ERROR, G_IO_ERROR_CANCELLED)) {
-			g_error("Unable to connect to D-Bus: %s", error->message);
+			g_error("Unable to connect to D-Bus");
 			g_main_loop_quit(mainloop);
 		}
 		g_error_free(error);
@@ -547,17 +586,18 @@ bus_got (GObject * obj, GAsyncResult * res, gpointer user_data)
 
 /* Initialize all the globals */
 gboolean
-dispatcher_init (GMainLoop * mainloop, OverlayTracker * intracker)
+dispatcher_init (GMainLoop * mainloop, OverlayTracker * intracker, ScopeChecker * inchecker)
 {
 	tracker = intracker;
+	checker = inchecker;
 	cancellable = g_cancellable_new();
 
 	urldb = url_db_create_database();
 	g_return_val_if_fail(urldb != NULL, FALSE);
 
 	applicationre = g_regex_new("^application:///([a-zA-Z0-9_\\.-]*)\\.desktop$", 0, 0, NULL);
-	appidre = g_regex_new("^appid://([a-z0-9\\.-]*)/([a-zA-Z0-9-]*)/([a-zA-Z0-9\\.-]*)$", 0, 0, NULL);
-	genericre = g_regex_new("^([a-z][a-z0-9]*):(?://(?:.*@)?([a-zA-Z0-9\\.-]*)(?::[0-9]*)?/?)?(.*)?$", 0, 0, NULL);
+	appidre = g_regex_new("^appid://([a-z0-9\\.-]*)/([a-zA-Z0-9-\\.]*)/([a-zA-Z0-9\\.-]*)$", 0, 0, NULL);
+	genericre = g_regex_new("^([a-z][a-z0-9]*):(?://(?:.*@)?([a-zA-Z0-9\\.-_]*)(?::[0-9]*)?/?)?(.*)?$", 0, 0, NULL);
 	intentre = g_regex_new("^intent://.*package=([a-zA-Z0-9\\.]*);.*$", 0, 0, NULL);
 
 	g_bus_get(G_BUS_TYPE_SESSION, cancellable, bus_got, mainloop);

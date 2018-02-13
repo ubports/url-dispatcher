@@ -4,6 +4,92 @@ url-dispatcher (0.2+ubports) xenial; urgency=medium
 
  -- UBports auto importer <infra@ubports.com>  Fri, 13 Oct 2017 19:54:36 +0200
 
+url-dispatcher (0.1+17.04.20170328-0ubuntu1) zesty; urgency=medium
+
+  * Fix deprecation warning in mir mock.
+  * The unity8-dash interface is actually com.canonical.UnityDash.
+  * Use libwhoopsie for reporting recoverable problems.
+  * Convert service main process and url-dispatcher tool code to C++.
+
+ -- Rodney Dawes <rodney.dawes@canonical.com>  Tue, 28 Mar 2017 18:29:07 +0000
+
+url-dispatcher (0.1+17.04.20170318-0ubuntu1) zesty; urgency=medium
+
+  * Update bad-url exec tool to UAL C++ interface
+  * Remove Upstart from the test suite and replace it with systemd
+
+ -- Ted Gould <ted@gould.cx>  Sat, 18 Mar 2017 19:59:26 +0000
+
+url-dispatcher (0.1+17.04.20170314-0ubuntu1) zesty; urgency=medium
+
+  [ Charles Kerr ]
+  * Honor XDG_CACHE_HOME in url-dispatcher-dump and url-dispatcher.conf
+
+  [ Rodney Dawes ]
+  * Remove click usage and support.
+  * Use gmock module from cmake-extras.
+  * Use the coverage support from cmake-extras.
+  * Use cmake-extras intltool support.
+  * Use gdbus integration from cmake-extras.
+  * Remove unused gsettings cmake module.
+
+ -- Rodney Dawes <rodney.dawes@canonical.com>  Tue, 14 Mar 2017 14:35:03 +0000
+
+url-dispatcher (0.1+17.04.20170308.1-0ubuntu1) zesty; urgency=medium
+
+  * Don't use upstart to get unity8 pid.
+
+ -- Rodney Dawes <rodney.dawes@canonical.com>  Wed, 08 Mar 2017 20:43:30 +0000
+
+url-dispatcher (0.1+17.04.20170227.2-0ubuntu1) zesty; urgency=medium
+
+  [ Ken VanDine ]
+  * Handle UAL API bump
+
+  [ Rodney Dawes ]
+  * Remove tests that depend on libertine, as url-dispatcher has no
+    support for handlers in libertine anyway.
+
+ -- Rodney Dawes <rodney.dawes@canonical.com>  Mon, 27 Feb 2017 19:07:50 +0000
+
+url-dispatcher (0.1+17.04.20161206-0ubuntu1) zesty; urgency=medium
+
+  [ Ted Gould ]
+  * Instead of sleeping make the refresh tasks low enough priority they
+    don't get in the way (LP: #1645793)
+  * Start after Unity8 so it has a chance to set the MIR_SOCKET
+
+ -- Michael Terry <michael.terry@canonical.com>  Tue, 06 Dec 2016 14:38:17 +0000
+
+url-dispatcher (0.1+17.04.20161108-0ubuntu1) zesty; urgency=medium
+
+  * Support running inside a snap.
+
+ -- Michael Terry <michael.terry@canonical.com>  Tue, 08 Nov 2016 22:16:56 +0000
+
+url-dispatcher (0.1+17.04.20161107-0ubuntu1) zesty; urgency=medium
+
+  [ Florian Boucault ]
+  * Crossbuilding Fixes
+
+  [ Larry Price ]
+  * App ID should allow package names with dots. (LP: #1591342) (LP: #1606498)
+
+  [ Ted Gould ]
+  * Check versions of appid:// urls to reduce the number of invalid appids
+    we send to UAL (LP: #1352656)
+  * Scope testing for the scope:// URL and overlays that should be over
+    the dash
+  * Protect the dash from getting NULL urls (LP: #1476257)
+  * Make sure URL Overlays are shutdown on exit
+  * Remove the wildcard that is confusing the update script (LP: #1461496)
+  * Not using a message that isn't set properly (LP: #1608009)
+  * Fixing tests to adjust for UAL changes
+  * Add a small GUI helper tool for testing
+  * Show error dialog over apps that use Bad URLs (LP: #1370008)
+
+ -- Ted Gould <ted@gould.cx>  Mon, 07 Nov 2016 16:33:15 +0000
+
 url-dispatcher (0.1+16.10.20160816.1-0ubuntu1) yakkety; urgency=medium
 
   * No chnage rebuild for UAL migration
@@ -11,9 +97,9 @@ url-dispatcher (0.1+16.10.20160816.1-0ubuntu1) yakkety; urgency=medium
  -- Ted Gould <ted@gould.cx>  Tue, 16 Aug 2016 15:20:27 +0000
 
 url-dispatcher (0.1+16.04.20151110-0ubuntu2) xenial; urgency=high
- 
+
   * No change rebuild for s390x.
- 
+
  -- Dimitri John Ledkov <xnox@ubuntu.com>  Fri, 11 Dec 2015 01:30:51 +0000
 
 url-dispatcher (0.1+16.04.20151110-0ubuntu1) xenial; urgency=medium

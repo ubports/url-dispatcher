@@ -89,16 +89,12 @@ DESTINATION "/usr/share/upstart/sessions"
 )
 
 ###########################
-# Click Hook
+# QML
 ###########################
 
-configure_file("url-dispatcher.urls.click-hook.in"
-	"${CMAKE_SOURCE_DIR}/debian/url-dispatcher.urls.click-hook"
-	@ONLY
-)
-
-configure_file("url-dispatcher.url-overlay.click-hook.in"
-	"${CMAKE_SOURCE_DIR}/debian/url-dispatcher.url-overlay.click-hook"
-	@ONLY
+install(
+FILES
+bad-url.qml
+DESTINATION ${datadir}/url-dispatcher
 )
 

@@ -3,13 +3,13 @@ cmake_minimum_required(VERSION 2.8.9)
 
 string(TOLOWER "${CMAKE_BUILD_TYPE}" cmake_build_type_lower) # Build types should always be lowercase but sometimes they are not.
 
-if (${cmake_build_type_lower} STREQUAL debug)
+if ("${cmake_build_type_lower}" STREQUAL "debug")
   option (werror "Treat warnings as errors." FALSE)
 else()
   option (werror "Treat warnings as errors." TRUE)
 endif()
 
-option (enable_tests "Build tests" ON)
+enable_testing ()
 option (enable_lcov "Generate Coverage Reports" ON)
 
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake" "${CMAKE_MODULE_PATH}")
@@ -17,20 +17,16 @@ set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake" "${CMAKE_MODULE_PATH}")
 set(PACKAGE ${CMAKE_PROJECT_NAME})
 set(GETTEXT_PACKAGE ${CMAKE_PROJECT_NAME})
 
-# Trick the H10enable_coverage script into enabling coverage by including the text below:
-# CMAKE_BUILD_TYPE coverage
-
 find_package(PkgConfig REQUIRED)
+find_package(GDbus)
 include(GNUInstallDirs)
 include(CheckIncludeFile)
 include(CheckFunctionExists)
-include(Coverage)
 include(UseGlibGeneration)
-include(UseGdbusCodegen)
 include(UseConstantBuilder)
 
 # Workaround for libexecdir on debian
-if (EXISTS "/etc/debian_version") 
+if (EXISTS "/etc/debian_version")
   set(CMAKE_INSTALL_LIBEXECDIR ${CMAKE_INSTALL_LIBDIR})
   set(CMAKE_INSTALL_FULL_LIBEXECDIR "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBEXECDIR}")
 endif()
@@ -42,7 +38,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
 # Since gdbus-codegen does not produce warning-free code
 # and we use -Werror, only enable these warnings for debug
 # builds. Drop this once the issue has been fixed and landed.
-if (${cmake_build_type_lower} STREQUAL debug)
+if ("${cmake_build_type_lower}" STREQUAL debug)
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wpedantic")# -Wextra")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wpedantic -Wextra")
 endif()
@@ -50,9 +46,9 @@ endif()
 if (${werror})
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Werror")
   set(CMAKE_C_FLAGS "${CMAKE_CXX_FLAGS} -Werror")
-endif() 
+endif()
 
-pkg_check_modules(UBUNTU_APP_LAUNCH REQUIRED ubuntu-app-launch-2>=0.5)
+pkg_check_modules(UBUNTU_APP_LAUNCH REQUIRED ubuntu-app-launch-3>=0.5)
 include_directories(${UBUNTU_APP_LAUNCH_INCLUDE_DIRS})
 
 pkg_check_modules(GLIB2 REQUIRED glib-2.0)
@@ -76,8 +72,14 @@ include_directories(${DBUSTEST_INCLUDE_DIRS})
 pkg_check_modules(SQLITE REQUIRED sqlite3)
 include_directories(${SQLITE_INCLUDE_DIRS})
 
-pkg_check_modules(CLICK REQUIRED click-0.4)
-include_directories(${CLICK_INCLUDE_DIRS})
+pkg_check_modules(SCOPES REQUIRED libunity-scopes)
+include_directories(${SCOPES_INCLUDE_DIRS})
+
+pkg_check_modules(APPARMOR REQUIRED libapparmor)
+include_directories(${APPARMOR_INCLUDE_DIRS})
+
+pkg_check_modules(WHOOPSIE REQUIRED libwhoopsie)
+include_directories(${WHOOPSIE_INCLUDE_DIRS})
 
 if(${LOCAL_INSTALL})
   set(DBUSSERVICEDIR "${CMAKE_INSTALL_DATADIR}/dbus-1/services/")
@@ -103,16 +105,16 @@ add_subdirectory(data)
 add_subdirectory(service)
 add_subdirectory(liburl-dispatcher)
 add_subdirectory(tools)
+add_subdirectory(gui)
+add_subdirectory(po)
+add_subdirectory(tests)
 
-# testing & coverage
-if (${enable_tests})
-  set (GTEST_SOURCE_DIR /usr/src/gtest/src)
-  set (GTEST_INCLUDE_DIR ${GTEST_SOURCE_DIR}/..)
-  set (GTEST_LIBS -pthread)
-  enable_testing ()
-  if (${enable_lcov})
-#    include(GCov)
-  endif ()
-  add_subdirectory(tests)
-endif ()
-
+# coverage reporting
+find_package(CoverageReport)
+get_property(COVERAGE_TARGETS GLOBAL PROPERTY COVERAGE_TARGETS)
+get_property(COVERAGE_TESTS GLOBAL PROPERTY COVERAGE_TESTS)
+ENABLE_COVERAGE_REPORT(
+  TARGETS ${COVERAGE_TARGETS}
+  TESTS ${COVERAGE_TESTS}
+  FILTER /usr/include ${CMAKE_BINARY_DIR}/*
+)
