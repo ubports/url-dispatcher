@@ -78,9 +78,6 @@ include_directories(${SCOPES_INCLUDE_DIRS})
 pkg_check_modules(APPARMOR REQUIRED libapparmor)
 include_directories(${APPARMOR_INCLUDE_DIRS})
 
-pkg_check_modules(WHOOPSIE REQUIRED libwhoopsie)
-include_directories(${WHOOPSIE_INCLUDE_DIRS})
-
 if(${LOCAL_INSTALL})
   set(DBUSSERVICEDIR "${CMAKE_INSTALL_DATADIR}/dbus-1/services/")
 else()

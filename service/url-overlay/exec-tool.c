@@ -18,7 +18,6 @@
  */
 
 #include <glib.h>
-#include <libwhoopsie/recoverable-problem.h>
 #include <ubuntu-app-launch.h>
 
 gchar *
@@ -79,7 +78,7 @@ main (int argc, char * argv[])
 	/* Build up our exec */
 	const gchar * appid = g_getenv("APP_ID");
 	if (appid == NULL) {
-		whoopsie_report_recoverable_problem("url-dispatcher-url-overlay-no-appid", 0, TRUE, NULL);
+        g_critical("APP_ID not set for url-overlay.");
 		return -1;
 	}
 
@@ -97,13 +96,7 @@ main (int argc, char * argv[])
 	}
 
 	if (exec == NULL) {
-		const gchar * props[3] = {
-			"AppID",
-			appid,
-			NULL
-		};
-
-		whoopsie_report_recoverable_problem("url-dispatcher-url-overlay-bad-appid", 0, TRUE, props);
+        g_warning("Invalid appid '%s' for url overlay.", appid);
 		return -1;
 	}
 

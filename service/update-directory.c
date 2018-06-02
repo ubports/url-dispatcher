@@ -19,7 +19,6 @@
 
 #include <gio/gio.h>
 #include <json-glib/json-glib.h>
-#include <libwhoopsie/recoverable-problem.h>
 #include "url-db.h"
 
 typedef struct {
@@ -66,20 +65,8 @@ each_url (JsonArray * array, guint index, JsonNode * value, gpointer user_data)
 	}
 
 	if (!url_db_insert_url(urldata->db, urldata->filename, protocol, suffix)) {
-		const gchar * additional[7] = {
-			"Filename",
-			NULL,
-			"Protocol",
-			NULL,
-			"Suffix",
-			NULL,
-			NULL
-		};
-		additional[1] = urldata->filename;
-		additional[3] = protocol;
-		additional[5] = suffix;
-
-		whoopsie_report_recoverable_problem("url-dispatcher-update-sqlite-insert-error", 0, TRUE, additional);
+        g_warning("Unable to add protocol '%s' with suffix '%s' from '%s'.",
+                  protocol, suffix, urldata->filename);
 	}
 }
 
@@ -141,14 +128,7 @@ check_file_outofdate (const gchar * filename, sqlite3 * db)
 	}
 
 	if (!url_db_set_file_motification_time(db, filename, &filetime)) {
-		const gchar * additional[7] = {
-			"Filename",
-			NULL,
-			NULL
-		};
-		additional[1] = filename;
-
-		whoopsie_report_recoverable_problem("url-dispatcher-update-sqlite-fileupdate-error", 0, TRUE, additional);
+        g_warning("Error updating SQLite with file '%s'.", filename);
 		return FALSE;
 	}
 
@@ -163,14 +143,6 @@ remove_file (gpointer key, gpointer value, gpointer user_data)
 	g_debug("  Removing file: %s", filename);
 	if (!url_db_remove_file((sqlite3*)user_data, filename)) {
 		g_warning("Unable to remove file: %s", filename);
-		const gchar * additional[3] = {
-			"Filename",
-			NULL,
-			NULL
-		};
-		additional[1] = filename;
-
-		whoopsie_report_recoverable_problem("url-dispatcher-update-remove-file-error", 0, TRUE, additional);
 	}
 }
 
@@ -241,16 +213,7 @@ main (int argc, char * argv[])
 
 	int close_status = sqlite3_close(db);
 	if (close_status != SQLITE_OK) {
-		const gchar * additional[3] = {
-			"SQLiteStatus",
-			NULL,
-			NULL
-		};
-		gchar * status = g_strdup_printf("%d", close_status);
-		additional[1] = status;
-
-		whoopsie_report_recoverable_problem("url-dispatcher-sqlite-close-error", 0, TRUE, additional);
-		g_free(status);
+        g_critical("Error closing SQLite db: %d", close_status);
 	}
 
 	g_debug("Directory '%s' is up-to-date", dirname);

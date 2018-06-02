@@ -53,7 +53,6 @@ target_link_libraries(dispatcher-lib
 	${SCOPES_LIBRARIES}
 	${SQLITE_LIBRARIES}
 	${UBUNTU_APP_LAUNCH_LIBRARIES}
-	${WHOOPSIE_LIBRARIES}
 )
 
 ###########################
@@ -91,7 +90,7 @@ add_executable(service-exec service.cpp)
 
 set_target_properties(service-exec PROPERTIES OUTPUT_NAME "url-dispatcher")
 
-target_link_libraries(service-exec ${WHOOPSIE_LIBRARIES} dispatcher-lib)
+target_link_libraries(service-exec dispatcher-lib)
 
 ###########################
 # Update Directory
@@ -99,7 +98,7 @@ target_link_libraries(service-exec ${WHOOPSIE_LIBRARIES} dispatcher-lib)
 
 add_executable(update-directory update-directory.c)
 set_target_properties(update-directory PROPERTIES OUTPUT_NAME "update-directory")
-target_link_libraries(update-directory ${GIO2_LIBRARIES} ${JSONGLIB_LIBRARIES} ${WHOOPSIE_LIBRARIES} url-db-lib)
+target_link_libraries(update-directory ${GIO2_LIBRARIES} ${JSONGLIB_LIBRARIES} url-db-lib)
 
 ###########################
 # Coverage
