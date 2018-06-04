@@ -18,7 +18,6 @@
  */
 
 #include <gio/gio.h>
-#include <libwhoopsie/recoverable-problem.h>
 #include <ubuntu-app-launch.h>
 #include "dispatcher.h"
 #include "service-iface.h"
@@ -77,14 +76,8 @@ recoverable_problem_file (GObject * obj, GAsyncResult * res, gpointer user_data)
 	/* Popup the bad url dialog */
 	overlay_tracker_badurl(tracker, pid, badurl);
 
-	/* Report recoverable error */
-	const gchar * additional[3] = {
-		"BadURL",
-		badurl,
-		NULL
-	};
-
-	whoopsie_report_recoverable_problem("url-dispatcher-bad-url", pid, FALSE, additional);
+    /* Log the bad url request */
+    g_warning("Unable to open url '%s' requested from pid '%u'.", badurl, pid);
 
 	g_free(badurl);
 

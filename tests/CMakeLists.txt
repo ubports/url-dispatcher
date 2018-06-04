@@ -11,7 +11,6 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR})
 add_library(mock-lib STATIC
 	apparmor-mock.h
 	apparmor-mock.c
-	recoverable-problem-mock.c
 	ubuntu-app-launch-mock.h
 	ubuntu-app-launch-mock.c)
 
