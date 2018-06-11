@@ -18,7 +18,7 @@ target_link_libraries(mock-lib
 	${GLIB2_LIBRARIES}
 )
 
-##########################
+###########################
 # Mir Mock Lib
 ###########################
 
