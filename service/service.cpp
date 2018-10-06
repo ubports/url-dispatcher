@@ -35,14 +35,8 @@ int main (int argc, char * argv[])
 
     auto tracker = overlay_tracker_new();
 
-    ScopeChecker* checker = nullptr;
-    /* Allow disabing for testing */
-    if (g_getenv("URL_DISPATCHER_DISABLE_SCOPE_CHECKING") == nullptr) {
-        checker = scope_checker_new();
-    }
-
     /* Initialize Dispatcher */
-    if (!dispatcher_init(mainloop, tracker, checker)) {
+    if (!dispatcher_init(mainloop, tracker)) {
         return -1;
     }
 
@@ -52,7 +46,6 @@ int main (int argc, char * argv[])
     /* Clean up globals */
     dispatcher_shutdown();
     overlay_tracker_delete(tracker);
-    scope_checker_delete(checker);
     g_main_loop_unref(mainloop);
 
     return 0;

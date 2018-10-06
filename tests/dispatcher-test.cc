@@ -24,7 +24,6 @@
 #include "ubuntu-app-launch-mock.h"
 #include "overlay-tracker-mock.h"
 #include "url-db.h"
-#include "scope-mock.h"
 #include "apparmor-mock.h"
 
 class DispatcherTest : public ::testing::Test
@@ -36,7 +35,6 @@ class DispatcherTest : public ::testing::Test
 
 	protected:
 		OverlayTrackerMock tracker;
-		RuntimeMock scope_runtime;
 		GDBusConnection * session = nullptr;
 
 		virtual void SetUp() {
@@ -68,9 +66,6 @@ class DispatcherTest : public ::testing::Test
 			url_db_set_file_motification_time(db, "/testdir/intenter.url-dispatcher", &timestamp);
 			url_db_insert_url(db, "/testdir/intenter.url-dispatcher", "intent", "my.android.package");
 
-			url_db_set_file_motification_time(db, "/testdir/scoper.url-dispatcher", &timestamp);
-			url_db_insert_url(db, "/testdir/scoper.url-dispatcher", "scope", nullptr);
-
 			sqlite3_close(db);
 
 			testbus = g_test_dbus_new(G_TEST_DBUS_NONE);
@@ -79,7 +74,7 @@ class DispatcherTest : public ::testing::Test
 			session = g_bus_get_sync(G_BUS_TYPE_SESSION, NULL, NULL);
 
 			mainloop = g_main_loop_new(nullptr, FALSE);
-			dispatcher_init(mainloop, reinterpret_cast<OverlayTracker *>(&tracker), reinterpret_cast<ScopeChecker *>(&scope_runtime));
+			dispatcher_init(mainloop, reinterpret_cast<OverlayTracker *>(&tracker));
 
 			return;
 		}
@@ -95,7 +90,6 @@ class DispatcherTest : public ::testing::Test
 			g_main_loop_unref(mainloop);
 
 			ubuntu_app_launch_mock_clear_last_app_id();
-			scope_runtime.clearExceptions();
 
 			/* let other threads settle */
 			g_usleep(500000);
@@ -329,7 +323,6 @@ TEST_F(DispatcherTest, OverlayTest)
 	EXPECT_EQ("overlay://ubuntu.com", std::get<2>(tracker.addedOverlays[0]));
 
 	tracker.addedOverlays.clear();
-	aa_mock_gettask_profile = "simplescope.scopemaster_simplescope_1.2.3";
 
 	auto pidmock = setupPidMock();
 
@@ -343,29 +336,4 @@ TEST_F(DispatcherTest, OverlayTest)
 	g_object_unref(pidmock);
 
 	return;
-}
-
-TEST_F(DispatcherTest, ScopeTest)
-{
-	gchar * out_appid = nullptr;
-
-	unity::scopes::NotFoundException scopeException("test", "badscope");
-	scope_runtime.addException("badscope.scopemaster_badscope", scopeException);
-	std::invalid_argument invalidException("confused");
-	scope_runtime.addException("confusedscope.scopemaster_confusedscope", invalidException);
-
-	/* Good sanity check */
-	dispatcher_url_to_appid("scope://simplescope.scopemaster_simplescope", &out_appid, nullptr);
-	EXPECT_STREQ("scoper", out_appid);
-	g_free(out_appid);
-
-	/* Bad scope */
-	dispatcher_url_to_appid("scope://badscope.scopemaster_badscope", &out_appid, nullptr);
-	EXPECT_STRNE("scoper", out_appid);
-	g_free(out_appid);
-
-	/* Confused scope */
-	dispatcher_url_to_appid("scope://confusedscope.scopemaster_confusedscope", &out_appid, nullptr);
-	EXPECT_STRNE("scoper", out_appid);
-	g_free(out_appid);
 }

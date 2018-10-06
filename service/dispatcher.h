@@ -22,11 +22,10 @@
 
 #include <gio/gio.h>
 #include "overlay-tracker.h"
-#include "scope-checker.h"
 
 G_BEGIN_DECLS
 
-gboolean dispatcher_init (GMainLoop * mainloop, OverlayTracker * tracker, ScopeChecker * checker);
+gboolean dispatcher_init (GMainLoop * mainloop, OverlayTracker * tracker);
 gboolean dispatcher_shutdown ();
 gboolean dispatcher_url_to_appid (const gchar * url, gchar ** out_appid, const gchar ** out_url);
 gboolean dispatcher_appid_restrict (const gchar * appid, const gchar * package);

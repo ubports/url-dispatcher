@@ -21,12 +21,10 @@
 #include <ubuntu-app-launch.h>
 #include "dispatcher.h"
 #include "service-iface.h"
-#include "scope-checker.h"
 #include "url-db.h"
 
 /* Globals */
 static OverlayTracker * tracker = NULL;
-static ScopeChecker * checker = NULL;
 static GCancellable * cancellable = NULL;
 static ServiceIfaceComCanonicalURLDispatcher * skel = NULL;
 static GRegex * applicationre = NULL;
@@ -249,12 +247,6 @@ dispatcher_send_to_overlay (const gchar * app_id, const gchar * url, GDBusConnec
     unsigned int pid = _get_pid_from_dbus(conn, sender);
     if (pid == 0) {
         return FALSE;
-    }
-
-    /* If it is from a scope we need to overlay onto the
-       dash instead */
-    if (scope_checker_is_scope_pid(checker, pid)) {
-        pid = _get_pid_from_dbus(conn, "com.canonical.UnityDash");
     }
 
     return overlay_tracker_add(tracker, app_id, pid, url);
@@ -504,17 +496,6 @@ dispatcher_url_to_appid (const gchar * url, gchar ** out_appid, const gchar ** o
 			}
 		}
 
-		if (g_strcmp0(protocol, "scope") == 0) {
-			/* Add a check for the scope if we can do that, since it is
-			   a system URL that we can do more checking on */
-			if (!scope_checker_is_scope(checker, domain)) {
-				found = FALSE;
-				g_clear_pointer(out_appid, g_free);
-				if (out_url != NULL)
-					g_clear_pointer(out_url, g_free);
-			}
-		}
-
 		g_free(protocol);
 		g_free(domain);
 
@@ -579,10 +560,9 @@ bus_got (GObject * obj, GAsyncResult * res, gpointer user_data)
 
 /* Initialize all the globals */
 gboolean
-dispatcher_init (GMainLoop * mainloop, OverlayTracker * intracker, ScopeChecker * inchecker)
+dispatcher_init (GMainLoop * mainloop, OverlayTracker * intracker)
 {
 	tracker = intracker;
-	checker = inchecker;
 	cancellable = g_cancellable_new();
 
 	urldb = url_db_create_database();
