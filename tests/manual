@@ -1,16 +1,3 @@
-Test-case url-dispatcher/scope-url
-<dl>
-    <dt>Navigate to the Home screen of the shell</dt>
-    <dt>Touch the search icon to open the search box of the shell</dt>
-        <dd>The search text box should open and if there is no physical keyboard present a keyboard to enter a search</dd>
-    <dt>Enter <tt>berlin wall</tt> into the search box</dt>
-        <dd>An entry with a picture of the Berlin Wall should be included</dd>
-    <dt>Activate the entry for The Berlin Wall to see the description and verify it's the correct entry</dt>
-        <dd>There should be a short description of the wall and a button to open up the Wikipedia entry</dd>
-    <dt>Select the button to bring up the Wikipedia entry</dt>
-        <dd>The webbrowser should come to focus and navigate to the Wikipedia entry on the Berlin Wall</dd>
-</dl>
-
 Test-case url-dispatcher/settings-second-activation
 <dl>
     <dt>Open the system settings app</dt>

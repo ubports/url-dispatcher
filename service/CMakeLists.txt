@@ -38,9 +38,7 @@ add_library(dispatcher-lib STATIC
 	overlay-tracker-iface.h
 	overlay-tracker-mir.h
 	overlay-tracker-mir.cpp
-	scope-checker-facade.h
-	scope-checker.h
-	scope-checker.cpp)
+)
 
 target_link_libraries(dispatcher-lib
 	url-db-lib
@@ -50,7 +48,6 @@ target_link_libraries(dispatcher-lib
 	${GLIB2_LIBRARIES}
 	${GOBJECT2_LIBRARIES}
 	${GIO2_LIBRARIES}
-	${SCOPES_LIBRARIES}
 	${SQLITE_LIBRARIES}
 	${UBUNTU_APP_LAUNCH_LIBRARIES}
 )
