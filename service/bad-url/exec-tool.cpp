@@ -19,6 +19,7 @@
 
 #include <ubuntu-app-launch/helper.h>
 #include <glib.h>
+#include <stdexcept>
 
 int
 main (int argc, char * argv[])
