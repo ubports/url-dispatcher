@@ -1,0 +1,7 @@
+[Unit]
+Description=URLDispatcher
+
+[Service]
+Type=dbus
+BusName=com.canonical.URLDispatcher
+ExecStart=@CMAKE_INSTALL_FULL_LIBEXECDIR@/url-dispatcher/url-dispatcher

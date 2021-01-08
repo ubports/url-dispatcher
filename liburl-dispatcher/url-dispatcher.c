@@ -93,7 +93,7 @@ url_dispatch_send_restricted (const gchar * url, const gchar * package, URLDispa
 	                       "DispatchURL",
 	                       g_variant_new("(ss)", url, package ? package : ""),
 	                       NULL,
-	                       G_DBUS_CALL_FLAGS_NO_AUTO_START,
+	                       G_DBUS_CALL_FLAGS_NONE,
 	                       -1, /* timeout */
 	                       NULL, /* cancelable */
 	                       cb != NULL ? url_dispatched : NULL,
@@ -131,7 +131,7 @@ url_dispatch_url_appid (const gchar ** urls)
 	                                     "TestURL",
 	                                     vparam,
 	                                     G_VARIANT_TYPE("(as)"),
-	                                     G_DBUS_CALL_FLAGS_NO_AUTO_START,
+	                                     G_DBUS_CALL_FLAGS_NONE,
 	                                     -1, /* timeout */
 	                                     NULL, /* cancelable */
 	                                     &error);

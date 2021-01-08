@@ -98,3 +98,22 @@ bad-url.qml
 DESTINATION ${datadir}/url-dispatcher
 )
 
+configure_file("url-dispatcher.service.in"
+  "url-dispatcher.service"
+  @ONLY
+)
+
+configure_file("com.canonical.URLDispatcher.service.in"
+  "com.canonical.URLDispatcher.service"
+  @ONLY
+)
+
+set (SYSTEMD_USER_DIR "/usr/lib/systemd/user")
+install(
+  FILES url-dispatcher.service
+  DESTINATION ${SYSTEMD_USER_DIR}
+)
+
+install(FILES com.canonical.URLDispatcher.service DESTINATION
+  ${CMAKE_INSTALL_DATADIR}/dbus-1/services
+)
