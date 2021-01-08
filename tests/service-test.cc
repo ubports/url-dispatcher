@@ -42,6 +42,7 @@ class ServiceTest : public ::testing::Test
 			g_setenv("UBUNTU_APP_LAUNCH_SYSTEMD_PATH", "/this/should/not/exist", TRUE);
 
 			g_setenv("URL_DISPATCHER_DISABLE_RECOVERABLE_ERROR", "1", TRUE);
+			g_setenv("URL_DISPATCHER_DISABLE_DIRECTORY_UPDATES", "1", TRUE);
 			g_setenv("XDG_DATA_DIRS", XDG_DATA_DIRS, TRUE);
 			g_setenv("LD_PRELOAD", MIR_MOCK_PATH, TRUE);
 

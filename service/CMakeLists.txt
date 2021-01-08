@@ -4,6 +4,8 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
 add_definitions( -DOVERLAY_SYSTEM_DIRECTORY="${CMAKE_INSTALL_FULL_DATADIR}/url-dispatcher/url-overlays" )
 
+configure_file(config.h.in config.h @ONLY)
+
 ###########################
 # Generated Lib
 ###########################
@@ -28,6 +30,17 @@ target_link_libraries(service-generated
 # Dispatcher Lib
 ###########################
 
+add_library(update-directory-lib STATIC
+	update-directory.h
+	update-directory.c
+)
+
+target_link_libraries(update-directory-lib
+	${GIO2_LIBRARIES}
+	${JSONGLIB_LIBRARIES}
+	url-db-lib
+)
+
 add_library(dispatcher-lib STATIC
 	dispatcher.h
 	dispatcher.c
@@ -41,6 +54,7 @@ add_library(dispatcher-lib STATIC
 )
 
 target_link_libraries(dispatcher-lib
+	update-directory-lib
 	url-db-lib
 	service-generated
 	-pthread
@@ -93,9 +107,9 @@ target_link_libraries(service-exec dispatcher-lib)
 # Update Directory
 ###########################
 
-add_executable(update-directory update-directory.c)
+add_executable(update-directory update-directory-exec.c)
 set_target_properties(update-directory PROPERTIES OUTPUT_NAME "update-directory")
-target_link_libraries(update-directory ${GIO2_LIBRARIES} ${JSONGLIB_LIBRARIES} url-db-lib)
+target_link_libraries(update-directory update-directory-lib)
 
 ###########################
 # Coverage

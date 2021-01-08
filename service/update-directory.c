@@ -17,7 +17,8 @@
  *
  */
 
-#include <gio/gio.h>
+#include "update-directory.h"
+
 #include <json-glib/json-glib.h>
 #include "url-db.h"
 
@@ -146,20 +147,11 @@ remove_file (gpointer key, gpointer value, gpointer user_data)
 	}
 }
 
-/* In the beginning, there was main, and that was good */
-int
-main (int argc, char * argv[])
+static gchar *
+sanitize_path (const gchar *directory)
 {
-	if (argc != 2) {
-		g_printerr("Usage: %s <directory>\n", argv[0]);
-		return 1;
-	}
-
-	sqlite3 * db = url_db_create_database();
-	g_return_val_if_fail(db != NULL, -1);
-
 	/* Check out what we got and recover */
-	gchar * dirname = g_strdup(argv[1]);
+	gchar * dirname = g_strdup(directory);
 	if (!g_file_test(dirname, G_FILE_TEST_IS_DIR) && !g_str_has_suffix(dirname, "/")) {
 		gchar * upone = g_path_get_dirname(dirname);
 		/* Upstart will give us filenames a bit, let's handle them */
@@ -172,6 +164,15 @@ main (int argc, char * argv[])
 			g_free(upone);
 		}
 	}
+
+	return dirname;
+}
+
+static int
+update_directory (gchar *dirname)
+{
+	sqlite3 * db = url_db_create_database();
+	g_return_val_if_fail(db != NULL, -1);
 
 	/* Get the current files in the directory in the DB so we
 	   know if any got dropped */
@@ -220,4 +221,48 @@ main (int argc, char * argv[])
 	g_free(dirname);
 
 	return 0;
+}
+
+static void
+file_changed_cb(GFileMonitor * monitor, GFile *file, GFile * other, GFileMonitorEvent evtype, gpointer user_data)
+{
+	gchar *fpath = g_file_get_path(file);
+	g_debug("Directory '%s' changed, updating directory", fpath);
+	update_directory(fpath);
+	g_free(fpath);
+}
+
+// API
+int
+update_and_monitor_directory (const gchar *directory)
+{
+	gchar * dirname = sanitize_path(directory);
+
+	if (!g_file_test(dirname, G_FILE_TEST_IS_DIR)) {
+		g_debug("Directory not found: %s", dirname);
+		return -1;
+	}
+
+	update_directory(dirname);
+
+	GFile *f = g_file_new_for_path(dirname);
+
+	GError *err = NULL;
+	GFileMonitor *fm = g_file_monitor_directory(f, G_FILE_MONITOR_WATCH_MOVES, NULL, &err);
+	if (err) {
+		g_warning("unable to monitor %s: %s\n", dirname, err->message);
+		g_error_free(err);
+		return -1;
+	}
+
+	g_signal_connect(G_OBJECT(fm), "changed", G_CALLBACK(file_changed_cb), NULL);
+
+	return 0;
+}
+
+
+int
+update_directory_sanitize (const gchar *directory)
+{
+	return update_directory(sanitize_path(directory));
 }

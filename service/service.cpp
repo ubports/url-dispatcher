@@ -17,11 +17,14 @@
 
 extern "C" {
 #include "dispatcher.h"
+#include "update-directory.h"
 }
 
 #include <glib.h>
 #include <glib-unix.h>
 #include <memory>
+
+#include "config.h"
 
 /* Where it all begins */
 int main (int argc, char * argv[])
@@ -34,6 +37,16 @@ int main (int argc, char * argv[])
         }, mainloop);
 
     auto tracker = overlay_tracker_new();
+
+    if (g_getenv("URL_DISPATCHER_DISABLE_DIRECTORY_UPDATES") == NULL) {
+        gchar * home = g_strconcat(g_get_home_dir(), URLS_HOME_DIRECTORY, NULL);
+
+        update_and_monitor_directory(URLS_SYSTEM_DIRECTORY);
+        update_and_monitor_directory(home);
+        g_free(home);
+    } else {
+        g_debug("Directory updates disabled with env");
+    }
 
     /* Initialize Dispatcher */
     if (!dispatcher_init(mainloop, tracker)) {
